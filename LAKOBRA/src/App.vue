@@ -1,8 +1,13 @@
 <script setup>
-import Footer from './components/footer.vue'
+import Header from './components/Header.vue';
+import Footer from './components/Footer.vue'
 </script>
 
 <template>
+  <div>
+        <Header />
+        <router-view />
+    </div>
   <div class="app-container">
     <main class="content">
       <h1>Bienvenido a Lakobra</h1>
