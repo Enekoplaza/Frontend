@@ -10,7 +10,7 @@
     <nav class="nav">
       <ul class="lista">
         <li><RouterLink to="/login">Iniciar Sesión</RouterLink></li>
-        <li><RouterLink to="/socios">Socios/as</RouterLink></li>
+        <li><RouterLink to="/socios/as">Socios/as</RouterLink></li>
         <li><RouterLink to="/artistas">Artistas</RouterLink></li>
         <li><RouterLink to="/eventos">Eventos</RouterLink></li>
         <li><RouterLink to="/contacto">Contacto</RouterLink></li>
@@ -20,16 +20,18 @@
 </template>
 
 <style scoped>
-:root {
+/* :root {
+  
+} */
+
+.header {
   --header-bg: #0f4791;           
-  --header-accent: #ff3f3f;       
+  --header-accent: #128baf;       
   --header-text: #ffffff;          
   --header-spacing: 1rem;          
   --header-shadow: rgba(0,0,0,0.4); 
-  --header-transition: 0.3s;       
-}
+  --header-transition: 0.3s;     
 
-.header {
   width: 100%;
   background-color: var(--header-bg);
   padding: var(--header-spacing);
