@@ -1,35 +1,26 @@
+/* Importa la base si la necesitas (reset de colores, etc) */
 @import './base.css';
 
+/* 1. Reset fundamental */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* 2. El contenedor #app debe permitir que el contenido fluya */
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  width: 100%;
+  min-height: 100vh;
+  display: block; /* Quitamos el grid extraño de Vue */
+  margin: 0;
+  padding: 0;
 }
 
-a,
-.green {
+/* 3. Estilos globales para enlaces (opcional, ajusta a tu gusto) */
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+  color: inherit;
+  transition: 0.3s;
 }
