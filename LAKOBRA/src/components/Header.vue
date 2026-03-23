@@ -1,9 +1,12 @@
 <template>
   <header class="header">
-    <!-- Espacio para el logo a la izquierda -->
-    <!-- <div class="logo">
+    <!-- Logo comentado por ahora -->
+    <!--
+    <div class="logo">
       <img src="/logo-lakobra.png" alt="Logo LAKOBRA" height="45" />
-    </div> -->
+    </div>
+    -->
+
     <nav class="nav">
       <ul class="lista">
         <li><RouterLink to="/login">Iniciar Sesión</RouterLink></li>
@@ -18,32 +21,29 @@
 
 <style scoped>
 :root {
-  --color-bg-header: #111111;     
-  --color-accent: #ff3f3f;      
-  --color-text: #ffffff;          
-  --spacing-header: 1.2rem;
-  --transition-time: 0.3s;
+  --header-bg: #0f4791;           
+  --header-accent: #ff3f3f;       
+  --header-text: #ffffff;          
+  --header-spacing: 1rem;          
+  --header-shadow: rgba(0,0,0,0.4); 
+  --header-transition: 0.3s;       
 }
 
 .header {
   width: 100%;
-  background: var(--color-bg-header);
-  padding: var(--spacing-header);
+  background-color: var(--header-bg);
+  padding: var(--header-spacing);
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;       
+  justify-content: flex-end;    
 
   position: sticky;
   top: 0;
   z-index: 1000;
 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 10px var(--header-shadow);
 }
-
-/* .logo img {
-  height: 45px;
-} */
 
 .nav {
   display: flex;
@@ -55,22 +55,23 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  margin-top: 0.3rem; 
 }
 
 a {
-  color: var(--color-text);
+  color: var(--header-text);
   text-decoration: none;
   font-weight: bold;
   padding: 0.4rem 0.6rem;
-  transition: color var(--transition-time), transform var(--transition-time);
+  transition: color var(--header-transition), transform var(--header-transition);
 }
 
 a:hover {
-  color: var(--color-accent);
+  color: var(--header-accent);
   transform: translateY(-2px);
 }
 
 a.router-link-active {
-  border-bottom: 3px solid var(--color-accent);
+  border-bottom: 3px solid var(--header-accent);
 }
 </style>
