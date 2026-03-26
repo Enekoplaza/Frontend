@@ -54,7 +54,51 @@ onMounted(verificarSesion);
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted } from 'vue'
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+
+// Estado para modo oscuro
+const modoOscuro = ref(false)
+
+// Cargar preferencia de localStorage
+onMounted(() => {
+  const temaGuardado = localStorage.getItem('modoOscuro')
+  if (temaGuardado) {
+    modoOscuro.value = temaGuardado === 'true'
+  }
+})
+
+// Alternar modo oscuro
+function toggleModo() {
+  modoOscuro.value = !modoOscuro.value
+  localStorage.setItem('modoOscuro', modoOscuro.value)
+}
+</script>
+
 <style scoped>
+
+.app-container.light {
+  --fondo: #ffffff;
+  --texto: #333333;
+  --titulo: #222222;
+  --boton-bg: #007BFF;
+  --boton-texto: #ffffff;
+  --boton-hover: #0056b3;
+}
+
+
+.app-container.dark {
+  --fondo: #121212;
+  --texto: #dddddd;
+  --titulo: #ffffff;
+  --boton-bg: #1e88e5;
+  --boton-texto: #ffffff;
+  --boton-hover: #1565c0;
+}
+
+
 .app-container {
   display: flex;
   flex-direction: column;
