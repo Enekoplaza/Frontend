@@ -11,7 +11,7 @@ import Footer from './components/Footer.vue'
     </div>
     <main class="content">
       <h1>Bienvenido a Lakobra</h1>
-      <p>iNFO LAKOBRA.</p>
+      <p>INFO LAKOBRA.</p>
     </main>
 
     <Footer />
@@ -22,12 +22,12 @@ import Footer from './components/Footer.vue'
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ocupa el 100% de la altura de la ventana */
-  width: 100%; /* Ocupa todo el ancho */
+  min-height: 100vh; 
+  width: 100%; 
 }
 
 .content {
-  flex: 1; /* Esto hace que el main crezca y empuje al footer al final */
+  flex: 1; 
   padding: 40px 20px;
 }
 </style>
