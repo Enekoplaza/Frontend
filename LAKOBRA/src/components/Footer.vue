@@ -9,7 +9,7 @@ defineEmits(['abrirModal']);
 <template>
   <footer class="footer">
     <div class="container">
-      
+
       <div class="col">
         <h2 class="logo">Lakobra</h2>
         <p class="description">
@@ -22,7 +22,6 @@ defineEmits(['abrirModal']);
         <h3>Enlaces</h3>
         <ul class="footer-links">
           <li><router-link to="/">Inicio</router-link></li>
-          <li><router-link to="/loquesea">Loquesea</router-link></li>
           <li><router-link to="/eventos">Eventos</router-link></li>
           <li v-if="!usuario">
             <button class="btn-login" @click="$emit('abrirModal')">Iniciar sesión</button>
@@ -58,7 +57,7 @@ defineEmits(['abrirModal']);
   --footer-text-muted: #94a3b8;
   --footer-text-links: #cbd5e1;
   --footer-border: rgba(255, 255, 255, 0.1);
-  
+
   /* Espaciados y Medidas */
   --footer-padding-top: 60px;
   --container-max-width: 1200px;
@@ -112,7 +111,8 @@ h3 {
   margin-bottom: var(--gap-small);
 }
 
-.footer-links a, .btn-login {
+.footer-links a,
+.btn-login {
   color: var(--footer-text-links);
   text-decoration: none;
   background: none;
@@ -123,7 +123,8 @@ h3 {
   transition: color 0.3s ease, transform 0.2s ease;
 }
 
-.footer-links a:hover, .btn-login:hover {
+.footer-links a:hover,
+.btn-login:hover {
   color: var(--footer-accent);
 }
 
@@ -160,9 +161,11 @@ h3 {
   .container {
     text-align: center;
   }
+
   .description {
     margin: 0 auto;
   }
+
   .socials {
     align-items: center;
   }
