@@ -9,7 +9,18 @@
     </div>
 
     <button class="btn-traducir" @click="cambiarIdioma">
-      {{ textos.botonTraducir }}
+      <svg v-if="idiomaActual === 'es'" class="flag-icon" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1000" height="700" fill="#d90012"/>
+        <path d="M0,0 L1000,700 M1000,0 L0,700" stroke="#009b48" stroke-width="130"/>
+        <path d="M0,350 L1000,350 M500,0 L500,700" stroke="#ffffff" stroke-width="130"/>
+      </svg>
+      
+      <svg v-else class="flag-icon" viewBox="0 0 750 500" xmlns="http://www.w3.org/2000/svg">
+        <rect width="750" height="500" fill="#c60b1e"/>
+        <rect width="750" height="250" y="125" fill="#ffc400"/>
+      </svg>
+
+      <span>{{ textos.botonTraducir }}</span>
     </button>
   </div>
 </template>
@@ -19,7 +30,7 @@ import { reactive, computed } from 'vue'
 
 const textosEspañol = {
   titulo: 'LAKOBRA',
-  descripcion: `¿Qué es la asociación? La Kobra es una asociación juvenil y cultural autogestionada situada en
+    descripcion: `¿Qué es la asociación? La Kobra es una asociación juvenil y cultural autogestionada situada en
 el barrio de Deusto (Bilbao). Funciona como un espacio comunitario alternativo donde se
 organizan actividades sociales, culturales y políticas desde una perspectiva participativa y
 asamblearia.
@@ -68,8 +79,13 @@ const textos = reactive({ ...textosEspañol })
 
 const parrafos = computed(() => textos.descripcion.split('\n\n'))
 
+// Computed para saber fácilmente en qué idioma estamos y poner la bandera correcta
+const idiomaActual = computed(() => 
+  textos.descripcion === textosEspañol.descripcion ? 'es' : 'eu'
+)
+
 function cambiarIdioma() {
-  if (textos.descripcion === textosEspañol.descripcion) {
+  if (idiomaActual.value === 'es') {
     Object.assign(textos, textosEuskera)
   } else {
     Object.assign(textos, textosEspañol)
@@ -78,65 +94,55 @@ function cambiarIdioma() {
 </script>
 
 <style scoped>
-
-:root {
-  --color-fondo: #ffffff;
-  --color-texto: #333333;
-  --color-titulo: #222222;
-  --color-boton-bg: #007BFF;
-  --color-boton-texto: #ffffff;
-  --color-boton-hover: #0056b3;
-
-
-  --fuente-principal: 'Arial', sans-serif;
-  --line-height: 1.6;
-  --gap-parrafo: 1.2rem;
-  --padding-container: 2rem;
-  --border-radius: 8px;
-}
-
-
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: var(--padding-container);
   text-align: center;
-  font-family: var(--fuente-principal);
-  line-height: var(--line-height);
-  color: var(--color-texto);
-  background-color: var(--color-fondo);
-  transition: background-color 0.3s, color 0.3s;
 }
-
 
 h1 {
   font-size: 3rem;
   margin-bottom: 2rem;
-  font-weight: bold;
-  color: var(--color-titulo);
+  font-weight: 800;
+  color: var(--titulo);
 }
-
 
 .descripcion p {
-  margin-bottom: var(--gap-parrafo);
+  margin-bottom: 1.5rem;
   text-align: justify;
+  line-height: 1.8;
+  font-size: 1.05rem;
 }
 
-
+/* Diseño del botón del idioma con la bandera */
 .btn-traducir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem; /* Reducimos el padding al no tener fondo */
   font-size: 1rem;
-  background-color: var(--color-boton-bg);
-  color: var(--color-boton-texto);
+  font-weight: bold;
+  background-color: transparent; 
+  color: var(--texto);           
   border: none;
-  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: all 0.3s ease;
 }
 
 .btn-traducir:hover {
-  background-color: var(--color-boton-hover);
-  transform: scale(1.05);
+  background-color: transparent; /* invisible */
+  color: var(--boton-bg);        /* El texto en azul al pasar el ratón */
+  transform: translateY(-2px);   /* Un pequeñísimo salto para dar feedback de que es clickeable */
+}
+
+/* Estilo para que la bandera quede perfecta */
+.flag-icon {
+  width: 24px;
+  height: 16px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 0 3px rgba(0,0,0,0.5);
 }
 </style>

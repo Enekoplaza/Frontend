@@ -4,6 +4,7 @@ import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import AuthModal from './components/AuthModal.vue'
 
+// --- LÓGICA DE AUTENTICACIÓN ---
 const mostrarModal = ref(false);
 const usuarioActivo = ref(null);
 
@@ -14,7 +15,6 @@ const verificarSesion = async () => {
     });
     const data = await res.json();
     if (data.logged_in) {
-      // ERROR: Antes decia usuario.value, corregido a usuarioActivo.value
       usuarioActivo.value = { nombre: data.nombre, rol: data.rol };
     }
   } catch (e) {
@@ -23,7 +23,7 @@ const verificarSesion = async () => {
 };
 
 const loginExitoso = (datosUsuario) => {
-  usuarioActivo.value = datosUsuario; // ERROR corregido
+  usuarioActivo.value = datosUsuario;
   mostrarModal.value = false;
 };
 
@@ -38,11 +38,29 @@ const cerrarSesion = async () => {
 };
 
 onMounted(verificarSesion);
+
+// --- LÓGICA DE MODO OSCURO ---
+// CAMBIO: Ahora empieza en true (Modo oscuro por defecto)
+const modoOscuro = ref(true)
+
+onMounted(() => {
+  const temaGuardado = localStorage.getItem('modoOscuro')
+  // Solo cambiamos si ya había una preferencia guardada
+  if (temaGuardado !== null) {
+    modoOscuro.value = temaGuardado === 'true'
+  }
+})
+
+function toggleModo() {
+  modoOscuro.value = !modoOscuro.value
+  localStorage.setItem('modoOscuro', modoOscuro.value)
+}
 </script>
 
 <template>
-  <div class="app-container">
-    <Header :usuario="usuarioActivo" @abrirModal="mostrarModal = true" @logout="cerrarSesion" />
+  <div class="app-container" :class="modoOscuro ? 'dark' : 'light'">
+    <Header :usuario="usuarioActivo" :modoOscuro="modoOscuro" @abrirModal="mostrarModal = true" @logout="cerrarSesion"
+      @toggleTema="toggleModo" />
 
     <main class="content">
       <router-view />
@@ -54,56 +72,33 @@ onMounted(verificarSesion);
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
-
-// Estado para modo oscuro
-const modoOscuro = ref(false)
-
-// Cargar preferencia de localStorage
-onMounted(() => {
-  const temaGuardado = localStorage.getItem('modoOscuro')
-  if (temaGuardado) {
-    modoOscuro.value = temaGuardado === 'true'
-  }
-})
-
-// Alternar modo oscuro
-function toggleModo() {
-  modoOscuro.value = !modoOscuro.value
-  localStorage.setItem('modoOscuro', modoOscuro.value)
-}
-</script>
-
 <style scoped>
-
 .app-container.light {
-  --fondo: #ffffff;
-  --texto: #333333;
-  --titulo: #222222;
-  --boton-bg: #007BFF;
-  --boton-texto: #ffffff;
-  --boton-hover: #0056b3;
+  --fondo: #f8fafc;
+  --texto: #334155;
+  --titulo: #0f172a;
+  --boton-bg: #38bdf8;
+  --boton-texto: #0f172a;
+  --boton-hover: #7dd3fc;
 }
-
 
 .app-container.dark {
-  --fondo: #121212;
-  --texto: #dddddd;
-  --titulo: #ffffff;
-  --boton-bg: #1e88e5;
-  --boton-texto: #ffffff;
-  --boton-hover: #1565c0;
+  --fondo: #0f172a;
+  --texto: #cbd5e1;
+  --titulo: #f8fafc;
+  --boton-bg: #38bdf8;
+  --boton-texto: #0f172a;
+  --boton-hover: #7dd3fc;
 }
-
 
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  background-color: var(--fondo);
+  color: var(--texto);
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .content {
