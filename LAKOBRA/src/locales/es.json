@@ -1,0 +1,43 @@
+{
+  "header": {
+    "login": "Iniciar sesión",
+    "logout": "Salir",
+    "socios": "Socios/as",
+    "artistas": "Artistas",
+    "eventos": "Eventos",
+    "contacto": "Contacto",
+    "traducir": "Euskera"
+  },
+  "footer": {
+    "descripcion": "Tu portal para descubrir eventos y mucho más. Únete a la comunidad.",
+    "enlaces": "Enlaces",
+    "siguenos": "Síguenos",
+    "inicio": "Inicio",
+    "socios": "Socios/as",
+    "artista": "Artista",
+    "eventos": "Eventos",
+    "contacto": "Contacto",
+    "iniciarSesion": "Iniciar sesión",
+    "copyright": "© 2026 Lakobra. Todos los derechos reservados."
+  },
+  "authModal": {
+    "loginTitulo": "Iniciar sesión",
+    "registroTitulo": "Registro",
+    "nombre": "Nombre",
+    "dni": "DNI",
+    "direccion": "Dirección",
+    "rolSocio": "Socio",
+    "rolTxandalari": "Txandalari",
+    "email": "Email",
+    "password": "Contraseña",
+    "entrar": "Entrar",
+    "registrar": "Registrar",
+    "toggleLogin": "¿Ya tienes cuenta? Inicia sesión",
+    "toggleRegistro": "¿No tienes cuenta? Regístrate"
+  },
+  "principal": {
+    "titulo": "LAKOBRA",
+    "descripcion": "¿Qué es la asociación? La Kobra es una asociación juvenil y cultural autogestionada situada en el barrio de Deusto (Bilbao). Funciona como un espacio comunitario alternativo donde se organizan actividades sociales, culturales y políticas desde una perspectiva participativa y asamblearia.\n\n¿Qué hace? La Kobra: Organiza conciertos, talleres, charlas y eventos culturales. Ofrece un espacio de encuentro para jóvenes y colectivos del barrio. Promueve actividades relacionadas con la cultura alternativa y el pensamiento crítico. Apoya iniciativas sociales y movimientos vecinales. Fomenta la autogestión y la participación comunitaria. Es un punto de referencia para la organización de actividades fuera de los circuitos comerciales tradicionales.\n\n¿Qué propone? La asociación propone: Un modelo de ocio alternativo, no comercial y participativo. Un espacio inclusivo donde cualquier persona pueda implicarse. La promoción de valores como la solidaridad, el apoyo mutuo y la cultura crítica. Dinamizar la vida cultural del barrio de Deusto. En resumen, propone una forma diferente de organizar actividades culturales y sociales, basada en la autogestión y la comunidad.\n\n¿A quién se dirige? Principalmente se dirige a: Jóvenes del barrio de Deusto y de Bilbao. Colectivos sociales y culturales. Personas interesadas en la cultura alternativa y los movimientos sociales. Vecinos y vecinas que quieran participar en actividades comunitarias. Aunque su público principal es juvenil, está abierta a cualquier persona interesada.",
+    "botonTraducir": "Euskera"
+  }
+}

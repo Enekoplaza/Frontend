@@ -1,0 +1,43 @@
+{
+  "header": {
+    "login": "Saioa hasi",
+    "logout": "Irten",
+    "socios": "Bazkideak",
+    "artistas": "Artista",
+    "eventos": "Ekitaldiak",
+    "contacto": "Harremana",
+    "traducir": "Gaztelania"
+  },
+  "footer": {
+    "descripcion": "Zure portal gazte eta komunitarioa. Komunitatearekin bat egin.",
+    "enlaces": "Estekak",
+    "siguenos": "Jarraitzen gaituzu",
+    "inicio": "Hasiera",
+    "socios": "Bazkideak",
+    "artista": "Artista",
+    "eventos": "Ekitaldiak",
+    "contacto": "Harremana",
+    "iniciarSesion": "Saioa hasi",
+    "copyright": "© 2026 LAKOBRA. Eskubide guztiak erreserbatuta."
+  },
+  "authModal": {
+    "loginTitulo": "Saioa hasi",
+    "registroTitulo": "Erregistroa",
+    "nombre": "Izena",
+    "dni": "DNI",
+    "direccion": "Helbidea",
+    "rolSocio": "Bazkidea",
+    "rolTxandalari": "Txandalari",
+    "email": "Email",
+    "password": "Pasahitza",
+    "entrar": "Sartu",
+    "registrar": "Erregistratu",
+    "toggleLogin": "Jada kontua baduzu? Saioa hasi",
+    "toggleRegistro": "Ez duzu konturik? Erregistratu"
+  },
+  "principal": {
+    "titulo": "LAKOBRA",
+    "descripcion": "Zer da elkartea? LAKOBRA gazte eta kultural autogestionatutako elkartea da, Deustuko auzoan (Bilbo) kokatua.\n\nEspazio komunitario alternatibo gisa funtzionatzen du, non jarduera sozial, kultural eta politikoak antolatzen diren parte-hartze eta asanbleario ikuspegitik.\n\nZer egiten du? LAKOBRAk: Kontzertuak, tailerrak, hitzaldiak eta ekitaldi kulturalak antolatzen ditu. Gazte eta auzoko kolektiboentzako topagune bat eskaintzen du. Kultur alternatiboarekin eta pentsamendu kritikoarekin lotutako jarduerak sustatzen ditu. Ekimen sozialen eta auzoko mugimenduen alde egiten du. Autogestioa eta komunitatearen parte-hartzea bultzatzen ditu. Ekitaldiak merkatu komertzialetik kanpo antolatzeko erreferentea da.\n\nZer proposatzen du? Elkarteak proposatzen du: aisialdi alternatibo, ez komertzial eta parte-hartzaile bat. Espazio inklusibo bat, edonork inplikatu daitekeena. Solidariotasun, elkartasun eta kultura kritikoaren balioak sustatzea. Deustuko auzoaren bizitza kultural dinamizatzea. Laburbilduz, jarduera kultural eta sozialak modu desberdinean antolatzea proposatzen du, autogestioan eta komunitatean oinarrituta.\n\nNorentzat da? Nagusiki: Deustuko eta Bilboko gazteentzat. Kolektibo sozial eta kulturalentzat. Kultura alternatiboan eta mugimendu sozialetan interesa duten pertsonentzat. Auzoko bizilagunentzat. Gazteentzako ariketa nagusia izanik, interesa duen edonork parte hartu dezake.",
+    "botonTraducir": "Castellano"
+  }
+}

@@ -1,10 +1,36 @@
 <script setup>
+import { ref, computed, watch } from "vue";
+import { i18n, cargarIdioma } from '../i18n.js'
+
+// Props y eventos
 const props = defineProps({
   usuario: Object,
-  modoOscuro: Boolean // Recibimos el estado actual del modo
+  modoOscuro: Boolean
 });
-// Añadimos el evento 'toggleTema' para avisar a App.vue
 defineEmits(['abrirModal', 'logout', 'toggleTema']);
+
+// Idioma seleccionado en el select
+const idiomaSeleccionado = ref(i18n.idioma || "");
+
+// Lista completa de idiomas
+const todosIdiomas = [
+  { valor: "es", etiqueta: "Gaztelania" },
+  { valor: "eus", etiqueta: "Euskara" }
+];
+
+// Opciones visibles según el idioma seleccionado
+const opcionesVisibles = computed(() => {
+  if (idiomaSeleccionado.value === "es") return [{ valor: "eus", etiqueta: "Euskara" }];
+  if (idiomaSeleccionado.value === "eus") return [{ valor: "es", etiqueta: "Gaztelania" }];
+  return todosIdiomas;
+});
+
+// Cuando cambie el idioma seleccionado, cargamos el JSON correspondiente
+watch(idiomaSeleccionado, (nuevo) => {
+  if (nuevo) {
+    cargarIdioma(nuevo);  // Esto actualiza todos los textos reactivos
+  }
+});
 </script>
 
 <template>
@@ -65,7 +91,18 @@ defineEmits(['abrirModal', 'logout', 'toggleTema']);
               </svg>
             </button>
           </li>
-
+        <li>
+    <select v-model="idiomaSeleccionado" class="select-idioma">
+      <option value="">Traducir</option>
+      <option
+        v-for="opcion in opcionesVisibles"
+        :key="opcion.valor"
+        :value="opcion.valor"
+      >
+        {{ opcion.etiqueta }}
+      </option>
+    </select>
+  </li>
         </ul>
       </nav>
     </div>
@@ -73,6 +110,21 @@ defineEmits(['abrirModal', 'logout', 'toggleTema']);
 </template>
 
 <style scoped>
+.select-idioma {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: var(--header-text);
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.select-idioma:hover {
+  border-color: var(--header-accent);
+  color: var(--header-accent);
+}
 .header {
   --header-bg-start: #1e293b;
   --header-bg-end: #0f172a;

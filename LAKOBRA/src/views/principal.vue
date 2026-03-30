@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <h1>{{ textos.titulo }}</h1>
+  <div class="container principal">
+    <h1>{{ textos.principal.titulo }}</h1>
 
     <div class="descripcion">
       <p v-for="(parrafo, index) in parrafos" :key="index">
@@ -9,7 +9,7 @@
     </div>
 
     <button class="btn-traducir" @click="cambiarIdioma">
-      <svg v-if="idiomaActual === 'es'" class="flag-icon" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+      <svg v-if="idiomaActual.lang === 'es'" class="flag-icon" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
         <rect width="1000" height="700" fill="#d90012"/>
         <path d="M0,0 L1000,700 M1000,0 L0,700" stroke="#009b48" stroke-width="130"/>
         <path d="M0,350 L1000,350 M500,0 L500,700" stroke="#ffffff" stroke-width="130"/>
@@ -26,73 +26,38 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { i18n, cargarIdioma } from '../i18n.js'
+import { reactive, ref, computed, onMounted } from 'vue'
 
-const textosEspañol = {
-  titulo: 'LAKOBRA',
-    descripcion: `¿Qué es la asociación? La Kobra es una asociación juvenil y cultural autogestionada situada en
-el barrio de Deusto (Bilbao). Funciona como un espacio comunitario alternativo donde se
-organizan actividades sociales, culturales y políticas desde una perspectiva participativa y
-asamblearia.
+// Objeto reactivo para los textos
+const textos = reactive({
+  principal: {}
+})
 
-¿Qué hace? La Kobra: Organiza conciertos, talleres, charlas y eventos culturales.
-Ofrece un espacio de encuentro para jóvenes y colectivos del barrio. Promueve actividades
-relacionadas con la cultura alternativa y el pensamiento crítico. Apoya iniciativas sociales y
-movimientos vecinales. Fomenta la autogestión y la participación comunitaria. Es un punto de
-referencia para la organización de actividades fuera de los circuitos comerciales
-tradicionales.
+// Idioma actual
+const idiomaActual = ref('eu') // Euskera por defecto
 
-¿Qué propone? La asociación propone: Un modelo de ocio alternativo, no
-comercial y participativo. Un espacio inclusivo donde cualquier persona pueda implicarse. La
-promoción de valores como la solidaridad, el apoyo mutuo y la cultura crítica. Dinamizar la
-vida cultural del barrio de Deusto. En resumen, propone una forma diferente de organizar
-actividades culturales y sociales, basada en la autogestión y la comunidad.
+// Computed para separar los párrafos
+const parrafos = computed(() => {
+  if (!textos.principal.descripcion) return []
+  return textos.principal.descripcion.split('\n\n')
+})
 
-¿A quién se dirige? Principalmente se dirige a: Jóvenes del barrio de Deusto y de Bilbao. Colectivos
-sociales y culturales. Personas interesadas en la cultura alternativa y los movimientos
-sociales. Vecinos y vecinas que quieran participar en actividades comunitarias. Aunque su
-público principal es juvenil, está abierta a cualquier persona interesada.`,
-  botonTraducir: 'Euskera',
+// Cambiar idioma
+async function cambiarIdioma() {
+  const nuevo = idiomaActual.value === 'eu' ? 'es' : 'eu'
+  await cargarIdioma(nuevo)                  // esperamos que i18n cargue
+  idiomaActual.value = nuevo
+  Object.assign(textos, i18n.textos.principal) // actualizamos los textos reactivos
 }
 
-const textosEuskera = {
-  titulo: 'LAKOBRA',
-  descripcion: `Zer da elkartea? Lakobra gazte eta kultural autogestionatutako elkartea da, Deustuko auzoan (Bilbo) kokatua.
-Espazio komunitario alternatibo gisa funtzionatzen du, non jarduera sozial, kultural eta politikoak
-antolatzen diren parte-hartze eta asanbleario ikuspegitik.
-
-Zer egiten du? Lakobrak: Kontzertuak, tailerrak, hitzaldiak eta ekitaldi kulturalak antolatzen ditu.
-Gazte eta auzoko kolektiboentzako topagune bat eskaintzen du. Kultur alternatiboarekin eta pentsamendu kritikoarekin lotutako jarduerak sustatzen ditu.
-Ekimen sozialen eta auzoko mugimenduen alde egiten du. Autogestioa eta komunitatearen parte-hartzea bultzatzen ditu.
-Ekitaldiak merkatu komertzialetik kanpo antolatzeko erreferentea da.
-
-Zer proposatzen du? Elkarteak proposatzen du: aisialdi alternatibo, ez komertzial eta parte-hartzaile bat.
-Espazio inklusibo bat, edonork inplikatu daitekeena. Solidariotasun, elkartasun eta kultura kritikoaren balioak sustatzea.
-Deustuko auzoaren bizitza kultural dinamizatzea. Laburbilduz, jarduera kultural eta sozialak modu desberdinean antolatzea proposatzen du, autogestioan eta komunitatean oinarrituta.
-
-Norentzat da? Nagusiki: Deustuko eta Bilboko gazteentzat. Kolektibo sozial eta kulturalentzat.
-Kultura alternatiboan eta mugimendu sozialetan interesa duten pertsonentzat. Auzoko bizilagunentzat. Gazteentzako ariketa nagusia izanik, interesa duen edonork parte hartu dezake.`,
-  botonTraducir: 'Castellano',
-}
-
-const textos = reactive({ ...textosEspañol })
-
-const parrafos = computed(() => textos.descripcion.split('\n\n'))
-
-// Computed para saber fácilmente en qué idioma estamos y poner la bandera correcta
-const idiomaActual = computed(() => 
-  textos.descripcion === textosEspañol.descripcion ? 'es' : 'eu'
-)
-
-function cambiarIdioma() {
-  if (idiomaActual.value === 'es') {
-    Object.assign(textos, textosEuskera)
-  } else {
-    Object.assign(textos, textosEspañol)
-  }
-}
+// Cargar idioma por defecto al montar
+onMounted(async () => {
+  await cargarIdioma('eu')                   // cargamos JSON de inicio
+  idiomaActual.value = 'eu'
+  Object.assign(textos, i18n.textos.principal)
+})
 </script>
-
 <style scoped>
 .container {
   max-width: 900px;
