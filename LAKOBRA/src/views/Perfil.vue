@@ -1,5 +1,3 @@
-egido:
-
 <template>
   <div class="perfil">
     <div class="contenedor">
@@ -83,21 +81,21 @@ egido:
             </div>
 
             <!-- Si no es Txandalari -->
+            <!-- Si no es Txandalari -->
             <div v-else class="formulario-solicitud">
               <p class="titulo-formulario">¿Quieres ser Txandalari?</p>
               <p class="descripcion-formulario">Únete al club y accede a ventajas exclusivas.</p>
 
-              <!-- Checkbox -->
-              <label class="checkbox-personalizado">
-                <input type="checkbox" v-model="aceptaTerminos" />
-                <span class="marca-check"></span>
-                <span class="texto-checkbox">Acepto el código LAKOBRA</span>
-              </label>
+              <!-- Input de texto clásico -->
+              <div class="grupo-dato">
+                <label>Mensaje para tu solicitud:</label>
+                <input type="text" v-model="mensajeSolicitud" placeholder="Escribe algo aquí..." />
+              </div>
 
-              <!-- Botón de solicitud -->
+              <!-- Botón -->
               <button
                 @click="enviarSolicitud"
-                :disabled="!aceptaTerminos || cargando"
+                :disabled="!mensajeSolicitud || cargando"
                 class="btn-txandalari"
               >
                 {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
@@ -170,6 +168,7 @@ export default {
     },
     async enviarSolicitud() {
       if (!this.aceptaTerminos) return
+
       this.cargando = true
       try {
         const respuesta = await fetch('http://localhost:3000/api/txandalari/solicitar', {
@@ -202,7 +201,6 @@ export default {
 </script>
 
 <style scoped>
-/* VARIABLES EN CASTELLANO */
 :root {
   --color-fondo: #f1f5f9;
   --color-primario: #3b82f6;
@@ -214,7 +212,6 @@ export default {
   --sombra: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* LAYOUT */
 .perfil {
   min-height: 100vh;
   background-color: var(--color-fondo);
@@ -372,6 +369,7 @@ export default {
 /* CHECKBOX */
 .checkbox-personalizado {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 10px;
   cursor: pointer;
@@ -417,8 +415,8 @@ export default {
   overflow: hidden;
 }
 .btn-txandalari:disabled {
-  background: #333;
-  color: #666;
+  background: #ad8989;
+  color: #723030;
   cursor: not-allowed;
 }
 .efecto-brillante {

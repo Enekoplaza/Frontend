@@ -46,7 +46,7 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
           </li>
 
           <!-- Enlaces públicos -->
-          <li><RouterLink to="/socios/as">Socios/as</RouterLink></li>
+          
           <li><RouterLink to="/artistas">Artistas</RouterLink></li>
           <li><RouterLink to="/eventos">Eventos</RouterLink></li>
           <li><RouterLink to="/contacto">Contacto</RouterLink></li>
