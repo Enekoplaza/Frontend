@@ -67,6 +67,7 @@ const handleSubmit = async () => {
     try {
         const response = await fetch(url, {
             method: 'POST',
+            credentials: 'include', // <--- ¡FALTABA ESTO! Permite guardar la sesión del PHP
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(form.value)
         });

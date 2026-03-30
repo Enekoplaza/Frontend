@@ -4,9 +4,17 @@ import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import AuthModal from './components/AuthModal.vue'
 
-// --- LÓGICA DE AUTENTICACIÓN ---
+// --- 1. LÓGICA DE AUTENTICACIÓN ---
 const mostrarModal = ref(false);
 const usuarioActivo = ref(null);
+
+// NUEVO: Función para cargar los datos instantáneamente desde el navegador
+const cargarSesionLocal = () => {
+  const usuarioGuardado = localStorage.getItem('usuarioLakobra');
+  if (usuarioGuardado) {
+    usuarioActivo.value = JSON.parse(usuarioGuardado);
+  }
+};
 
 const verificarSesion = async () => {
   try {
@@ -14,8 +22,16 @@ const verificarSesion = async () => {
       credentials: 'include'
     });
     const data = await res.json();
+    
     if (data.logged_in) {
-      usuarioActivo.value = { nombre: data.nombre, rol: data.rol };
+      const datosUsuario = { nombre: data.nombre, rol: data.rol };
+      usuarioActivo.value = datosUsuario;
+      // Actualizamos el localStorage por si hubo cambios en el servidor
+      localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario));
+    } else {
+      // Si el servidor dice que la sesión expiró, limpiamos todo
+      usuarioActivo.value = null;
+      localStorage.removeItem('usuarioLakobra');
     }
   } catch (e) {
     console.error("Error verificando sesión");
@@ -24,6 +40,8 @@ const verificarSesion = async () => {
 
 const loginExitoso = (datosUsuario) => {
   usuarioActivo.value = datosUsuario;
+  // NUEVO: Guardamos en localStorage al hacer login
+  localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario));
   mostrarModal.value = false;
 };
 
@@ -31,21 +49,24 @@ const cerrarSesion = async () => {
   try {
     await fetch('http://localhost/Backend/logout.php', { credentials: 'include' });
     usuarioActivo.value = null;
+    // NUEVO: Borramos los datos del navegador al salir
+    localStorage.removeItem('usuarioLakobra');
     location.reload();
   } catch (e) {
     console.error("Error al cerrar sesión");
   }
 };
 
-onMounted(verificarSesion);
+onMounted(() => {
+  cargarSesionLocal(); // 1. Carga visual inmediata
+  verificarSesion();   // 2. Comprobación de seguridad en segundo plano
+});
 
-// --- LÓGICA DE MODO OSCURO ---
-// CAMBIO: Ahora empieza en true (Modo oscuro por defecto)
+// --- 2. LÓGICA DE MODO OSCURO ---
 const modoOscuro = ref(true)
 
 onMounted(() => {
   const temaGuardado = localStorage.getItem('modoOscuro')
-  // Solo cambiamos si ya había una preferencia guardada
   if (temaGuardado !== null) {
     modoOscuro.value = temaGuardado === 'true'
   }
