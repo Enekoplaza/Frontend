@@ -1,10 +1,11 @@
 <script setup>
 const props = defineProps({
   usuario: Object,
-  modoOscuro: Boolean // Recibimos el estado actual del modo
-});
+  modoOscuro: Boolean, // Recibimos el estado actual del modo
+})
+
 // Añadimos el evento 'toggleTema' para avisar a App.vue
-defineEmits(['abrirModal', 'logout', 'toggleTema']);
+defineEmits(['abrirModal', 'logout', 'toggleTema'])
 </script>
 
 <template>
@@ -16,39 +17,62 @@ defineEmits(['abrirModal', 'logout', 'toggleTema']);
 
       <nav class="nav">
         <ul class="lista">
+          <!-- Usuario no logueado -->
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">Iniciar Sesión</a>
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">
+              Iniciar Sesión
+            </a>
           </li>
 
+          <!-- Usuario logueado -->
           <template v-else>
             <li class="user-welcome">
-              <span v-if="usuario.rol === 'admin'">Admin <strong>{{ usuario.nombre }}</strong></span>
-              <span v-else-if="usuario.rol === 'txandalari'">Worker <strong>{{ usuario.nombre }}</strong></span>
-              <span v-else>Hola, <strong>{{ usuario.nombre }}</strong></span>
+              <span v-if="usuario?.rol === 'admin'">Admin <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else-if="usuario?.rol === 'txandalari'">Worker <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else>Hola, <strong>{{ usuario?.nombre }}</strong></span>
             </li>
-            <li><a href="#" @click.prevent="$emit('logout')" class="btn-logout">Salir</a></li>
+            <li>
+              <a href="#" @click.prevent="$emit('logout')" class="btn-logout">Salir</a>
+            </li>
           </template>
 
-          <li>
-            <RouterLink to="/socios/as">Socios/as</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/artistas">Artistas</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/eventos">Eventos</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/contacto">Contacto</RouterLink>
+          <!-- Perfil (si usuario existe) -->
+          <li class="user-welcome" v-if="usuario">
+            <RouterLink to="/perfil">
+              <span v-if="usuario?.rol === 'admin'">Admin <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else-if="usuario?.rol === 'txandalari'">Worker <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else>Hola, <strong>{{ usuario?.nombre }}</strong></span>
+            </RouterLink>
           </li>
 
+          <!-- Enlaces públicos -->
+          <li><RouterLink to="/socios/as">Socios/as</RouterLink></li>
+          <li><RouterLink to="/artistas">Artistas</RouterLink></li>
+          <li><RouterLink to="/eventos">Eventos</RouterLink></li>
+          <li><RouterLink to="/contacto">Contacto</RouterLink></li>
+
+          <!-- Separador -->
           <li class="divider"></li>
 
+          <!-- Botón cambiar tema -->
           <li>
-            <button class="btn-tema" @click="$emit('toggleTema')"
-              :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-              <svg v-if="modoOscuro" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              class="btn-tema"
+              @click="$emit('toggleTema')"
+              :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            >
+              <svg
+                v-if="modoOscuro"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="12" cy="12" r="5"></circle>
                 <line x1="12" y1="1" x2="12" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -59,13 +83,22 @@ defineEmits(['abrirModal', 'logout', 'toggleTema']);
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </button>
           </li>
-
         </ul>
       </nav>
     </div>
@@ -138,7 +171,6 @@ a:hover {
   border-bottom: 2px solid var(--header-accent);
 }
 
-/* Separador visual antes del botón de modo */
 .divider {
   width: 1px;
   height: 20px;
@@ -146,7 +178,6 @@ a:hover {
   margin: 0 0.5rem;
 }
 
-/* Botón Tema Oscuro/Claro disimulado */
 .btn-tema {
   background: none;
   border: none;
