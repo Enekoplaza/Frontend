@@ -5,7 +5,7 @@
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Bienvenido a LAKOBRA <span>{{ usuario.nombre }}</span>
+            Bienvenid@ a LAKOBRA <span>{{ usuario.nombre }}</span>
           </h1>
           
         </div>
