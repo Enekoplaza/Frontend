@@ -5,7 +5,7 @@
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Bienvenid@ a LAKOBRA <span>{{ usuario.nombre }}</span>
+            Bienvenido a LAKOBRA <span>{{ usuario.nombre }}</span>
           </h1>
           
         </div>
@@ -94,12 +94,10 @@
 
               <!-- Botón -->
               <button
-                @click="enviarSolicitud"
-                :disabled="!mensajeSolicitud || cargando"
                 class="btn-txandalari"
               >
                 {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
-                <div class="efecto-brillante"></div>
+           
               </button>
             </div>
           </section>
@@ -405,8 +403,8 @@ export default {
   position: relative;
   width: 100%;
   padding: 12px;
-  background: var(--color-activo);
-  color: black;
+  background: rgb(125, 125, 236);
+  color: rgb(2, 60, 87);
   border: none;
   border-radius: var(--radio-bordes);
   font-weight: 800;
