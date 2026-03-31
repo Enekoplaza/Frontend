@@ -175,33 +175,35 @@ export default {
     },
 
     // Confirmar y enviar solicitud Txandalari
-    async confirmarSolicitud() {
-      this.abrirConfirmacion = false
-      this.cargando = true
-      try {
-        const respuesta = await fetch('http://localhost:3000/api/txandalari/solicitar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usuario_id: this.usuario.id,
-            mensaje: this.mensajeSolicitud
-          }),
-        })
-        const datos = await respuesta.json()
-        if (respuesta.ok) {
-          this.usuario.solicitudTxandalari = 1
-          this.mensajeSolicitud = ''
-          alert('Solicitud enviada correctamente')
-        } else {
-          alert(datos.message || 'Error al enviar solicitud')
-        }
-      } catch (error) {
-        console.error(error)
-        alert('Error de conexión con el servidor')
-      } finally {
-        this.cargando = false
-      }
+async confirmarSolicitud() {
+  this.abrirConfirmacion = false
+  this.cargando = true
+  try {
+    const respuesta = await fetch('http://localhost/Backend/solictar_txandalari.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id: this.usuario.id,
+        mensaje: this.mensajeSolicitud
+      }),
+    })
+
+    const datos = await respuesta.json()
+
+    if (datos.ok) {
+      this.usuario.solicitudTxandalari = 1
+      this.mensajeSolicitud = ''
+      alert(datos.message)
+    } else {
+      alert(datos.message || 'Error al enviar solicitud')
     }
+  } catch (error) {
+    console.error(error)
+    alert('Error de conexión con el servidor')
+  } finally {
+    this.cargando = false
+  }
+}
   },
   watch: {
     modoEdicion(val) {
