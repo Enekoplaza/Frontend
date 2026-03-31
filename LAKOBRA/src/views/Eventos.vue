@@ -141,31 +141,31 @@ onMounted(cargarEventos);
 <template>
   <div class="eventos-container">
     <div class="header-eventos">
-      <h1>Cartelera de Eventos</h1>
+      <h1>Ekitaldien karteldegia</h1>
       <button v-if="esAdmin" class="btn-admin"
         @click="mostrarFormulario ? cancelarFormulario() : (mostrarFormulario = true)">
-        {{ mostrarFormulario ? 'Cancelar' : '+ Crear Nuevo Evento' }}
+        {{ mostrarFormulario ? 'Ezeztatu' : '+ Sortu gertaera berria' }}
       </button>
     </div>
 
     <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
-      <h2>{{ modoEdicion ? '✏️ Editar Evento' : '✨ Nuevo Evento' }}</h2>
+      <h2>{{ modoEdicion ? '✏️ Editatu gertaera' : '✨ Gertaera berria' }}</h2>
       <form @submit.prevent="guardarEvento" class="form-grid">
-        <input v-model="formEvento.titulo" type="text" placeholder="Título del evento" required>
+        <input v-model="formEvento.titulo" type="text" placeholder="Gertaeraren tituloa" required>
         <input v-model="formEvento.fecha_evento" type="date" required>
         <input v-model="formEvento.hora_inicio" type="time" required>
         <input v-model="formEvento.aforo_max" type="number" placeholder="Aforo Máx" required>
         <select v-model="formEvento.estado">
-          <option value="pendiente">Pendiente</option>
-          <option value="confirmado">Confirmado</option>
-          <option value="cancelado">Cancelado</option>
+          <option value="pendiente">Zintzilik</option>
+          <option value="confirmado">Konfirmatuta</option>
+          <option value="cancelado">Kantzelatuta</option>
         </select>
-        <button type="submit" class="btn-submit">{{ modoEdicion ? 'Actualizar Evento' : 'Guardar Evento' }}</button>
+        <button type="submit" class="btn-submit">{{ modoEdicion ? 'Gertaera aktualizatu' : 'Gertaera gorde' }}</button>
       </form>
     </div>
 
     <div class="grid-eventos">
-      <p v-if="eventos.length === 0" class="no-eventos">Actualmente no hay eventos programados.</p>
+      <p v-if="eventos.length === 0" class="no-eventos">Gaur egun ez dago programatutako ekitaldirik.</p>
 
       <div v-for="evento in eventos" :key="evento.id" class="tarjeta-evento">
         <div v-if="esAdmin" class="admin-actions">
@@ -187,10 +187,10 @@ onMounted(cargarEventos);
             Completo</button>
           <button v-else :class="evento.estoy_apuntado ? 'btn-no-asistir' : 'btn-asistir'"
             @click="toggleAsistencia(evento)">
-            {{ evento.estoy_apuntado ? 'No asistir' : 'Asistir' }}
+            {{ evento.estoy_apuntado ? 'Ez etorri' : 'Etorri' }}
           </button>
         </template>
-        <p v-else class="aviso-login">Inicia sesión para asistir</p>
+        <p v-else class="aviso-login">Hasi saioa etortzeko</p>
       </div>
     </div>
   </div>

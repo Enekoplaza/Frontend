@@ -64,43 +64,45 @@
             </div>
           </section>
 
-          <!-- TXANDALARI -->
-          <section
-            class="tarjeta estado-txandalari"
-            :class="{ activo: usuario.solicitudTxandalari == 1 }"
-          >
-            <h3>🐍 Estado LAKOBRA</h3>
+<!-- TXANDALARI -->
+<section
+  class="tarjeta estado-txandalari"
+  :class="{ activo: usuario.solicitudTxandalari == 1 }"
+>
+  <h3>🐍 Estado LAKOBRA</h3>
 
-            <!-- Si ya es Txandalari -->
-            <div v-if="usuario.solicitudTxandalari == 1" class="estado-activo">
-              <div class="anillo-pulso"></div>
-              <div class="texto-estado">
-                <span class="estado-principal">TXANDALARI OFICIAL</span>
-                <span class="estado-secundario">Miembro de la élite</span>
-              </div>
-            </div>
+  <!-- Si ya es Txandalari -->
+  <div v-if="usuario.solicitudTxandalari == 1" class="estado-activo">
+    <div class="anillo-pulso"></div>
+    <div class="texto-estado">
+      <span class="estado-principal">TXANDALARI OFICIAL</span>
+      <span class="estado-secundario">Miembro de la élite</span>
+    </div>
+  </div>
 
-            <!-- Si no es Txandalari -->
-            <!-- Si no es Txandalari -->
-            <div v-else class="formulario-solicitud">
-              <p class="titulo-formulario">¿Quieres ser Txandalari?</p>
-              <p class="descripcion-formulario">Únete al club y accede a ventajas exclusivas.</p>
+  <!-- Si no es Txandalari -->
+  <div v-else class="formulario-solicitud">
+    <p class="titulo-formulario">¿Quieres ser Txandalari?</p>
+    <p class="descripcion-formulario">Únete al club y accede a ventajas exclusivas.</p>
 
-              <!-- Input de texto clásico -->
-              <div class="grupo-dato">
-                <label>Mensaje para tu solicitud:</label>
-                <input type="text" v-model="mensajeSolicitud" placeholder="Escribe algo aquí..." />
-              </div>
+    <!-- Botón que abre el modal -->
+    <button class="btn-txandalari" @click="abrirConfirmacion = true">
+      {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
+    </button>
+  </div>
 
-              <!-- Botón -->
-              <button
-                class="btn-txandalari"
-              >
-                {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
-           
-              </button>
-            </div>
-          </section>
+  <!-- Modal de confirmación -->
+  <div v-if="abrirConfirmacion" class="modal-overlay">
+    <div class="modal-contenido">
+      <h4>Confirmar solicitud</h4>
+      <p>¿Estás seguro que quieres ser Txandalari?</p>
+      <div class="botones-modal">
+        <button @click="confirmarSolicitud" class="btn-guardar">Sí, enviar</button>
+        <button @click="abrirConfirmacion = false" class="btn-cancelar">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</section>
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -136,16 +138,17 @@
 export default {
   data() {
     return {
-      aceptaTerminos: false,
       cargando: false,
       modoEdicion: false,
+      abrirConfirmacion: false, // Control del modal de confirmación
+      mensajeSolicitud: '',      // Mensaje opcional para la solicitud
       usuario: {
         id: 1,
         nombre: 'aaaa',
         dni: '12345678F',
         email: 'aaaa@gmail.com',
         direccion: 'Calle Falsa 123',
-        rol: 'admin',
+        rol: 'admin',             // Cambia a 'usuario' para probar el envío
         solicitudTxandalari: 0,
       },
       usuarioEditar: {},
@@ -156,6 +159,7 @@ export default {
     }
   },
   methods: {
+    // Gestión de edición de perfil
     cancelarEdicion() {
       this.modoEdicion = false
     },
@@ -164,21 +168,30 @@ export default {
       this.modoEdicion = false
       alert('Datos actualizados correctamente')
     },
-    async enviarSolicitud() {
-      if (!this.aceptaTerminos) return
 
+    // Abrir modal
+    abrirModalConfirmacion() {
+      this.abrirConfirmacion = true
+    },
+
+    // Confirmar y enviar solicitud Txandalari
+    async confirmarSolicitud() {
+      this.abrirConfirmacion = false
       this.cargando = true
       try {
         const respuesta = await fetch('http://localhost:3000/api/txandalari/solicitar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ usuario_id: this.usuario.id }),
+          body: JSON.stringify({
+            usuario_id: this.usuario.id,
+            mensaje: this.mensajeSolicitud
+          }),
         })
         const datos = await respuesta.json()
         if (respuesta.ok) {
           this.usuario.solicitudTxandalari = 1
-          this.aceptaTerminos = false
-          alert(' Solicitud enviada correctamente')
+          this.mensajeSolicitud = ''
+          alert('Solicitud enviada correctamente')
         } else {
           alert(datos.message || 'Error al enviar solicitud')
         }
@@ -188,7 +201,7 @@ export default {
       } finally {
         this.cargando = false
       }
-    },
+    }
   },
   watch: {
     modoEdicion(val) {
@@ -206,7 +219,7 @@ export default {
   --color-claro: #fff;
   --color-muted: #64748b;
   --color-activo: #facc15;
-  --radio-bordes: 12px;
+  --border-raduis: 16px;
   --sombra: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
@@ -234,7 +247,7 @@ export default {
 .cabecera-perfil h1 span {
   color: var(--color-claro);
   padding: 2px 10px;
-  border-radius: var(--radio-bordes);
+  border-radius: var(--border-raduis);
 }
 .etiqueta {
   padding: 6px 16px;
@@ -260,7 +273,7 @@ export default {
 }
 .tarjeta {
   background: var(--color-claro);
-  border-radius: var(--radio-bordes);
+  border-radius: var(--border-raduis);
   padding: 1.5rem;
   box-shadow: var(--sombra);
   margin-bottom: 1.5rem;
@@ -305,11 +318,11 @@ export default {
   cursor: pointer;
 }
 .btn-cancelar {
-  background: #e5e7eb;
+  background: rgb(126, 126, 219);
   color: var(--color-secundario);
   padding: 8px 12px;
   border: none;
-  border-radius: var(--radio-bordes);
+  border-radius: 16px;
   cursor: pointer;
 }
 .boton-editar {
@@ -363,41 +376,6 @@ export default {
   }
 }
 
-/* CHECKBOX */
-.checkbox-personalizado {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  margin-bottom: 1rem;
-}
-.checkbox-personalizado input {
-  display: none;
-}
-.marca-check {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--color-activo);
-  border-radius: 4px;
-  position: relative;
-}
-.checkbox-personalizado input:checked + .marca-check {
-  background: var(--color-activo);
-}
-.marca-check:after {
-  content: '✔';
-  position: absolute;
-  left: 3px;
-  top: 0px;
-  font-weight: 700;
-  color: black;
-  display: none;
-}
-.checkbox-personalizado input:checked + .marca-check:after {
-  display: block;
-}
-
 /* BOTON TXANDALARI */
 .btn-txandalari {
   position: relative;
@@ -406,7 +384,7 @@ export default {
   background: rgb(125, 125, 236);
   color: rgb(2, 60, 87);
   border: none;
-  border-radius: var(--radio-bordes);
+  border-radius: 16px;
   font-weight: 800;
   cursor: pointer;
   overflow: hidden;
@@ -416,14 +394,7 @@ export default {
   color: #723030;
   cursor: not-allowed;
 }
-.efecto-brillante {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-}
+
 .btn-txandalari:hover .efecto-brillante {
   left: 200%;
   transition: 0.8s ease;

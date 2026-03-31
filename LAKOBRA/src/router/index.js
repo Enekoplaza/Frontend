@@ -5,7 +5,7 @@ import Eventos from '@/views/Eventos.vue'
 import Perfil from '@/views/Perfil.vue'  // <-- Importa tu vista de perfil
 
 const routes = [
-  { path: '/', name: 'principal', component: principal },
+  { path: '/principal', name: 'principal', component: principal },
   { path: '/artistas', name: 'artistas', component: Artistas },
   { path: '/eventos', name: 'eventos', component: Eventos },
   { path: '/perfil', name: 'perfil', component: Perfil }, // <-- Ruta perfil

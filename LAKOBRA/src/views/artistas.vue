@@ -63,41 +63,42 @@ const enviarSolicitud = async () => {
 <template>
   <div class="artistas-container">
     <div class="hero">
-      <h1>Sube al escenario de Lakobra</h1>
+      <h1>Lakobrako agertokira igo</h1>
       <p class="intro">
-        ¿Quieres formar parte de nuestro equipo musical y ambientar los conciertos? 
-        Ya seas cantante, DJ, animador o tengas una propuesta escénica diferente, 
-        estamos buscando talentos locales para darles voz en nuestro espacio.
+Gure musika-taldean parte hartu eta kontzertuak girotu nahi dituzu?
+Kantaria, DJa, animatzailea edo proposamen eszeniko desberdina izan.
+talentu lokalen bila ari gara, gure espazioan ahotsa emateko.
+
       </p>
 
       <button 
         class="btn-llamada" 
         @click="mostrarFormulario = !mostrarFormulario"
       >
-        {{ mostrarFormulario ? 'Ocultar formulario' : '¿Quieres participar como Artista? ¡Click aquí!' }}
+        {{ mostrarFormulario ? 'Ezkutatu formularioa': 'Artista gisa parte hartu nahi duzu? Egin klik hemen! ' }}
       </button>
     </div>
 
     <div v-if="mostrarFormulario" class="formulario-wrapper animate-fade-in">
-      <h2>Envíanos tu propuesta</h2>
+      <h2>Bidali zure proposamena</h2>
       <form @submit.prevent="enviarSolicitud" class="form-artistas">
         <div class="form-group">
-          <label>Nombre Artístico / Grupo</label>
+          <label>Izen artistikoa/Taldea</label>
           <input v-model="form.nombre_artista" type="text" placeholder="Ej: Los Rockeros de Deusto" required>
         </div>
 
         <div class="form-group">
-          <label>Email de Contacto</label>
+          <label>Harremanetarako e-maila</label>
           <input v-model="form.email_contacto" type="email" placeholder="tu@email.com" required>
         </div>
 
         <div class="form-group">
-          <label>Cuéntanos sobre tu proyecto</label>
-          <textarea v-model="form.descripcion" rows="4" placeholder="¿Qué estilo tocas? ¿Tienes experiencia? Déjanos enlaces a tu música si tienes..." required></textarea>
+          <label>Kontaiguzu zure proiektuari buruz</label>
+          <textarea v-model="form.descripcion" rows="4" placeholder="Zer estilo jotzen duzu? Baduzu esperientziarik? Utzi zure musikarako estekak..." required></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="cargando">
-          {{ cargando ? 'Enviando...' : 'Enviar Solicitud' }}
+        <button type="submit" class="btn-submit" :disabled="kargatu">
+          {{ kargatu ? 'Bidaltzen...' : 'Bidali eskabidea' }}
         </button>
       </form>
     </div>
