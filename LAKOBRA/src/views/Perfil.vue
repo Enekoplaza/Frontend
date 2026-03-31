@@ -5,9 +5,9 @@
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Hola, <span>{{ usuario.nombre }}</span>
+            Bienvenido a LAKOBRA <span>{{ usuario.nombre }}</span>
           </h1>
-          <p>Bienvenido al panel exclusivo de <strong>LAKOBRA</strong></p>
+          
         </div>
         <div class="etiqueta" :class="usuario.rol">{{ usuario.rol }}</div>
       </header>
@@ -180,7 +180,7 @@ export default {
         if (respuesta.ok) {
           this.usuario.solicitudTxandalari = 1
           this.aceptaTerminos = false
-          alert('🔥 Solicitud enviada correctamente')
+          alert(' Solicitud enviada correctamente')
         } else {
           alert(datos.message || 'Error al enviar solicitud')
         }
@@ -234,7 +234,6 @@ export default {
   font-weight: 800;
 }
 .cabecera-perfil h1 span {
-  background: black;
   color: var(--color-claro);
   padding: 2px 10px;
   border-radius: var(--radio-bordes);
