@@ -5,6 +5,7 @@ import Eventos from '@/views/Eventos.vue'
 import Perfil from '@/views/Perfil.vue'  
 
 const routes = [
+  { path: '/', redirect: '/principal' }, // ✅ Redirige por defecto a principal
   { path: '/principal', name: 'principal', component: principal },
   { path: '/artistas', name: 'artistas', component: Artistas },
   { path: '/eventos', name: 'eventos', component: Eventos },

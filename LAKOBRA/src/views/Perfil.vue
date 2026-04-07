@@ -1,114 +1,118 @@
 <template>
   <div class="perfil">
     <div class="contenedor">
-      <!-- HEADER -->
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Bienvenido a LAKOBRA <span>{{ usuario.nombre }}</span>
+            Ongi Etorri LAKOBRA-RA <span>{{ usuarioEditar.nombre || '...' }}</span>
           </h1>
-          
         </div>
-        <div class="etiqueta" :class="usuario.rol">{{ usuario.rol }}</div>
+        <div class="etiqueta" :class="usuarioEditar.rol">{{ usuarioEditar.rol }}</div>
       </header>
 
-      <!-- GRID PRINCIPAL -->
       <div class="grid-principal">
-        <!-- SIDEBAR -->
         <aside class="barra-lateral">
-          <!-- DATOS DEL USUARIO -->
           <section class="tarjeta datos-usuario">
-            <h3>
-              <i class="icono">👤</i> Mis Datos
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar">
+            <div class="cabecera-seccion">
+              <h3><i class="icono">👤</i> Nire Datuak</h3>
+              <button
+                v-if="!modoEdicion"
+                @click="modoEdicion = true"
+                class="boton-editar-icono"
+                title="Editatu"
+              >
                 ✏️
               </button>
-            </h3>
+            </div>
 
-            <div v-if="!modoEdicion">
+            <div v-if="!modoEdicion" class="vista-datos">
               <div class="grupo-dato">
-                <label>DNI</label>
-                <p>{{ usuario.dni }}</p>
+                <label>Izena</label>
+                <p class="dato-texto">{{ usuarioEditar.nombre || '---' }}</p>
               </div>
               <div class="grupo-dato">
-                <label>Email</label>
-                <p>{{ usuario.email }}</p>
+                <label>DNI-a</label>
+                <p class="dato-texto">{{ usuarioEditar.dni || '---' }}</p>
               </div>
               <div class="grupo-dato">
-                <label>Dirección</label>
-                <p>{{ usuario.direccion }}</p>
+                <label>Email-a</label>
+                <p class="dato-texto">{{ usuarioEditar.email || '---' }}</p>
+              </div>
+              <div class="grupo-dato">
+                <label>Norabidea</label>
+                <p class="dato-texto">{{ usuarioEditar.direccion || '---' }}</p>
               </div>
             </div>
 
-            <div v-else>
+            <div v-else class="formulario-edicion">
               <div class="grupo-dato">
-                <label>Nombre</label>
-                <input type="text" v-model="usuarioEditar.nombre" />
+                <label>Izena</label>
+                <input type="text" v-model="usuarioEditar.nombre" placeholder="Sartu izena..." />
               </div>
               <div class="grupo-dato">
-                <label>DNI</label>
-                <input type="text" v-model="usuarioEditar.dni" />
+                <label>DNI-a</label>
+                <input type="text" v-model="usuarioEditar.dni" placeholder="12345678X" />
               </div>
               <div class="grupo-dato">
-                <label>Email</label>
-                <input type="email" v-model="usuarioEditar.email" />
+                <label>Email-a</label>
+                <input type="email" v-model="usuarioEditar.email" placeholder="adibidea@mail.com" />
               </div>
               <div class="grupo-dato">
-                <label>Dirección</label>
-                <input type="text" v-model="usuarioEditar.direccion" />
+                <label>Norabidea</label>
+                <input
+                  type="text"
+                  v-model="usuarioEditar.direccion"
+                  placeholder="Zure helbidea..."
+                />
               </div>
+
               <div class="botones-edicion">
-                <button @click="guardarCambios" class="btn-guardar">Guardar</button>
-                <button @click="cancelarEdicion" class="btn-cancelar">Cancelar</button>
+                <button @click="guardarCambios" class="btn-guardar">Gorde</button>
+                <button @click="cancelarEdicion" class="btn-cancelar">Ezeztatu</button>
               </div>
             </div>
           </section>
 
-<!-- TXANDALARI -->
-<section
-  class="tarjeta estado-txandalari"
-  :class="{ activo: usuario.solicitudTxandalari == 1 }"
->
-  <h3>🐍 Estado LAKOBRA</h3>
+          <section
+            class="tarjeta estado-txandalari"
+            :class="{ activo: usuarioEditar.solicitudTxandalari == 1 }"
+          >
+            <h3>🐍 LAKOBRAREN EGOERA</h3>
 
-  <!-- Si ya es Txandalari -->
-  <div v-if="usuario.solicitudTxandalari == 1" class="estado-activo">
-    <div class="anillo-pulso"></div>
-    <div class="texto-estado">
-      <span class="estado-principal">TXANDALARI OFICIAL</span>
-      <span class="estado-secundario">Miembro de la élite</span>
-    </div>
-  </div>
+            <div v-if="usuarioEditar.solicitudTxandalari == 1" class="estado-activo">
+              <div class="anillo-pulso"></div>
+              <div class="texto-estado">
+                <span class="estado-principal">TXANDALARI OFICIALA</span>
+                <span class="estado-secundario">Eliteko kidea</span>
+              </div>
+            </div>
 
-  <!-- Si no es Txandalari -->
-  <div v-else class="formulario-solicitud">
-    <p class="titulo-formulario">¿Quieres ser Txandalari?</p>
-    <p class="descripcion-formulario">Únete al club y accede a ventajas exclusivas.</p>
+            <div v-else class="formulario-solicitud">
+              <p class="titulo-formulario">Txandalaria izan nahi duzu?</p>
+              <p class="descripcion-formulario">
+                Egin bat klubarekin eta sartu abantaila esklusiboetan.
+              </p>
+              <button class="btn-txandalari" @click="abrirConfirmacion = true">
+                {{ cargando ? 'Bidaltzen...' : 'MANDAR SOLICITUD' }}
+              </button>
+            </div>
 
-    <!-- Botón que abre el modal -->
-    <button class="btn-txandalari" @click="abrirConfirmacion = true">
-      {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
-    </button>
-  </div>
-
-  <!-- Modal de confirmación -->
-  <div v-if="abrirConfirmacion" class="modal-overlay">
-    <div class="modal-contenido">
-      <h4>Confirmar solicitud</h4>
-      <p>¿Estás seguro que quieres ser Txandalari?</p>
-      <div class="botones-modal">
-        <button @click="confirmarSolicitud" class="btn-guardar">Sí, enviar</button>
-        <button @click="abrirConfirmacion = false" class="btn-cancelar">Cancelar</button>
-      </div>
-    </div>
-  </div>
-</section>
+            <div v-if="abrirConfirmacion" class="modal-overlay">
+              <div class="modal-contenido">
+                <h4>Eskaera berretsi</h4>
+                <p>Ziur zaude Txandalari izan nahi duzula?</p>
+                <div class="botones-modal">
+                  <button @click="confirmarSolicitud" class="btn-guardar">Bai, Bidali</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">Ezeztatu</button>
+                </div>
+              </div>
+            </div>
+          </section>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="contenido">
           <section class="tarjeta eventos">
-            <h3><i class="icono">📅</i> Mis Eventos Próximos</h3>
+            <h3><i class="icono">📅</i> Nire Hurrengo Ekitaldiak</h3>
 
             <div v-if="eventos.length > 0" class="lista-eventos">
               <div v-for="evento in eventos" :key="evento.id" class="evento-item">
@@ -125,7 +129,7 @@
             </div>
 
             <div v-else class="estado-vacio">
-              <p>Aún no te has apuntado a ninguna quedada.</p>
+              <p>Oraindik ez duzu geraleku bakar batean ere izena eman.</p>
             </div>
           </section>
         </main>
@@ -136,78 +140,75 @@
 
 <script>
 export default {
+  props: {
+    usuario: { type: Object, required: true },
+  },
   data() {
     return {
       cargando: false,
       modoEdicion: false,
-      abrirConfirmacion: false, // Control del modal de confirmación
-      mensajeSolicitud: '',      // Mensaje opcional para la solicitud
-      usuario: {
-        id: 1,
-        nombre: 'aaaa',
-        dni: '12345678F',
-        email: 'aaaa@gmail.com',
-        direccion: 'Calle Falsa 123',
-        rol: 'admin',             // Cambia a 'usuario' para probar el envío
-        solicitudTxandalari: 0,
-      },
-      usuarioEditar: {},
+      abrirConfirmacion: false,
+      mensajeSolicitud: '',
+      usuarioEditar: {}, 
       eventos: [
         { id: 1, titulo: 'KDD Nocturna LAKOBRA', dia: '15', mes: 'ABR', lugar: 'Parking Norte' },
         { id: 2, titulo: 'Ruta Montaña Sierra', dia: '22', mes: 'MAY', lugar: 'Punto Pack' },
       ],
     }
   },
-  methods: {
-    // Gestión de edición de perfil
-    cancelarEdicion() {
-      this.modoEdicion = false
-    },
-    guardarCambios() {
-      this.usuario = { ...this.usuarioEditar }
-      this.modoEdicion = false
-      alert('Datos actualizados correctamente')
-    },
-
-    // Abrir modal
-    abrirModalConfirmacion() {
-      this.abrirConfirmacion = true
-    },
-
-    // Confirmar y enviar solicitud Txandalari
-async confirmarSolicitud() {
-  this.abrirConfirmacion = false
-  this.cargando = true
-  try {
-    const respuesta = await fetch('http://localhost/Backend/solictar_txandalari.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuario_id: this.usuario.id,
-        mensaje: this.mensajeSolicitud
-      }),
-    })
-
-    const datos = await respuesta.json()
-
-    if (datos.ok) {
-      this.usuario.solicitudTxandalari = 1
-      this.mensajeSolicitud = ''
-      alert(datos.message)
-    } else {
-      alert(datos.message || 'Error al enviar solicitud')
-    }
-  } catch (error) {
-    console.error(error)
-    alert('Error de conexión con el servidor')
-  } finally {
-    this.cargando = false
-  }
-}
-  },
   watch: {
-    modoEdicion(val) {
-      if (val) this.usuarioEditar = { ...this.usuario }
+    usuario: {
+      immediate: true,
+      deep: true,
+      handler(nuevoUsuario) {
+        if (nuevoUsuario && Object.keys(nuevoUsuario).length > 0) {
+          this.usuarioEditar = { ...nuevoUsuario };
+        }
+      },
+    },
+  },
+  methods: {
+    cancelarEdicion() {
+      this.usuarioEditar = { ...this.usuario };
+      this.modoEdicion = false;
+    },
+
+    async guardarCambios() {
+      this.cargando = true;
+      try {
+        this.$emit('actualizar-usuario', { ...this.usuarioEditar });
+        this.modoEdicion = false;
+      } catch (error) {
+        console.error("Error al guardar:", error);
+      } finally {
+        this.cargando = false;
+      }
+    },
+
+    async confirmarSolicitud() {
+      this.abrirConfirmacion = false;
+      this.cargando = true;
+      try {
+        const respuesta = await fetch('http://localhost/Backend/solictar_txandalari.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            usuario_id: this.usuario.id,
+            mensaje: this.mensajeSolicitud,
+          }),
+        });
+        const datos = await respuesta.json();
+        if (datos.ok) {
+          this.$emit('solicitud-enviada'); 
+          this.mensajeSolicitud = '';
+        } else {
+          alert(datos.message || 'Errorea');
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        this.cargando = false;
+      }
     },
   },
 }

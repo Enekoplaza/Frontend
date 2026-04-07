@@ -19,45 +19,29 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
         <ul class="lista">
           <!-- Usuario no logueado -->
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth"> Saioa hasi </a>
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">Saioa hasi</a>
           </li>
 
           <!-- Usuario logueado -->
-          <template v-else>
-            <li class="user-welcome">
-              <span v-if="usuario?.rol === 'admin'"
-                >Admin <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else-if="usuario?.rol === 'txandalari'"
-                >Txandalari <strong>{{ usuario?.nombre }}</strong></span
-              >
-            </li>
-          </template>
-
-          <!-- Perfil (si usuario existe) -->
-          <li class="user-welcome" v-if="usuario">
+          <li class="user-welcome" v-else>
             <RouterLink to="/perfil">
-              <span v-if="usuario?.rol === 'admin'"
-                >Admin <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else-if="usuario?.rol === 'txandalari'"
-                >Txandalari <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else
-                ><strong>{{ usuario?.nombre }}</strong></span
-              >
+              <strong>{{ usuario.nombre }}</strong>
+              <!-- Opcional: mostrar rol solo si NO es admin -->
+              <span v-if="usuario.rol && usuario.rol !== 'admin'">({{ usuario.rol }})</span>
             </RouterLink>
           </li>
 
           <!-- Enlaces públicos -->
-
           <li><RouterLink to="/artistas">Artistak</RouterLink></li>
           <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
           <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
           <li><RouterLink to="/principal">Hasiera</RouterLink></li>
+
+          <!-- Logout -->
           <li v-if="usuario">
             <a href="#" @click.prevent="$emit('logout')" class="btn-logout">Salir</a>
           </li>
+
           <!-- Separador -->
           <li class="divider"></li>
 

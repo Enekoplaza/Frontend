@@ -10,6 +10,7 @@ const mostrarModal = ref(false)
 const usuarioActivo = ref(null)
 const router = useRouter()
 
+// Cargar usuario desde localStorage al arrancar
 const cargarSesionLocal = () => {
   const usuarioGuardado = localStorage.getItem('usuarioLakobra')
   if (usuarioGuardado) {
@@ -22,6 +23,7 @@ const cargarSesionLocal = () => {
   }
 }
 
+// Verificar sesión en backend y RELLENAR DATOS
 const verificarSesion = async () => {
   try {
     const res = await fetch('http://localhost/Backend/check_sesion.php', {
@@ -30,7 +32,16 @@ const verificarSesion = async () => {
     const data = await res.json()
 
     if (data.logged_in) {
-      const datosUsuario = { nombre: data.nombre, rol: data.rol }
+      // MAPEAREMOS EXACTAMENTE LOS NOMBRES DE TU BBDD
+      const datosUsuario = { 
+        id: data.id,
+        nombre: data.nombre, 
+        dni: data.dni,           // <--- IMPORTANTE: Asegúrate que el PHP mande 'dni'
+        email: data.email,       // <--- IMPORTANTE: Asegúrate que el PHP mande 'email'
+        direccion: data.direccion, // <--- IMPORTANTE: Asegúrate que el PHP mande 'direccion'
+        rol: data.rol,
+        solicitudTxandalari: data.solicitud_txandalari || 0 
+      }
       usuarioActivo.value = datosUsuario
       localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario))
     } else {
@@ -43,24 +54,25 @@ const verificarSesion = async () => {
   }
 }
 
+// Login exitoso
 const loginExitoso = (datosUsuario) => {
   usuarioActivo.value = datosUsuario
   localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario))
   mostrarModal.value = false
 }
 
+// Cerrar sesión
 const cerrarSesion = async () => {
   try {
     await fetch('http://localhost/Backend/logout.php', { credentials: 'include' })
-
     usuarioActivo.value = null
     localStorage.removeItem('usuarioLakobra')
-
-    router.push('/principal') // 👈 REDIRECCIÓN LIMPIA
+    router.push('/principal')
   } catch (e) {
     console.error('Error al cerrar sesión', e)
   }
 }
+
 // --- MONTADO ---
 onMounted(() => {
   cargarSesionLocal()
@@ -85,7 +97,6 @@ function toggleModo() {
 
 <template>
   <div class="app-container" :class="modoOscuro ? 'dark' : 'light'">
-    <!-- Header: pasamos usuario seguro usando optional chaining en Header.vue -->
     <Header
       :usuario="usuarioActivo"
       :modoOscuro="modoOscuro"
@@ -95,7 +106,7 @@ function toggleModo() {
     />
 
     <main class="content">
-      <router-view :usuario="usuarioActivo" /> <!-- opcional, si quieres pasar usuario a vistas -->
+      <router-view :usuario="usuarioActivo" />
     </main>
 
     <Footer
