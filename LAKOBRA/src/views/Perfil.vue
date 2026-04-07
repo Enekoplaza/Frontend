@@ -4,7 +4,7 @@
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Ongi Etorri LAKOBRA-RA <span>{{ usuarioEditar.nombre || '...' }}</span>
+            {{ $t('perfil.bienvenido') }} <span>{{ usuarioEditar.nombre || '...' }}</span>
           </h1>
         </div>
         <div class="etiqueta" :class="usuarioEditar.rol">{{ usuarioEditar.rol }}</div>
@@ -14,96 +14,56 @@
         <aside class="barra-lateral">
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
-              <h3><i class="icono">👤</i> Nire Datuak</h3>
-              <button
-                v-if="!modoEdicion"
-                @click="modoEdicion = true"
-                class="boton-editar-icono"
-                title="Editatu"
-              >
-                ✏️
-              </button>
+              <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono">✏️</button>
             </div>
 
             <div v-if="!modoEdicion" class="vista-datos">
-              <div class="grupo-dato">
-                <label>Izena</label>
-                <p class="dato-texto">{{ usuarioEditar.nombre || '---' }}</p>
-              </div>
-              <div class="grupo-dato">
-                <label>DNI-a</label>
-                <p class="dato-texto">{{ usuarioEditar.dni || '---' }}</p>
-              </div>
-              <div class="grupo-dato">
-                <label>Email-a</label>
-                <p class="dato-texto">{{ usuarioEditar.email || '---' }}</p>
-              </div>
-              <div class="grupo-dato">
-                <label>Norabidea</label>
-                <p class="dato-texto">{{ usuarioEditar.direccion || '---' }}</p>
-              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><p class="dato-texto">{{ usuarioEditar.nombre }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><p class="dato-texto">{{ usuarioEditar.dni }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><p class="dato-texto">{{ usuarioEditar.email }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><p class="dato-texto">{{ usuarioEditar.direccion }}</p></div>
             </div>
 
             <div v-else class="formulario-edicion">
-              <div class="grupo-dato">
-                <label>Izena</label>
-                <input type="text" v-model="usuarioEditar.nombre" placeholder="Sartu izena..." />
-              </div>
-              <div class="grupo-dato">
-                <label>DNI-a</label>
-                <input type="text" v-model="usuarioEditar.dni" placeholder="12345678X" />
-              </div>
-              <div class="grupo-dato">
-                <label>Email-a</label>
-                <input type="email" v-model="usuarioEditar.email" placeholder="adibidea@mail.com" />
-              </div>
-              <div class="grupo-dato">
-                <label>Norabidea</label>
-                <input
-                  type="text"
-                  v-model="usuarioEditar.direccion"
-                  placeholder="Zure helbidea..."
-                />
-              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text" v-model="usuarioEditar.nombre" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text" v-model="usuarioEditar.dni" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email" v-model="usuarioEditar.email" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text" v-model="usuarioEditar.direccion" /></div>
 
               <div class="botones-edicion">
-                <button @click="guardarCambios" class="btn-guardar">Gorde</button>
-                <button @click="cancelarEdicion" class="btn-cancelar">Ezeztatu</button>
+                <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
+                <button @click="cancelarEdicion" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
               </div>
             </div>
           </section>
 
-          <section
-            class="tarjeta estado-txandalari"
-            :class="{ activo: usuarioEditar.solicitudTxandalari == 1 }"
-          >
-            <h3>🐍 LAKOBRAREN EGOERA</h3>
+          <section class="tarjeta estado-txandalari" :class="{ activo: usuarioEditar.solicitud_txandalari == 1 }">
+            <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-            <div v-if="usuarioEditar.solicitudTxandalari == 1" class="estado-activo">
+            <div v-if="usuarioEditar.solicitud_txandalari == 1" class="estado-activo">
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
-                <span class="estado-principal">TXANDALARI OFICIALA</span>
-                <span class="estado-secundario">Eliteko kidea</span>
+                <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
+                <span class="estado-secundario">{{ $t('perfil.txan_elite') }}</span>
               </div>
             </div>
 
             <div v-else class="formulario-solicitud">
-              <p class="titulo-formulario">Txandalaria izan nahi duzu?</p>
-              <p class="descripcion-formulario">
-                Egin bat klubarekin eta sartu abantaila esklusiboetan.
-              </p>
+              <p class="titulo-formulario">{{ $t('perfil.quieres_txan') }}</p>
+              <p class="descripcion-formulario">{{ $t('perfil.unete_club') }}</p>
               <button class="btn-txandalari" @click="abrirConfirmacion = true">
-                {{ cargando ? 'Bidaltzen...' : 'MANDAR SOLICITUD' }}
+                {{ cargando ? $t('perfil.btn_enviando') : $t('perfil.btn_mandar_solicitud') }}
               </button>
             </div>
 
             <div v-if="abrirConfirmacion" class="modal-overlay">
               <div class="modal-contenido">
-                <h4>Eskaera berretsi</h4>
-                <p>Ziur zaude Txandalari izan nahi duzula?</p>
+                <h4>{{ $t('perfil.conf_titulo') }}</h4>
+                <p>{{ $t('perfil.conf_seguro') }}</p>
                 <div class="botones-modal">
-                  <button @click="confirmarSolicitud" class="btn-guardar">Bai, Bidali</button>
-                  <button @click="abrirConfirmacion = false" class="btn-cancelar">Ezeztatu</button>
+                  <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
                 </div>
               </div>
             </div>
@@ -112,24 +72,24 @@
 
         <main class="contenido">
           <section class="tarjeta eventos">
-            <h3><i class="icono">📅</i> Nire Hurrengo Ekitaldiak</h3>
+            <h3><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
 
-            <div v-if="eventos.length > 0" class="lista-eventos">
-              <div v-for="evento in eventos" :key="evento.id" class="evento-item">
+            <div v-if="misEventos.length > 0" class="lista-eventos">
+              <div v-for="evento in misEventos" :key="evento.id" class="evento-item">
                 <div class="fecha-evento">
-                  <span class="dia">{{ evento.dia }}</span>
-                  <span class="mes">{{ evento.mes }}</span>
+                  <span class="dia">{{ evento.fecha_evento.split('-')[2] }}</span>
+                  <span class="mes">{{ evento.fecha_evento.split('-')[1] }}</span>
                 </div>
                 <div class="detalle-evento">
                   <h4>{{ evento.titulo }}</h4>
-                  <p>{{ evento.lugar }}</p>
+                  <p>🕒 {{ evento.hora_inicio.substring(0,5) }}</p>
                 </div>
-                <button class="btn-anular" title="Anular asistencia">×</button>
+                <button @click="cancelarAsistencia(evento.id)" class="btn-anular" title="Anular asistencia">×</button>
               </div>
             </div>
 
             <div v-else class="estado-vacio">
-              <p>Oraindik ez duzu geraleku bakar batean ere izena eman.</p>
+              <p>{{ $t('perfil.no_eventos') }}</p>
             </div>
           </section>
         </main>
@@ -138,79 +98,108 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    usuario: { type: Object, required: true },
+<script setup>
+import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import Swal from 'sweetalert2'
+
+const { t } = useI18n()
+
+const props = defineProps({
+  usuario: { type: Object, required: true },
+})
+const emit = defineEmits(['actualizar-usuario'])
+
+const cargando = ref(false)
+const modoEdicion = ref(false)
+const abrirConfirmacion = ref(false)
+const usuarioEditar = ref({})
+const misEventos = ref([])
+
+// Sincronizar datos del usuario
+watch(
+  () => props.usuario,
+  (nuevoUsuario) => {
+    if (nuevoUsuario) usuarioEditar.value = { ...nuevoUsuario }
   },
-  data() {
-    return {
-      cargando: false,
-      modoEdicion: false,
-      abrirConfirmacion: false,
-      mensajeSolicitud: '',
-      usuarioEditar: {}, 
-      eventos: [
-        { id: 1, titulo: 'KDD Nocturna LAKOBRA', dia: '15', mes: 'ABR', lugar: 'Parking Norte' },
-        { id: 2, titulo: 'Ruta Montaña Sierra', dia: '22', mes: 'MAY', lugar: 'Punto Pack' },
-      ],
+  { immediate: true, deep: true }
+)
+
+// Cargar mis eventos al entrar
+const cargarMisEventos = async () => {
+  try {
+    const res = await fetch('http://localhost/Backend/api_perfil.php', { credentials: 'include' })
+    const data = await res.json()
+    if (data.success) misEventos.value = data.eventos
+  } catch (error) { console.error("Error eventos:", error) }
+}
+
+onMounted(cargarMisEventos)
+
+// Guardar datos
+const cancelarEdicion = () => {
+  usuarioEditar.value = { ...props.usuario }
+  modoEdicion.value = false
+}
+
+const guardarCambios = async () => {
+  try {
+    const res = await fetch('http://localhost/Backend/api_perfil.php', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(usuarioEditar.value)
+    })
+    const data = await res.json()
+    
+    if (data.success) {
+      // Emitimos al App.vue para que recargue la sesión
+      emit('actualizar-usuario', usuarioEditar.value)
+      modoEdicion.value = false
+      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'success', title: t('perfil.msg_datos_ok'), timer: 1500, showConfirmButton: false })
     }
-  },
-  watch: {
-    usuario: {
-      immediate: true,
-      deep: true,
-      handler(nuevoUsuario) {
-        if (nuevoUsuario && Object.keys(nuevoUsuario).length > 0) {
-          this.usuarioEditar = { ...nuevoUsuario };
-        }
-      },
-    },
-  },
-  methods: {
-    cancelarEdicion() {
-      this.usuarioEditar = { ...this.usuario };
-      this.modoEdicion = false;
-    },
+  } catch (error) {
+    console.error(error)
+  }
+}
 
-    async guardarCambios() {
-      this.cargando = true;
-      try {
-        this.$emit('actualizar-usuario', { ...this.usuarioEditar });
-        this.modoEdicion = false;
-      } catch (error) {
-        console.error("Error al guardar:", error);
-      } finally {
-        this.cargando = false;
-      }
-    },
+// Solicitar Txandalari
+const confirmarSolicitud = async () => {
+  abrirConfirmacion.value = false
+  cargando.value = true
+  try {
+    const res = await fetch('http://localhost/Backend/api_perfil.php', { method: 'PATCH', credentials: 'include' })
+    const data = await res.json()
+    
+    if (data.success) {
+      usuarioEditar.value.solicitud_txandalari = 1
+      emit('actualizar-usuario', usuarioEditar.value)
+      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'success', title: '¡Solicitud enviada!' })
+    } else {
+      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'error', title: t('perfil.msg_err_enviar') })
+    }
+  } catch (error) {
+    Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'error', title: t('perfil.msg_err_conexion') })
+  } finally {
+    cargando.value = false
+  }
+}
 
-    async confirmarSolicitud() {
-      this.abrirConfirmacion = false;
-      this.cargando = true;
-      try {
-        const respuesta = await fetch('http://localhost/Backend/solictar_txandalari.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usuario_id: this.usuario.id,
-            mensaje: this.mensajeSolicitud,
-          }),
-        });
-        const datos = await respuesta.json();
-        if (datos.ok) {
-          this.$emit('solicitud-enviada'); 
-          this.mensajeSolicitud = '';
-        } else {
-          alert(datos.message || 'Errorea');
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        this.cargando = false;
-      }
-    },
-  },
+// Cancelar asistencia a un evento desde el perfil
+const cancelarAsistencia = async (id_evento) => {
+  try {
+    const res = await fetch('http://localhost/Backend/api_asistir.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id_evento })
+    })
+    const data = await res.json()
+    if (data.success) {
+      cargarMisEventos() // Recargamos la lista
+      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: 'Cancelado', timer: 1000, showConfirmButton: false })
+    }
+  } catch (error) { console.error(error) }
 }
 </script>
 

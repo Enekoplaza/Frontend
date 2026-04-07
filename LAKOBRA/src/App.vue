@@ -55,9 +55,8 @@ const verificarSesion = async () => {
 }
 
 // Login exitoso
-const loginExitoso = (datosUsuario) => {
-  usuarioActivo.value = datosUsuario
-  localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario))
+const loginExitoso = async () => {
+  await verificarSesion() // <--- Descarga el perfil COMPLETO desde PHP
   mostrarModal.value = false
 }
 
@@ -106,7 +105,7 @@ function toggleModo() {
     />
 
     <main class="content">
-      <router-view :usuario="usuarioActivo" />
+      <router-view :usuario="usuarioActivo" @actualizar-usuario="verificarSesion" />
     </main>
 
     <Footer

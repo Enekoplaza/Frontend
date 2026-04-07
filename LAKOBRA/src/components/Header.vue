@@ -25,30 +25,25 @@ const toggleIdioma = () => {
       <nav class="nav">
         <ul class="lista">
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">Saioa hasi</a>
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">{{ $t('header.login') }}</a>
           </li>
 
-          <!-- Usuario logueado -->
           <li class="user-welcome" v-else>
             <RouterLink to="/perfil">
               <strong>{{ usuario.nombre }}</strong>
-              <!-- Opcional: mostrar rol solo si NO es admin -->
               <span v-if="usuario.rol && usuario.rol !== 'admin'">({{ usuario.rol }})</span>
             </RouterLink>
           </li>
 
-          <!-- Enlaces públicos -->
-          <li><RouterLink to="/artistas">Artistak</RouterLink></li>
-          <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
-          <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
-          <li><RouterLink to="/principal">Hasiera</RouterLink></li>
+          <li><RouterLink to="/artistas">{{ $t('header.artistas') }}</RouterLink></li>
+          <li><RouterLink to="/eventos">{{ $t('header.eventos') }}</RouterLink></li>
+          <li><RouterLink to="/contacto">{{ $t('header.contacto') }}</RouterLink></li>
+          <li><RouterLink to="/principal">{{ $t('header.inicio') }}</RouterLink></li>
 
-          <!-- Logout -->
           <li v-if="usuario">
             <a href="#" @click.prevent="$emit('logout')" class="btn-logout">{{ $t('header.logout') }}</a>
           </li>
 
-          <!-- Separador -->
           <li class="divider"></li>
 
           <li>

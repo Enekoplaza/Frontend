@@ -56,7 +56,7 @@ const handleSubmit = async () => {
           timer: 2000,
           showConfirmButton: false
         });
-        emit('logeado', { nombre: data.user.nombre, rol: data.user.rol });
+        emit('logeado');
       } else {
         Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('auth.ok_reg_tit'), text: t('auth.ok_reg_msg') });
         esLogin.value = true;
