@@ -55,7 +55,7 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
           <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
           <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
           <li><RouterLink to="/principal">Hasiera</RouterLink></li>
-          <li>
+          <li v-if="usuario">
             <a href="#" @click.prevent="$emit('logout')" class="btn-logout">Salir</a>
           </li>
           <!-- Separador -->

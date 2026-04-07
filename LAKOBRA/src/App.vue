@@ -1,4 +1,5 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
@@ -7,6 +8,7 @@ import AuthModal from './components/AuthModal.vue'
 // --- AUTENTICACIÓN ---
 const mostrarModal = ref(false)
 const usuarioActivo = ref(null)
+const router = useRouter()
 
 const cargarSesionLocal = () => {
   const usuarioGuardado = localStorage.getItem('usuarioLakobra')
@@ -50,14 +52,15 @@ const loginExitoso = (datosUsuario) => {
 const cerrarSesion = async () => {
   try {
     await fetch('http://localhost/Backend/logout.php', { credentials: 'include' })
+
     usuarioActivo.value = null
     localStorage.removeItem('usuarioLakobra')
-    location.reload()
+
+    router.push('/principal') // 👈 REDIRECCIÓN LIMPIA
   } catch (e) {
     console.error('Error al cerrar sesión', e)
   }
 }
-
 // --- MONTADO ---
 onMounted(() => {
   cargarSesionLocal()
