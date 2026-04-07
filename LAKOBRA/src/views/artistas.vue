@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
+import { useI18n } from 'vue-i18n'; // <-- IMPORTAMOS LA LIBRERÍA
+
+const { t } = useI18n(); // <-- SACAMOS LA FUNCIÓN DE TRADUCCIÓN 't'
 
 const mostrarFormulario = ref(false);
 const cargando = ref(false);
@@ -22,8 +25,8 @@ const enviarSolicitud = async () => {
     Swal.fire({
       ...swalDarkConfig,
       icon: 'warning',
-      title: 'Datos incompletos',
-      text: 'Por favor, explícanos un poco más qué haces (mín. 10 caracteres).'
+      title: t('artistas.swal_inc_titulo'), // <-- TEXTO TRADUCIDO EN JS
+      text: t('artistas.swal_inc_texto')
     });
     return;
   }
@@ -43,17 +46,16 @@ const enviarSolicitud = async () => {
       Swal.fire({
         ...swalDarkConfig,
         icon: 'success',
-        title: '¡Solicitud enviada!',
-        text: 'Hemos recibido tu propuesta. Los administradores la revisarán pronto.'
+        title: t('artistas.swal_ok_titulo'),
+        text: t('artistas.swal_ok_texto')
       });
-      // Limpiamos y ocultamos el formulario
       form.value = { nombre_artista: '', email_contacto: '', descripcion: '' };
       mostrarFormulario.value = false;
     } else {
       Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Oops...', text: data.message });
     }
   } catch (error) {
-    Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: 'Problema de conexión' });
+    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('artistas.swal_err_titulo'), text: t('artistas.swal_err_texto') });
   } finally {
     cargando.value = false;
   }
@@ -63,42 +65,35 @@ const enviarSolicitud = async () => {
 <template>
   <div class="artistas-container">
     <div class="hero">
-      <h1>Lakobrako agertokira igo</h1>
-      <p class="intro">
-Gure musika-taldean parte hartu eta kontzertuak girotu nahi dituzu?
-Kantaria, DJa, animatzailea edo proposamen eszeniko desberdina izan.
-talentu lokalen bila ari gara, gure espazioan ahotsa emateko.
+      <h1>{{ $t('artistas.titulo') }}</h1>
+      <p class="intro">{{ $t('artistas.intro') }}</p>
 
-      </p>
-
-      <button 
-        class="btn-llamada" 
-        @click="mostrarFormulario = !mostrarFormulario"
-      >
-        {{ mostrarFormulario ? 'Ezkutatu formularioa': 'Artista gisa parte hartu nahi duzu? Egin klik hemen! ' }}
+      <button class="btn-llamada" @click="mostrarFormulario = !mostrarFormulario">
+        {{ mostrarFormulario ? $t('artistas.btn_ocultar') : $t('artistas.btn_mostrar') }}
       </button>
     </div>
 
     <div v-if="mostrarFormulario" class="formulario-wrapper animate-fade-in">
-      <h2>Bidali zure proposamena</h2>
+      <h2>{{ $t('artistas.form_titulo') }}</h2>
       <form @submit.prevent="enviarSolicitud" class="form-artistas">
+        
         <div class="form-group">
-          <label>Izen artistikoa/Taldea</label>
-          <input v-model="form.nombre_artista" type="text" placeholder="Ej: Los Rockeros de Deusto" required>
+          <label>{{ $t('artistas.label_nombre') }}</label>
+          <input v-model="form.nombre_artista" type="text" :placeholder="$t('artistas.ph_nombre')" required>
         </div>
 
         <div class="form-group">
-          <label>Harremanetarako e-maila</label>
+          <label>{{ $t('artistas.label_email') }}</label>
           <input v-model="form.email_contacto" type="email" placeholder="tu@email.com" required>
         </div>
 
         <div class="form-group">
-          <label>Kontaiguzu zure proiektuari buruz</label>
-          <textarea v-model="form.descripcion" rows="4" placeholder="Zer estilo jotzen duzu? Baduzu esperientziarik? Utzi zure musikarako estekak..." required></textarea>
+          <label>{{ $t('artistas.label_desc') }}</label>
+          <textarea v-model="form.descripcion" rows="4" :placeholder="$t('artistas.ph_desc')" required></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="kargatu">
-          {{ kargatu ? 'Bidaltzen...' : 'Bidali eskabidea' }}
+        <button type="submit" class="btn-submit" :disabled="cargando">
+          {{ cargando ? $t('artistas.btn_enviando') : $t('artistas.btn_enviar') }}
         </button>
       </form>
     </div>

@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
-import Swal from 'sweetalert2'; // Importamos SweetAlert
+import Swal from 'sweetalert2';
+import { useI18n } from 'vue-i18n'; // <-- 1. Importamos la librería
+
+const { t } = useI18n(); // <-- 2. Usamos 't' para las alertas de JS
 
 const props = defineProps({ mostrar: Boolean });
 const emit = defineEmits(['cerrar', 'logeado']);
@@ -8,143 +11,90 @@ const emit = defineEmits(['cerrar', 'logeado']);
 const esLogin = ref(true);
 
 const form = ref({
-    nombre: '',
-    dni: '',
-    email: '',
-    password: '',
-    direccion: '',
-    rol: 'socio'
+  nombre: '', dni: '', email: '', password: '', direccion: '', rol: 'socio'
 });
 
-// Configuración base para que las alertas combinen con tu diseño oscuro
-const swalDarkConfig = {
-    background: '#1e293b', // Color de fondo del modal
-    color: '#f8fafc',      // Color del texto
-    confirmButtonColor: '#38bdf8', // Azul Lakobra para el botón
-};
+const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' };
 
 const handleSubmit = async () => {
-    // --- NUEVAS VALIDACIONES DE FRONTEND ---
-    if (!esLogin.value) { // Solo comprobamos esto si se está registrando
-        // 1. Nombre mínimo 3 caracteres
-        if (form.value.nombre.trim().length < 3) {
-            Swal.fire({
-                ...swalDarkConfig,
-                icon: 'warning',
-                title: 'Nombre muy corto',
-                text: 'El nombre debe tener al menos 3 caracteres.'
-            });
-            return; // Detiene la función y no envía nada al backend
-        }
-
-        // 2. Email válido (usando una expresión regular)
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.value.email)) {
-            Swal.fire({
-                ...swalDarkConfig,
-                icon: 'warning',
-                title: 'Email inválido',
-                text: 'Por favor, introduce una dirección de correo válida.'
-            });
-            return;
-        }
-
-        // 3. Contraseña mínimo 5 caracteres
-        if (form.value.password.length < 5) {
-            Swal.fire({
-                ...swalDarkConfig,
-                icon: 'warning',
-                title: 'Contraseña débil',
-                text: 'La contraseña debe tener al menos 5 caracteres por seguridad.'
-            });
-            return;
-        }
+  if (!esLogin.value) {
+    if (form.value.nombre.trim().length < 3) {
+      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('auth.err_nombre_corto_tit'), text: t('auth.err_nombre_corto_msg') });
+      return;
     }
-    // --- FIN VALIDACIONES ---
-    const endpoint = esLogin.value ? 'login_api.php' : 'registro_api.php';
-    const url = `http://localhost/Backend/${endpoint}`;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.value.email)) {
+      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('auth.err_email_tit'), text: t('auth.err_email_msg') });
+      return;
+    }
+    if (form.value.password.length < 5) {
+      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('auth.err_pass_tit'), text: t('auth.err_pass_msg') });
+      return;
+    }
+  }
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            credentials: 'include', // <--- ¡FALTABA ESTO! Permite guardar la sesión del PHP
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form.value)
-        });
+  const endpoint = esLogin.value ? 'login_api.php' : 'registro_api.php';
+  const url = `http://localhost/Backend/${endpoint}`;
 
-        const data = await response.json();
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form.value)
+    });
 
-        if (data.success) {
-            if (esLogin.value) {
-                // ALERTA DE LOGIN EXITOSO
-                Swal.fire({
-                    ...swalDarkConfig,
-                    icon: 'success',
-                    title: `¡Bienvenido de nuevo!`,
-                    text: `Hola, ${data.user.nombre}`,
-                    timer: 2000, // Se cierra sola a los 2 segundos
-                    showConfirmButton: false
-                });
+    const data = await response.json();
 
-                emit('logeado', { nombre: data.user.nombre, rol: data.user.rol });
-            } else {
-                // ALERTA DE REGISTRO EXITOSO
-                Swal.fire({
-                    ...swalDarkConfig,
-                    icon: 'success',
-                    title: '¡Registro completado!',
-                    text: 'Ahora puedes iniciar sesión con tu nueva cuenta.',
-                });
-
-                esLogin.value = true; // Cambiamos a la vista de login
-                // Limpiamos la contraseña por seguridad
-                form.value.password = '';
-            }
-        } else {
-            // ALERTA DE ERROR DESDE EL BACKEND (Ej: Email ya existe o contraseña mal)
-            Swal.fire({
-                ...swalDarkConfig,
-                icon: 'error',
-                title: 'Oops...',
-                text: data.message,
-            });
-        }
-    } catch (error) {
-        // ALERTA DE ERROR GRAVE (Ej: XAMPP apagado)
+    if (data.success) {
+      if (esLogin.value) {
         Swal.fire({
-            ...swalDarkConfig,
-            icon: 'error',
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor. Revisa tu conexión.',
+          ...swalDarkConfig,
+          icon: 'success',
+          title: t('auth.ok_login_tit'),
+          text: `${t('auth.ok_login_msg')}, ${data.user.nombre}`,
+          timer: 2000,
+          showConfirmButton: false
         });
+        emit('logeado', { nombre: data.user.nombre, rol: data.user.rol });
+      } else {
+        Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('auth.ok_reg_tit'), text: t('auth.ok_reg_msg') });
+        esLogin.value = true;
+        form.value.password = '';
+      }
+    } else {
+      Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('auth.err_oops'), text: data.message }); // El mensaje del servidor no lo traducimos por simplicidad ahora
     }
+  } catch (error) {
+    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('auth.err_server_tit'), text: t('auth.err_server_msg') });
+  }
 };
 </script>
 
 <template>
-    <div v-if="mostrar" class="modal-overlay">
-        <div class="modal-content">
-            <button class="btn-close" @click="$emit('cerrar')">X</button>
-            <h2>{{ esLogin ? 'Iniciar Sesión' : 'Registro' }}</h2>
-            <form @submit.prevent="handleSubmit">
-                <template v-if="!esLogin">
-                    <input v-model="form.nombre" type="text" placeholder="Nombre completo" required>
-                    <input v-model="form.dni" type="text" placeholder="DNI" required>
-                    <input v-model="form.direccion" type="text" placeholder="Dirección">
-                    <select v-model="form.rol">
-                        <option value="socio">Socio</option>
-                        <option value="txandalari">Txandalari</option>
-                    </select>
-                </template>
-                <input v-model="form.email" type="email" placeholder="Email" required>
-                <input v-model="form.password" type="password" placeholder="Contraseña" required>
-                <button type="submit" class="btn-submit">{{ esLogin ? 'Entrar' : 'Registrar' }}</button>
-            </form>
-            <p @click="esLogin = !esLogin" class="toggle-auth">
-                {{ esLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
-            </p>
-        </div>
+  <div v-if="mostrar" class="modal-overlay">
+    <div class="modal-content">
+      <button class="btn-close" @click="$emit('cerrar')">X</button>
+      <h2>{{ esLogin ? $t('auth.login_title') : $t('auth.register_title') }}</h2>
+      <form @submit.prevent="handleSubmit">
+        <template v-if="!esLogin">
+          <input v-model="form.nombre" type="text" :placeholder="$t('auth.ph_nombre')" required>
+          <input v-model="form.dni" type="text" :placeholder="$t('auth.ph_dni')" required>
+          <input v-model="form.direccion" type="text" :placeholder="$t('auth.ph_dir')">
+          <select v-model="form.rol">
+            <option value="socio">{{ $t('auth.rol_socio') }}</option>
+            <option value="txandalari">{{ $t('auth.rol_txandalari') }}</option>
+          </select>
+        </template>
+        <input v-model="form.email" type="email" :placeholder="$t('auth.ph_email')" required>
+        <input v-model="form.password" type="password" :placeholder="$t('auth.ph_pass')" required>
+        <button type="submit" class="btn-submit">{{ esLogin ? $t('auth.btn_entrar') : $t('auth.btn_registrar') }}</button>
+      </form>
+      <p @click="esLogin = !esLogin" class="toggle-auth">
+        {{ esLogin ? $t('auth.toggle_to_reg') : $t('auth.toggle_to_login') }}
+      </p>
     </div>
+  </div>
 </template>
 
 <style scoped>

@@ -233,25 +233,30 @@ export default {
   color: var(--color-secundario);
   padding: 2rem 1rem;
 }
+
 .contenedor {
   max-width: 1000px;
   margin: 0 auto;
 }
+
 .cabecera-perfil {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
 }
+
 .cabecera-perfil h1 {
   font-size: 2rem;
   font-weight: 800;
 }
+
 .cabecera-perfil h1 span {
   color: var(--color-claro);
   padding: 2px 10px;
   border-radius: var(--border-raduis);
 }
+
 .etiqueta {
   padding: 6px 16px;
   border-radius: 50px;
@@ -260,20 +265,24 @@ export default {
   background: var(--color-claro);
   border: 1px solid #e2e8f0;
 }
+
 .etiqueta.admin {
   background: #fee2e2;
   color: #dc2626;
 }
+
 .grid-principal {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 2rem;
 }
+
 @media (max-width: 768px) {
   .grid-principal {
     grid-template-columns: 1fr;
   }
 }
+
 .tarjeta {
   background: var(--color-claro);
   border-radius: var(--border-raduis);
@@ -281,6 +290,7 @@ export default {
   box-shadow: var(--sombra);
   margin-bottom: 1.5rem;
 }
+
 .tarjeta h3 {
   font-size: 1.1rem;
   margin-bottom: 1.2rem;
@@ -289,15 +299,18 @@ export default {
   align-items: center;
   gap: 0.5rem;
 }
+
 .grupo-dato {
   margin-bottom: 1rem;
 }
+
 .grupo-dato label {
   font-size: 0.75rem;
   color: var(--color-muted);
   font-weight: 600;
   display: block;
 }
+
 .grupo-dato p,
 .grupo-dato input {
   font-weight: 500;
@@ -307,11 +320,13 @@ export default {
   margin-top: 3px;
   width: 100%;
 }
+
 .botones-edicion {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
+
 .btn-guardar {
   background: var(--color-primario);
   color: var(--color-claro);
@@ -320,6 +335,7 @@ export default {
   border-radius: var(--radio-bordes);
   cursor: pointer;
 }
+
 .btn-cancelar {
   background: rgb(126, 126, 219);
   color: var(--color-secundario);
@@ -328,6 +344,7 @@ export default {
   border-radius: 16px;
   cursor: pointer;
 }
+
 .boton-editar {
   background: none;
   border: none;
@@ -344,22 +361,27 @@ export default {
   padding: 1rem;
   border-radius: var(--radio-bordes);
 }
+
 .estado-txandalari.activo {
   border: 2px solid var(--color-activo);
 }
+
 .estado-activo {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .estado-principal {
   font-weight: 800;
   color: var(--color-activo);
 }
+
 .estado-secundario {
   font-size: 0.75rem;
   color: var(--color-muted);
 }
+
 .anillo-pulso {
   width: 12px;
   height: 12px;
@@ -367,12 +389,15 @@ export default {
   background: var(--color-activo);
   animation: pulso 2s infinite;
 }
+
 @keyframes pulso {
+
   0%,
   100% {
     transform: scale(0.95);
     opacity: 0.7;
   }
+
   50% {
     transform: scale(1);
     opacity: 0;
@@ -392,6 +417,7 @@ export default {
   cursor: pointer;
   overflow: hidden;
 }
+
 .btn-txandalari:disabled {
   background: #ad8989;
   color: #723030;
@@ -413,6 +439,7 @@ export default {
   border-radius: var(--radio-bordes);
   margin-bottom: 1rem;
 }
+
 .fecha-evento {
   display: flex;
   flex-direction: column;
@@ -423,23 +450,28 @@ export default {
   border-radius: var(--radio-bordes);
   min-width: 50px;
 }
+
 .dia {
   font-weight: 800;
   font-size: 1.2rem;
 }
+
 .mes {
   font-size: 0.7rem;
   font-weight: 700;
 }
+
 .detalle-evento h4 {
   margin: 0;
   font-weight: 700;
 }
+
 .detalle-evento p {
   margin: 0;
   font-size: 0.85rem;
   color: var(--color-muted);
 }
+
 .btn-anular {
   margin-left: auto;
   background: none;
@@ -447,6 +479,7 @@ export default {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
 .btn-anular:hover {
   color: #ef4444;
 }
