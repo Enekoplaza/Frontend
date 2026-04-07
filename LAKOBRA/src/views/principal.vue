@@ -3,33 +3,10 @@
     <h1 class="titulo">LAKOBRA</h1>
 
     <div class="descripcion">
-      <p>
-        <strong>Lakobra</strong> gazte eta kultural autogestionatutako elkartea da,
-        Deustuko auzoan (Bilbo) kokatua. Espazio komunitario alternatibo gisa
-        funtzionatzen du, non jarduera sozial, kultural eta politikoak antolatzen
-        diren ikuspegi parte-hartzaile eta asanbleario batetik.
-      </p>
-
-      <p>
-        Lakobrak kontzertuak, tailerrak, hitzaldiak eta bestelako ekitaldi
-        kulturalak antolatzen ditu, gazte eta auzoko kolektiboentzako topagune bat
-        eskainiz. Gainera, kultura alternatiboa eta pentsamendu kritikoa sustatzen
-        ditu, baita ekimen sozialak eta auzoko mugimenduak babestu ere.
-      </p>
-
-      <p>
-        Elkarteak aisialdi alternatibo, ez komertzial eta parte-hartzailea
-        proposatzen du, espazio inklusibo eta ireki baten bidez. Helburua da
-        solidariotasuna, elkartasuna eta kultura kritikoa sustatzea, eta aldi berean
-        Deustuko auzoaren bizitza kulturalaren dinamizazioa bultzatzea.
-      </p>
-
-      <p>
-        Lakobra batez ere Deustuko eta Bilboko gazteei zuzenduta dago, baina baita
-        kolektibo sozial eta kulturalentzat, kultura alternatiboan interesa duten
-        pertsonentzat eta auzoko bizilagunentzat ere. Parte hartu nahi duen edonork
-        du tokia bertan.
-      </p>
+      <p><strong>Lakobra</strong> {{ $t('principal.p1') }}</p>
+      <p>{{ $t('principal.p2') }}</p>
+      <p>{{ $t('principal.p3') }}</p>
+      <p>{{ $t('principal.p4') }}</p>
     </div>
   </div>
 </template>

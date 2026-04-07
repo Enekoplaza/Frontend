@@ -1,114 +1,98 @@
 <template>
   <div class="perfil">
     <div class="contenedor">
-      <!-- HEADER -->
       <header class="cabecera-perfil">
         <div class="info-usuario">
           <h1>
-            Bienvenido a LAKOBRA <span>{{ usuario.nombre }}</span>
+            {{ $t('perfil.bienvenido') }} <span>{{ usuario.nombre }}</span>
           </h1>
-          
         </div>
         <div class="etiqueta" :class="usuario.rol">{{ usuario.rol }}</div>
       </header>
 
-      <!-- GRID PRINCIPAL -->
       <div class="grid-principal">
-        <!-- SIDEBAR -->
         <aside class="barra-lateral">
-          <!-- DATOS DEL USUARIO -->
           <section class="tarjeta datos-usuario">
             <h3>
-              <i class="icono">👤</i> Mis Datos
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar">
-                ✏️
-              </button>
+              <i class="icono">👤</i> {{ $t('perfil.mis_datos') }}
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar">✏️</button>
             </h3>
 
             <div v-if="!modoEdicion">
               <div class="grupo-dato">
-                <label>DNI</label>
+                <label>{{ $t('perfil.dni') }}</label>
                 <p>{{ usuario.dni }}</p>
               </div>
               <div class="grupo-dato">
-                <label>Email</label>
+                <label>{{ $t('perfil.email') }}</label>
                 <p>{{ usuario.email }}</p>
               </div>
               <div class="grupo-dato">
-                <label>Dirección</label>
+                <label>{{ $t('perfil.direccion') }}</label>
                 <p>{{ usuario.direccion }}</p>
               </div>
             </div>
 
             <div v-else>
               <div class="grupo-dato">
-                <label>Nombre</label>
+                <label>{{ $t('perfil.nombre') }}</label>
                 <input type="text" v-model="usuarioEditar.nombre" />
               </div>
               <div class="grupo-dato">
-                <label>DNI</label>
+                <label>{{ $t('perfil.dni') }}</label>
                 <input type="text" v-model="usuarioEditar.dni" />
               </div>
               <div class="grupo-dato">
-                <label>Email</label>
+                <label>{{ $t('perfil.email') }}</label>
                 <input type="email" v-model="usuarioEditar.email" />
               </div>
               <div class="grupo-dato">
-                <label>Dirección</label>
+                <label>{{ $t('perfil.direccion') }}</label>
                 <input type="text" v-model="usuarioEditar.direccion" />
               </div>
               <div class="botones-edicion">
-                <button @click="guardarCambios" class="btn-guardar">Guardar</button>
-                <button @click="cancelarEdicion" class="btn-cancelar">Cancelar</button>
+                <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
+                <button @click="cancelarEdicion" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
               </div>
             </div>
           </section>
 
-<!-- TXANDALARI -->
-<section
-  class="tarjeta estado-txandalari"
-  :class="{ activo: usuario.solicitudTxandalari == 1 }"
->
-  <h3>🐍 Estado LAKOBRA</h3>
+          <section class="tarjeta estado-txandalari" :class="{ activo: usuario.solicitudTxandalari == 1 }">
+            <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-  <!-- Si ya es Txandalari -->
-  <div v-if="usuario.solicitudTxandalari == 1" class="estado-activo">
-    <div class="anillo-pulso"></div>
-    <div class="texto-estado">
-      <span class="estado-principal">TXANDALARI OFICIAL</span>
-      <span class="estado-secundario">Miembro de la élite</span>
-    </div>
-  </div>
+            <div v-if="usuario.solicitudTxandalari == 1" class="estado-activo">
+              <div class="anillo-pulso"></div>
+              <div class="texto-estado">
+                <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
+                <span class="estado-secundario">{{ $t('perfil.txan_elite') }}</span>
+              </div>
+            </div>
 
-  <!-- Si no es Txandalari -->
-  <div v-else class="formulario-solicitud">
-    <p class="titulo-formulario">¿Quieres ser Txandalari?</p>
-    <p class="descripcion-formulario">Únete al club y accede a ventajas exclusivas.</p>
+            <div v-else class="formulario-solicitud">
+              <p class="titulo-formulario">{{ $t('perfil.quieres_txan') }}</p>
+              <p class="descripcion-formulario">{{ $t('perfil.unete_club') }}</p>
 
-    <!-- Botón que abre el modal -->
-    <button class="btn-txandalari" @click="abrirConfirmacion = true">
-      {{ cargando ? 'Enviando...' : 'MANDAR SOLICITUD' }}
-    </button>
-  </div>
+              <button class="btn-txandalari" @click="abrirConfirmacion = true">
+                {{ cargando ? $t('perfil.btn_enviando') : $t('perfil.btn_mandar_solicitud') }}
+              </button>
+            </div>
 
-  <!-- Modal de confirmación -->
-  <div v-if="abrirConfirmacion" class="modal-overlay">
-    <div class="modal-contenido">
-      <h4>Confirmar solicitud</h4>
-      <p>¿Estás seguro que quieres ser Txandalari?</p>
-      <div class="botones-modal">
-        <button @click="confirmarSolicitud" class="btn-guardar">Sí, enviar</button>
-        <button @click="abrirConfirmacion = false" class="btn-cancelar">Cancelar</button>
-      </div>
-    </div>
-  </div>
-</section>
+            <div v-if="abrirConfirmacion" class="modal-overlay">
+              <div class="modal-contenido">
+                <h4>{{ $t('perfil.conf_titulo') }}</h4>
+                <p>{{ $t('perfil.conf_seguro') }}</p>
+                <div class="botones-modal">
+                  <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
+                </div>
+              </div>
+            </div>
+          </section>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="contenido">
           <section class="tarjeta eventos">
-            <h3><i class="icono">📅</i> Mis Eventos Próximos</h3>
+            <h3><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
 
             <div v-if="eventos.length > 0" class="lista-eventos">
               <div v-for="evento in eventos" :key="evento.id" class="evento-item">
@@ -125,7 +109,7 @@
             </div>
 
             <div v-else class="estado-vacio">
-              <p>Aún no te has apuntado a ninguna quedada.</p>
+              <p>{{ $t('perfil.no_eventos') }}</p>
             </div>
           </section>
         </main>
@@ -134,83 +118,85 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      cargando: false,
-      modoEdicion: false,
-      abrirConfirmacion: false, // Control del modal de confirmación
-      mensajeSolicitud: '',      // Mensaje opcional para la solicitud
-      usuario: {
-        id: 1,
-        nombre: 'aaaa',
-        dni: '12345678F',
-        email: 'aaaa@gmail.com',
-        direccion: 'Calle Falsa 123',
-        rol: 'admin',             // Cambia a 'usuario' para probar el envío
-        solicitudTxandalari: 0,
-      },
-      usuarioEditar: {},
-      eventos: [
-        { id: 1, titulo: 'KDD Nocturna LAKOBRA', dia: '15', mes: 'ABR', lugar: 'Parking Norte' },
-        { id: 2, titulo: 'Ruta Montaña Sierra', dia: '22', mes: 'MAY', lugar: 'Punto Pack' },
-      ],
-    }
-  },
-  methods: {
-    // Gestión de edición de perfil
-    cancelarEdicion() {
-      this.modoEdicion = false
-    },
-    guardarCambios() {
-      this.usuario = { ...this.usuarioEditar }
-      this.modoEdicion = false
-      alert('Datos actualizados correctamente')
-    },
+<script setup>
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-    // Abrir modal
-    abrirModalConfirmacion() {
-      this.abrirConfirmacion = true
-    },
+// Inicializamos la librería de traducción
+const { t } = useI18n()
 
-    // Confirmar y enviar solicitud Txandalari
-async confirmarSolicitud() {
-  this.abrirConfirmacion = false
-  this.cargando = true
+// Variables reactivas (antes en data)
+const cargando = ref(false)
+const modoEdicion = ref(false)
+const abrirConfirmacion = ref(false)
+const mensajeSolicitud = ref('')
+
+const usuario = ref({
+  id: 1,
+  nombre: 'Invitado', // Dato de prueba temporal
+  dni: '12345678F',
+  email: 'invitado@lakobra.com',
+  direccion: 'Calle Falsa 123',
+  rol: 'admin',
+  solicitudTxandalari: 0,
+})
+
+const usuarioEditar = ref({})
+
+const eventos = ref([
+  { id: 1, titulo: 'KDD Nocturna LAKOBRA', dia: '15', mes: 'ABR', lugar: 'Parking Norte' },
+  { id: 2, titulo: 'Ruta Montaña Sierra', dia: '22', mes: 'MAY', lugar: 'Punto Pack' },
+])
+
+// Métodos (antes en methods)
+const cancelarEdicion = () => {
+  modoEdicion.value = false
+}
+
+const guardarCambios = () => {
+  usuario.value = { ...usuarioEditar.value }
+  modoEdicion.value = false
+  // Usamos t() importado de vue-i18n
+  alert(t('perfil.msg_datos_ok')) 
+}
+
+const confirmarSolicitud = async () => {
+  abrirConfirmacion.value = false
+  cargando.value = true
+  
   try {
     const respuesta = await fetch('http://localhost/Backend/solictar_txandalari.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        usuario_id: this.usuario.id,
-        mensaje: this.mensajeSolicitud
+        usuario_id: usuario.value.id,
+        mensaje: mensajeSolicitud.value
       }),
     })
 
     const datos = await respuesta.json()
 
     if (datos.ok) {
-      this.usuario.solicitudTxandalari = 1
-      this.mensajeSolicitud = ''
+      usuario.value.solicitudTxandalari = 1
+      mensajeSolicitud.value = ''
       alert(datos.message)
     } else {
-      alert(datos.message || 'Error al enviar solicitud')
+      alert(datos.message || t('perfil.msg_err_enviar'))
     }
   } catch (error) {
     console.error(error)
-    alert('Error de conexión con el servidor')
+    alert(t('perfil.msg_err_conexion'))
   } finally {
-    this.cargando = false
+    cargando.value = false
   }
 }
-  },
-  watch: {
-    modoEdicion(val) {
-      if (val) this.usuarioEditar = { ...this.usuario }
-    },
-  },
-}
+
+// Watchers (antes en watch)
+watch(modoEdicion, (nuevoValor) => {
+  if (nuevoValor) {
+    usuarioEditar.value = { ...usuario.value }
+  }
+})
 </script>
 
 <style scoped>
@@ -232,25 +218,30 @@ async confirmarSolicitud() {
   color: var(--color-secundario);
   padding: 2rem 1rem;
 }
+
 .contenedor {
   max-width: 1000px;
   margin: 0 auto;
 }
+
 .cabecera-perfil {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
 }
+
 .cabecera-perfil h1 {
   font-size: 2rem;
   font-weight: 800;
 }
+
 .cabecera-perfil h1 span {
   color: var(--color-claro);
   padding: 2px 10px;
   border-radius: var(--border-raduis);
 }
+
 .etiqueta {
   padding: 6px 16px;
   border-radius: 50px;
@@ -259,20 +250,24 @@ async confirmarSolicitud() {
   background: var(--color-claro);
   border: 1px solid #e2e8f0;
 }
+
 .etiqueta.admin {
   background: #fee2e2;
   color: #dc2626;
 }
+
 .grid-principal {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 2rem;
 }
+
 @media (max-width: 768px) {
   .grid-principal {
     grid-template-columns: 1fr;
   }
 }
+
 .tarjeta {
   background: var(--color-claro);
   border-radius: var(--border-raduis);
@@ -280,6 +275,7 @@ async confirmarSolicitud() {
   box-shadow: var(--sombra);
   margin-bottom: 1.5rem;
 }
+
 .tarjeta h3 {
   font-size: 1.1rem;
   margin-bottom: 1.2rem;
@@ -288,15 +284,18 @@ async confirmarSolicitud() {
   align-items: center;
   gap: 0.5rem;
 }
+
 .grupo-dato {
   margin-bottom: 1rem;
 }
+
 .grupo-dato label {
   font-size: 0.75rem;
   color: var(--color-muted);
   font-weight: 600;
   display: block;
 }
+
 .grupo-dato p,
 .grupo-dato input {
   font-weight: 500;
@@ -306,11 +305,13 @@ async confirmarSolicitud() {
   margin-top: 3px;
   width: 100%;
 }
+
 .botones-edicion {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
+
 .btn-guardar {
   background: var(--color-primario);
   color: var(--color-claro);
@@ -319,6 +320,7 @@ async confirmarSolicitud() {
   border-radius: var(--radio-bordes);
   cursor: pointer;
 }
+
 .btn-cancelar {
   background: rgb(126, 126, 219);
   color: var(--color-secundario);
@@ -327,6 +329,7 @@ async confirmarSolicitud() {
   border-radius: 16px;
   cursor: pointer;
 }
+
 .boton-editar {
   background: none;
   border: none;
@@ -343,22 +346,27 @@ async confirmarSolicitud() {
   padding: 1rem;
   border-radius: var(--radio-bordes);
 }
+
 .estado-txandalari.activo {
   border: 2px solid var(--color-activo);
 }
+
 .estado-activo {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .estado-principal {
   font-weight: 800;
   color: var(--color-activo);
 }
+
 .estado-secundario {
   font-size: 0.75rem;
   color: var(--color-muted);
 }
+
 .anillo-pulso {
   width: 12px;
   height: 12px;
@@ -366,12 +374,15 @@ async confirmarSolicitud() {
   background: var(--color-activo);
   animation: pulso 2s infinite;
 }
+
 @keyframes pulso {
+
   0%,
   100% {
     transform: scale(0.95);
     opacity: 0.7;
   }
+
   50% {
     transform: scale(1);
     opacity: 0;
@@ -391,6 +402,7 @@ async confirmarSolicitud() {
   cursor: pointer;
   overflow: hidden;
 }
+
 .btn-txandalari:disabled {
   background: #ad8989;
   color: #723030;
@@ -412,6 +424,7 @@ async confirmarSolicitud() {
   border-radius: var(--radio-bordes);
   margin-bottom: 1rem;
 }
+
 .fecha-evento {
   display: flex;
   flex-direction: column;
@@ -422,23 +435,28 @@ async confirmarSolicitud() {
   border-radius: var(--radio-bordes);
   min-width: 50px;
 }
+
 .dia {
   font-weight: 800;
   font-size: 1.2rem;
 }
+
 .mes {
   font-size: 0.7rem;
   font-weight: 700;
 }
+
 .detalle-evento h4 {
   margin: 0;
   font-weight: 700;
 }
+
 .detalle-evento p {
   margin: 0;
   font-size: 0.85rem;
   color: var(--color-muted);
 }
+
 .btn-anular {
   margin-left: auto;
   background: none;
@@ -446,6 +464,7 @@ async confirmarSolicitud() {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
 .btn-anular:hover {
   color: #ef4444;
 }

@@ -1,11 +1,18 @@
 <script setup>
+import { useI18n } from 'vue-i18n' // Importamos la herramienta de idioma
+
 const props = defineProps({
   usuario: Object,
-  modoOscuro: Boolean, // Recibimos el estado actual del modo
+  modoOscuro: Boolean,
 })
-
-// Añadimos el evento 'toggleTema' para avisar a App.vue
 defineEmits(['abrirModal', 'logout', 'toggleTema'])
+
+const { locale } = useI18n() // Obtenemos el idioma actual
+
+// Función para alternar el idioma
+const toggleIdioma = () => {
+  locale.value = locale.value === 'es' ? 'eus' : 'es'
+}
 </script>
 
 <template>
@@ -17,69 +24,55 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
 
       <nav class="nav">
         <ul class="lista">
-          <!-- Usuario no logueado -->
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth"> Saioa hasi </a>
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth"> {{ $t('header.login') }} </a>
           </li>
 
-          <!-- Usuario logueado -->
           <template v-else>
             <li class="user-welcome">
-              <span v-if="usuario?.rol === 'admin'"
-                >Admin <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else-if="usuario?.rol === 'txandalari'"
-                >Txandalari <strong>{{ usuario?.nombre }}</strong></span
-              >
+              <span v-if="usuario?.rol === 'admin'">Admin <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else-if="usuario?.rol === 'txandalari'">Txandalari <strong>{{ usuario?.nombre }}</strong></span>
             </li>
           </template>
 
-          <!-- Perfil (si usuario existe) -->
           <li class="user-welcome" v-if="usuario">
             <RouterLink to="/perfil">
-              <span v-if="usuario?.rol === 'admin'"
-                >Admin <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else-if="usuario?.rol === 'txandalari'"
-                >Txandalari <strong>{{ usuario?.nombre }}</strong></span
-              >
-              <span v-else
-                ><strong>{{ usuario?.nombre }}</strong></span
-              >
+              <span v-if="usuario?.rol === 'admin'">Admin <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else-if="usuario?.rol === 'txandalari'">Txandalari <strong>{{ usuario?.nombre }}</strong></span>
+              <span v-else><strong>{{ usuario?.nombre }}</strong></span>
             </RouterLink>
           </li>
 
-          <!-- Enlaces públicos -->
-
-          <li><RouterLink to="/artistas">Artistak</RouterLink></li>
-          <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
-          <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
-          <li><RouterLink to="/principal">Hasiera</RouterLink></li>
-          <li v-if="usuario">
-            <a href="#" @click.prevent="$emit('logout')" class="btn-logout">Salir</a>
+          <li>
+            <RouterLink to="/artistas">{{ $t('header.artistas') }}</RouterLink>
           </li>
-          <!-- Separador -->
+          <li>
+            <RouterLink to="/eventos">{{ $t('header.eventos') }}</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/contacto">{{ $t('header.contacto') }}</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/principal">{{ $t('header.inicio') }}</RouterLink>
+          </li>
+
+          <li v-if="usuario">
+            <a href="#" @click.prevent="$emit('logout')" class="btn-logout">{{ $t('header.logout') }}</a>
+          </li>
+
           <li class="divider"></li>
 
-          <!-- Botón cambiar tema -->
           <li>
-            <button
-              class="btn-tema"
-              @click="$emit('toggleTema')"
-              :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
-            >
-              <svg
-                v-if="modoOscuro"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+            <button class="btn-idioma" @click="toggleIdioma" title="Cambiar idioma">
+              {{ locale === 'es' ? 'EUS' : 'ES' }}
+            </button>
+          </li>
+
+          <li>
+            <button class="btn-tema" @click="$emit('toggleTema')"
+              :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+              <svg v-if="modoOscuro" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="5"></circle>
                 <line x1="12" y1="1" x2="12" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -90,18 +83,8 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </button>
@@ -202,5 +185,21 @@ a:hover {
   color: var(--header-accent);
   background: rgba(255, 255, 255, 0.1);
   transform: rotate(15deg);
+}
+
+.btn-idioma {
+  background: none;
+  border: 1px solid var(--header-text);
+  color: var(--header-text);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-idioma:hover {
+  color: var(--header-accent);
+  border-color: var(--header-accent);
 }
 </style>
