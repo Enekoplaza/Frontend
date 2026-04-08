@@ -31,7 +31,6 @@ const toggleIdioma = () => {
           <li class="user-welcome" v-else>
             <RouterLink to="/perfil">
               <strong>{{ usuario.nombre }}</strong>
-              <span v-if="usuario.rol && usuario.rol !== 'admin'">({{ usuario.rol }})</span>
             </RouterLink>
           </li>
 
