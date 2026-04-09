@@ -37,7 +37,15 @@
     "swal_ok_titulo": "Eskabidea bidalita!",
     "swal_ok_texto": "Zure proposamena jaso dugu. Administratzaileek laster aztertuko dute.",
     "swal_err_titulo": "Errorea",
-    "swal_err_texto": "Konexio arazoa"
+    "swal_err_texto": "Konexio arazoa",
+    "admin_titulo": "Administrazio Panela: Eskabideak",
+    "sin_solicitudes": "Gaur egun ez dago artista eskaerarik.",
+    "btn_aceptar": "Onartu",
+    "btn_rechazar": "Ezetsi",
+    "estado_pendiente": "Zintzilik",
+    "estado_aceptada": "Onartuta",
+    "estado_rechazada": "Ezetsia",
+    "swal_estado_ok": "Egoera eguneratu da"
   },
   "auth": {
     "login_title": "Saioa hasi",

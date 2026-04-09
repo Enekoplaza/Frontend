@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n(); // Importamos t para SweetAlert
+const { t } = useI18n();
 
 const usuarioLocal = localStorage.getItem('usuarioLakobra');
 const usuarioActivo = ref(usuarioLocal ? JSON.parse(usuarioLocal) : null);
@@ -15,7 +15,11 @@ const modoEdicion = ref(false);
 const idEditando = ref(null);
 
 const formEvento = ref({
-  titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'confirmado'
+  titulo: '', 
+  fecha_evento: '', 
+  hora_inicio: '', 
+  aforo_max: 120, 
+  estado: 'confirmado'
 });
 
 const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' };
@@ -29,9 +33,11 @@ const cargarEventos = async () => {
   try {
     const res = await fetch('http://localhost/Backend/api_eventos.php', { credentials: 'include' });
     const data = await res.json();
-    if (data.success) eventos.value = data.eventos;
+    if (data.success) {
+      eventos.value = data.eventos;
+    }
   } catch (error) {
-    console.error("Error", error);
+    console.error("Error al cargar eventos", error);
   }
 };
 
@@ -39,7 +45,17 @@ const prepararEdicion = (evento) => {
   modoEdicion.value = true;
   mostrarFormulario.value = true;
   idEditando.value = evento.id;
-  formEvento.value = { ...evento };
+  
+  // SOLUCIÓN: Asignamos estrictamente solo los campos del formulario.
+  // Evitamos arrastrar 'plazas_libres' u otros datos calculados que rompen la vista.
+  formEvento.value = {
+    titulo: evento.titulo,
+    fecha_evento: evento.fecha_evento,
+    hora_inicio: evento.hora_inicio,
+    aforo_max: evento.aforo_max,
+    estado: evento.estado
+  };
+  
   window.scrollTo({ top: 0, behavior: 'smooth' }); 
 };
 
@@ -56,8 +72,10 @@ const guardarEvento = async () => {
 
   try {
     const res = await fetch('http://localhost/Backend/api_eventos.php', {
-      method: method, headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', body: JSON.stringify(payload)
+      method: method, 
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', 
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
 
@@ -89,25 +107,32 @@ const borrarEvento = async (id) => {
   if (confirmacion.isConfirmed) {
     try {
       const res = await fetch('http://localhost/Backend/api_eventos.php', {
-        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', body: JSON.stringify({ id })
+        method: 'DELETE', 
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', 
+        body: JSON.stringify({ id })
       });
       const data = await res.json();
       if (data.success) {
         Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_borrado'), timer: 1500, showConfirmButton: false });
         cargarEventos();
       }
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+      console.error(error); 
+    }
   }
 };
 
 const toggleAsistencia = async (evento) => {
   try {
     const res = await fetch('http://localhost/Backend/api_asistir.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', body: JSON.stringify({ id_evento: evento.id })
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', 
+      body: JSON.stringify({ id_evento: evento.id })
     });
     const data = await res.json();
+    
     if (data.success) {
       const esApuntado = data.accion === 'apuntado';
       Swal.fire({ ...swalDarkConfig, icon: esApuntado ? 'success' : 'info', title: esApuntado ? t('eventos.swal_ok_conf') : t('eventos.swal_ok_canc'), text: data.message, timer: 1500, showConfirmButton: false });
@@ -115,7 +140,9 @@ const toggleAsistencia = async (evento) => {
     } else {
       Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('eventos.swal_aviso'), text: data.message });
     }
-  } catch (error) { console.error("Error", error); }
+  } catch (error) { 
+    console.error("Error", error); 
+  }
 };
 
 onMounted(cargarEventos);

@@ -37,7 +37,15 @@
     "swal_ok_titulo": "¡Solicitud enviada!",
     "swal_ok_texto": "Hemos recibido tu propuesta. Los administradores la revisarán pronto.",
     "swal_err_titulo": "Error",
-    "swal_err_texto": "Problema de conexión"
+    "swal_err_texto": "Problema de conexión",
+    "admin_titulo": "Panel de Administración: Solicitudes",
+    "sin_solicitudes": "No hay solicitudes de artistas actualmente.",
+    "btn_aceptar": "Aceptar",
+    "btn_rechazar": "Rechazar",
+    "estado_pendiente": "Pendiente",
+    "estado_aceptada": "Aceptada",
+    "estado_rechazada": "Rechazada",
+    "swal_estado_ok": "Estado actualizado"
   },
   "auth": {
     "login_title": "Iniciar Sesión",

@@ -52,23 +52,24 @@ const toggleIdioma = () => {
           </li>
 
           <li>
-            <button class="btn-tema" @click="$emit('toggleTema')"
+            <button class="btn-tema theme-toggle" :class="{ 'is-dark': modoOscuro }" @click="$emit('toggleTema')"
               :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-              <svg v-if="modoOscuro" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
+                <mask class="moon" id="moon-mask">
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  <circle cx="24" cy="10" r="6" fill="black" />
+                </mask>
+                <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)" fill="currentColor" />
+                <g class="sun-beams" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </g>
               </svg>
             </button>
           </li>
@@ -184,5 +185,58 @@ a:hover {
 .btn-idioma:hover {
   color: var(--header-accent);
   border-color: var(--header-accent);
+}
+
+/* =========================================
+   ANIMACIÓN DEL TEMA (SUN & MOON MORPH)
+   ========================================= */
+
+/* Eliminamos la rotación antigua que tenías en :hover para que no estropee la nueva */
+.btn-tema:hover {
+  color: var(--header-accent);
+  background: rgba(255, 255, 255, 0.1);
+  /* Hemos quitado el transform: rotate(15deg); de aquí */
+}
+
+/* Configuramos el contenedor del SVG */
+.theme-toggle .sun-and-moon {
+  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+  overflow: visible;
+}
+
+/* Transiciones para todas las partes del icono */
+.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) {
+  transform-origin: center center;
+  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25), 
+              opacity 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+}
+
+.theme-toggle .sun-and-moon .moon > circle {
+  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+}
+
+/* =========================================
+   ESTADO: MODO OSCURO (LUNA)
+   ========================================= */
+
+/* 1. Giramos todo el icono un poco hacia la izquierda */
+.theme-toggle.is-dark .sun-and-moon {
+  transform: rotate(-100deg);
+}
+
+/* 2. El círculo central se hace más grande */
+.theme-toggle.is-dark .sun-and-moon .sun {
+  transform: scale(1.75);
+}
+
+/* 3. Los rayos del sol se encogen, giran y desaparecen */
+.theme-toggle.is-dark .sun-and-moon .sun-beams {
+  opacity: 0;
+  transform: rotate(-25deg) scale(0.5);
+}
+
+/* 4. El círculo de la máscara se mueve hacia la izquierda para "comerse" el sol */
+.theme-toggle.is-dark .sun-and-moon .moon > circle {
+  transform: translateX(-7px);
 }
 </style>
