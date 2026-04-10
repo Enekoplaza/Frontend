@@ -45,7 +45,12 @@
     "estado_pendiente": "Zintzilik",
     "estado_aceptada": "Onartuta",
     "estado_rechazada": "Ezetsia",
-    "swal_estado_ok": "Egoera eguneratu da"
+    "swal_estado_ok": "Egoera eguneratu da",
+    "swal_aceptado_tit": "Artista onartuta!",
+    "swal_aceptado_msg": "Talde hau onartu duzu. Dagoeneko Ekitaldiak atalera joan zaitezke bere kontzertua sortzeko.",
+    "swal_rechazado_tit": "Eskabidea ezabatuta",
+    "swal_rechazado_msg": "Eskaera ezetsi eta sistematik ezabatu da.",
+    "btn_listo_evento": "Ekitaldirako prest"
   },
   "auth": {
     "login_title": "Saioa hasi",
@@ -104,7 +109,8 @@
     "swal_btn_cancelar": "Ezeztatu",
     "swal_ok_conf": "Konfirmatuta!",
     "swal_ok_canc": "Kantzelatuta",
-    "swal_aviso": "Abisua"
+    "swal_aviso": "Abisua",
+    "btn_proximamente": "Laster"
   },
   "perfil": {
     "bienvenido": "Ongi etorri LAKOBRA-ra",
@@ -129,6 +135,15 @@
     "no_eventos": "Oraindik ez zara inongo topaketatan apuntatu.",
     "msg_datos_ok": "Datuak behar bezala eguneratu dira",
     "msg_err_enviar": "Errorea eskabidea bidaltzean",
-    "msg_err_conexion": "Konexio errorea zerbitzariarekin"
+    "msg_err_conexion": "Konexio errorea zerbitzariarekin",
+    "txan_pendiente": "ESKABIDEA BIDALITA",
+    "txan_espera": "Onarpenaren zain",
+    "turno_label": "Postua:",
+    "turno_ninguno": "Posturik ez (Etorri soilik)",
+    "turno_barra": "Barra",
+    "turno_puerta": "Atea",
+    "turno_limpieza": "Garbiketa",
+    "turno_otros": "Beste batzuk",
+    "msg_turno_ok": "Txanda esleituta"
   }
 }

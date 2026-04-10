@@ -50,10 +50,26 @@ const cambiarEstado = async (id, nuevoEstado) => {
       body: JSON.stringify({ id, estado: nuevoEstado })
     });
     const data = await res.json();
-
+    
     if (data.success) {
-      Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('artistas.swal_estado_ok'), timer: 1500, showConfirmButton: false });
-      cargarSolicitudes(); // Recargamos para que cambien los colores en pantalla
+      if (data.accion === 'aceptada') {
+        Swal.fire({ 
+          ...swalDarkConfig, 
+          icon: 'success', 
+          title: t('artistas.swal_aceptado_tit'), 
+          text: t('artistas.swal_aceptado_msg') 
+        });
+      } else {
+        Swal.fire({ 
+          ...swalDarkConfig, 
+          icon: 'info', 
+          title: t('artistas.swal_rechazado_tit'), 
+          text: t('artistas.swal_rechazado_msg'), 
+          timer: 2000, 
+          showConfirmButton: false 
+        });
+      }
+      cargarSolicitudes(); // Recargamos la lista (la rechazada desaparecerá)
     }
   } catch (error) {
     console.error(error);
@@ -118,14 +134,20 @@ const enviarSolicitud = async () => {
             <span :class="['badge', solicitud.estado]">{{ $t('artistas.estado_' + solicitud.estado) }}</span>
 
             <div class="botones-admin">
-              <button v-if="solicitud.estado !== 'aceptada'" @click="cambiarEstado(solicitud.id, 'aceptada')"
-                class="btn-aceptar">
-                {{ $t('artistas.btn_aceptar') }}
-              </button>
-              <button v-if="solicitud.estado !== 'rechazada'" @click="cambiarEstado(solicitud.id, 'rechazada')"
-                class="btn-rechazar">
-                {{ $t('artistas.btn_rechazar') }}
-              </button>
+              <template v-if="solicitud.estado === 'pendiente'">
+                <button @click="cambiarEstado(solicitud.id, 'aceptada')" class="btn-aceptar">
+                  {{ $t('artistas.btn_aceptar') }}
+                </button>
+                <button @click="cambiarEstado(solicitud.id, 'rechazada')" class="btn-rechazar">
+                  {{ $t('artistas.btn_rechazar') }}
+                </button>
+              </template>
+
+              <template v-else-if="solicitud.estado === 'aceptada'">
+                <button class="btn-listo" disabled>
+                  ⭐ {{ $t('artistas.btn_listo_evento') }}
+                </button>
+              </template>
             </div>
           </div>
 
@@ -437,6 +459,15 @@ textarea:focus {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
+}
+
+/* Botón dorado para cuando la solicitud ya está aceptada */
+.btn-listo {
+  background: rgba(250, 204, 21, 0.1) !important;
+  color: #facc15 !important;
+  border: 1px solid #facc15 !important;
+  cursor: default !important;
+  width: 100%;
 }
 
 @keyframes fadeIn {

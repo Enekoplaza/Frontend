@@ -45,7 +45,12 @@
     "estado_pendiente": "Pendiente",
     "estado_aceptada": "Aceptada",
     "estado_rechazada": "Rechazada",
-    "swal_estado_ok": "Estado actualizado"
+    "swal_estado_ok": "Estado actualizado",
+    "swal_aceptado_tit": "¡Artista aceptado!",
+    "swal_aceptado_msg": "Has aceptado a este grupo. Ya puedes ir a la sección de Eventos para crear su concierto.",
+    "swal_rechazado_tit": "Solicitud eliminada",
+    "swal_rechazado_msg": "La petición ha sido rechazada y borrada del sistema.",
+    "btn_listo_evento": "Listo para evento"
   },
   "auth": {
     "login_title": "Iniciar Sesión",
@@ -104,7 +109,8 @@
     "swal_btn_cancelar": "Cancelar",
     "swal_ok_conf": "¡Confirmado!",
     "swal_ok_canc": "Cancelado",
-    "swal_aviso": "Aviso"
+    "swal_aviso": "Aviso",
+    "btn_proximamente": "Próximamente"
   },
   "perfil": {
     "bienvenido": "Bienvenido a LAKOBRA",
@@ -129,6 +135,15 @@
     "no_eventos": "Aún no te has apuntado a ninguna quedada.",
     "msg_datos_ok": "Datos actualizados correctamente",
     "msg_err_enviar": "Error al enviar solicitud",
-    "msg_err_conexion": "Error de conexión con el servidor"
+    "msg_err_conexion": "Error de conexión con el servidor",
+    "txan_pendiente": "SOLICITUD ENVIADA",
+    "txan_espera": "Esperando aprobación",
+    "turno_label": "Puesto:",
+    "turno_ninguno": "Sin puesto (Solo asistir)",
+    "turno_barra": "Barra",
+    "turno_puerta": "Puerta",
+    "turno_limpieza": "Limpieza",
+    "turno_otros": "Otros",
+    "msg_turno_ok": "Turno asignado"
   }
 }

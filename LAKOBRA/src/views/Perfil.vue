@@ -15,34 +15,21 @@
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
               <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono"
-                title="Editar">✏️</button>
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono" title="Editar">✏️</button>
             </div>
 
             <div v-if="!modoEdicion" class="vista-datos">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label>
-                <p class="dato-texto">{{ usuarioEditar.nombre }}</p>
-              </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label>
-                <p class="dato-texto">{{ usuarioEditar.dni }}</p>
-              </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label>
-                <p class="dato-texto">{{ usuarioEditar.email }}</p>
-              </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label>
-                <p class="dato-texto">{{ usuarioEditar.direccion }}</p>
-              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><p class="dato-texto">{{ usuarioEditar.nombre }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><p class="dato-texto">{{ usuarioEditar.dni }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><p class="dato-texto">{{ usuarioEditar.email }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><p class="dato-texto">{{ usuarioEditar.direccion }}</p></div>
             </div>
 
             <div v-else class="formulario-edicion">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text"
-                  v-model="usuarioEditar.nombre" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text"
-                  v-model="usuarioEditar.dni" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email"
-                  v-model="usuarioEditar.email" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text"
-                  v-model="usuarioEditar.direccion" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text" v-model="usuarioEditar.nombre" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text" v-model="usuarioEditar.dni" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email" v-model="usuarioEditar.email" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text" v-model="usuarioEditar.direccion" /></div>
 
               <div class="botones-edicion">
                 <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
@@ -51,14 +38,23 @@
             </div>
           </section>
 
-          <section class="tarjeta estado-txandalari" :class="{ activo: usuarioEditar.solicitud_txandalari == 1 }">
+          <section class="tarjeta estado-txandalari"
+            :class="{ activo: usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1 }">
             <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-            <div v-if="usuarioEditar.solicitud_txandalari == 1" class="estado-activo">
+            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'" class="estado-activo oficial">
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
                 <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
                 <span class="estado-secundario">{{ $t('perfil.txan_elite') }}</span>
+              </div>
+            </div>
+
+            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1" class="estado-activo pendiente">
+              <div class="anillo-pulso azul"></div>
+              <div class="texto-estado">
+                <span class="estado-principal" style="color: #38bdf8;">{{ $t('perfil.txan_pendiente') }}</span>
+                <span class="estado-secundario">{{ $t('perfil.txan_espera') }}</span>
               </div>
             </div>
 
@@ -76,8 +72,7 @@
                 <p>{{ $t('perfil.conf_seguro') }}</p>
                 <div class="botones-modal">
                   <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
-                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar')
-                    }}</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
                 </div>
               </div>
             </div>
@@ -90,14 +85,29 @@
 
             <div v-if="misEventos.length > 0" class="lista-eventos">
               <div v-for="evento in misEventos" :key="evento.id" class="evento-item">
+
                 <div class="fecha-evento">
                   <span class="dia">{{ evento.fecha_evento.split('-')[2] }}</span>
                   <span class="mes">{{ evento.fecha_evento.split('-')[1] }}</span>
                 </div>
+
                 <div class="detalle-evento">
                   <h4>{{ evento.titulo }}</h4>
                   <p>🕒 {{ evento.hora_inicio.substring(0, 5) }}</p>
+
+                  <div class="selector-turno"
+                    v-if="usuarioEditar.rol === 'admin' || usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1">
+                    <label>{{ $t('perfil.turno_label') }}</label>
+                    <select v-model="evento.puesto" @change="asignarTurno(evento)">
+                      <option value="">{{ $t('perfil.turno_ninguno') }}</option>
+                      <option value="barra">{{ $t('perfil.turno_barra') }}</option>
+                      <option value="puerta">{{ $t('perfil.turno_puerta') }}</option>
+                      <option value="limpieza">{{ $t('perfil.turno_limpieza') }}</option>
+                      <option value="otros">{{ $t('perfil.turno_otros') }}</option>
+                    </select>
+                  </div>
                 </div>
+
                 <button @click="cancelarAsistencia(evento.id)" class="btn-anular" title="Anular asistencia">×</button>
               </div>
             </div>
@@ -130,7 +140,6 @@ const abrirConfirmacion = ref(false)
 const usuarioEditar = ref({})
 const misEventos = ref([])
 
-// Sincronizar datos del usuario
 watch(
   () => props.usuario,
   (nuevoUsuario) => {
@@ -139,7 +148,6 @@ watch(
   { immediate: true, deep: true }
 )
 
-// Cargar mis eventos al entrar
 const cargarMisEventos = async () => {
   try {
     const res = await fetch('http://localhost/Backend/api_perfil.php', { credentials: 'include' })
@@ -150,7 +158,6 @@ const cargarMisEventos = async () => {
 
 onMounted(cargarMisEventos)
 
-// Guardar datos
 const cancelarEdicion = () => {
   usuarioEditar.value = { ...props.usuario }
   modoEdicion.value = false
@@ -176,7 +183,6 @@ const guardarCambios = async () => {
   }
 }
 
-// Solicitar Txandalari
 const confirmarSolicitud = async () => {
   abrirConfirmacion.value = false
   cargando.value = true
@@ -185,7 +191,9 @@ const confirmarSolicitud = async () => {
     const data = await res.json()
 
     if (data.success) {
+      // SOLUCIÓN: Actualizamos ambas variables para asegurar que la interfaz reaccione al instante y se mantenga
       usuarioEditar.value.solicitud_txandalari = 1
+      usuarioEditar.value.solicitudTxandalari = 1 
       emit('actualizar-usuario', usuarioEditar.value)
       Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'success', title: '¡Solicitud enviada!' })
     } else {
@@ -198,7 +206,28 @@ const confirmarSolicitud = async () => {
   }
 }
 
-// Cancelar asistencia
+// ASIGNAR TURNO
+const asignarTurno = async (evento) => {
+  try {
+    const res = await fetch('http://localhost/Backend/api_perfil.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        accion: 'asignar_turno',
+        id_evento: evento.id,
+        puesto: evento.puesto || ''
+      })
+    })
+    const data = await res.json()
+    if (data.success) {
+      const Toast = Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 2000, background: '#1e293b', color: '#facc15' })
+      Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
+    }
+  } catch (error) { console.error(error) }
+}
+
+// Cancelar asistencia y turno
 const cancelarAsistencia = async (id_evento) => {
   try {
     const res = await fetch('http://localhost/Backend/api_asistir.php', {
@@ -208,19 +237,34 @@ const cancelarAsistencia = async (id_evento) => {
       body: JSON.stringify({ id_evento })
     })
     const data = await res.json()
+    
     if (data.success) {
       cargarMisEventos()
-      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: 'Cancelado', timer: 1000, showConfirmButton: false })
+      
+      let mensajeAlerta = 'Cancelado';
+      if (usuarioEditar.value.rol === 'admin' || usuarioEditar.value.rol === 'txandalari') {
+        mensajeAlerta = 'Asistencia y turno cancelados';
+      }
+      
+      Swal.fire({ 
+        background: '#1e293b', 
+        color: '#f8fafc', 
+        icon: 'info', 
+        title: mensajeAlerta, 
+        timer: 1500, 
+        showConfirmButton: false 
+      })
     }
-  } catch (error) { console.error(error) }
+  } catch (error) { 
+    console.error(error) 
+  }
 }
 </script>
 
 <style scoped>
-/* ESTILOS ADAPTADOS AL TEMA OSCURO DE LAKOBRA */
+/* Mantenemos tu estilo y añadimos el CSS para el selector de turnos */
 .perfil {
   min-height: 100vh;
-  /* Hereda el fondo de App.vue, quitamos el blanco/gris */
   padding: 2rem 1rem;
 }
 
@@ -246,7 +290,6 @@ const cancelarAsistencia = async (id_evento) => {
 
 .cabecera-perfil h1 span {
   color: #38bdf8;
-  /* Azul Lakobra */
 }
 
 .etiqueta {
@@ -278,7 +321,6 @@ const cancelarAsistencia = async (id_evento) => {
   }
 }
 
-/* TARJETAS PRINCIPALES */
 .tarjeta {
   background: #1e293b;
   border-radius: 12px;
@@ -320,7 +362,6 @@ const cancelarAsistencia = async (id_evento) => {
   background: #38bdf8;
 }
 
-/* DATOS USUARIO */
 .grupo-dato {
   margin-bottom: 1.2rem;
 }
@@ -340,7 +381,6 @@ const cancelarAsistencia = async (id_evento) => {
   margin: 0;
 }
 
-/* FORMULARIO EDICIÓN */
 .formulario-edicion input {
   width: 100%;
   background: #0f172a;
@@ -391,7 +431,7 @@ const cancelarAsistencia = async (id_evento) => {
   background: #475569;
 }
 
-/* TXANDALARI - ESTILO PREMIUM */
+/* TXANDALARI */
 .estado-txandalari {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border: 1px solid #334155;
@@ -430,6 +470,12 @@ const cancelarAsistencia = async (id_evento) => {
   box-shadow: 0 0 10px #facc15;
 }
 
+.anillo-pulso.azul {
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: pulso-azul 2s infinite;
+}
+
 @keyframes pulso {
   0% {
     transform: scale(0.95);
@@ -444,6 +490,23 @@ const cancelarAsistencia = async (id_evento) => {
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+  }
+}
+
+@keyframes pulso-azul {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
   }
 }
 
@@ -522,10 +585,13 @@ const cancelarAsistencia = async (id_evento) => {
 
 .detalle-evento {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .detalle-evento h4 {
-  margin: 0 0 5px 0;
+  margin: 0;
   font-weight: 700;
   color: #f8fafc;
   font-size: 1.1rem;
@@ -535,6 +601,35 @@ const cancelarAsistencia = async (id_evento) => {
   margin: 0;
   font-size: 0.9rem;
   color: #94a3b8;
+}
+
+/* SELECTOR DE TURNOS */
+.selector-turno {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.selector-turno label {
+  font-size: 0.85rem;
+  color: #facc15;
+  font-weight: bold;
+}
+
+.selector-turno select {
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.selector-turno select:focus {
+  border-color: #facc15;
 }
 
 .btn-anular {
@@ -565,7 +660,6 @@ const cancelarAsistencia = async (id_evento) => {
   padding: 2rem 0;
 }
 
-/* MODALES DEL PERFIL */
 .modal-overlay {
   position: fixed;
   top: 0;

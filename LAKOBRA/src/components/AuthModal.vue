@@ -83,7 +83,6 @@ const handleSubmit = async () => {
           <input v-model="form.direccion" type="text" :placeholder="$t('auth.ph_dir')">
           <select v-model="form.rol">
             <option value="socio">{{ $t('auth.rol_socio') }}</option>
-            <option value="txandalari">{{ $t('auth.rol_txandalari') }}</option>
           </select>
         </template>
         <input v-model="form.email" type="email" :placeholder="$t('auth.ph_email')" required>

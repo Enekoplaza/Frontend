@@ -11,15 +11,16 @@ const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin');
 
 const eventos = ref([]);
 const mostrarFormulario = ref(false);
-const modoEdicion = ref(false); 
+const modoEdicion = ref(false);
 const idEditando = ref(null);
+const estadoOriginal = ref(''); // Para saber si ya estaba confirmado
 
 const formEvento = ref({
-  titulo: '', 
-  fecha_evento: '', 
-  hora_inicio: '', 
-  aforo_max: 120, 
-  estado: 'confirmado'
+  titulo: '',
+  fecha_evento: '',
+  hora_inicio: '',
+  aforo_max: 120,
+  estado: 'pendiente' // Por defecto lo creamos en pendiente
 });
 
 const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' };
@@ -45,9 +46,8 @@ const prepararEdicion = (evento) => {
   modoEdicion.value = true;
   mostrarFormulario.value = true;
   idEditando.value = evento.id;
-  
-  // SOLUCIÓN: Asignamos estrictamente solo los campos del formulario.
-  // Evitamos arrastrar 'plazas_libres' u otros datos calculados que rompen la vista.
+  estadoOriginal.value = evento.estado; // Guardamos cómo estaba antes de editar
+
   formEvento.value = {
     titulo: evento.titulo,
     fecha_evento: evento.fecha_evento,
@@ -55,15 +55,16 @@ const prepararEdicion = (evento) => {
     aforo_max: evento.aforo_max,
     estado: evento.estado
   };
-  
-  window.scrollTo({ top: 0, behavior: 'smooth' }); 
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const cancelarFormulario = () => {
   mostrarFormulario.value = false;
   modoEdicion.value = false;
   idEditando.value = null;
-  formEvento.value = { titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'confirmado' };
+  estadoOriginal.value = '';
+  formEvento.value = { titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'pendiente' };
 };
 
 const guardarEvento = async () => {
@@ -72,9 +73,9 @@ const guardarEvento = async () => {
 
   try {
     const res = await fetch('http://localhost/Backend/api_eventos.php', {
-      method: method, 
+      method: method,
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', 
+      credentials: 'include',
       body: JSON.stringify(payload)
     });
     const data = await res.json();
@@ -107,9 +108,9 @@ const borrarEvento = async (id) => {
   if (confirmacion.isConfirmed) {
     try {
       const res = await fetch('http://localhost/Backend/api_eventos.php', {
-        method: 'DELETE', 
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', 
+        credentials: 'include',
         body: JSON.stringify({ id })
       });
       const data = await res.json();
@@ -117,22 +118,24 @@ const borrarEvento = async (id) => {
         Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_borrado'), timer: 1500, showConfirmButton: false });
         cargarEventos();
       }
-    } catch (error) { 
-      console.error(error); 
+    } catch (error) {
+      console.error(error);
     }
   }
 };
 
 const toggleAsistencia = async (evento) => {
+  if (evento.estado !== 'confirmado') return; // Seguridad extra
+
   try {
     const res = await fetch('http://localhost/Backend/api_asistir.php', {
-      method: 'POST', 
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', 
+      credentials: 'include',
       body: JSON.stringify({ id_evento: evento.id })
     });
     const data = await res.json();
-    
+
     if (data.success) {
       const esApuntado = data.accion === 'apuntado';
       Swal.fire({ ...swalDarkConfig, icon: esApuntado ? 'success' : 'info', title: esApuntado ? t('eventos.swal_ok_conf') : t('eventos.swal_ok_canc'), text: data.message, timer: 1500, showConfirmButton: false });
@@ -140,8 +143,8 @@ const toggleAsistencia = async (evento) => {
     } else {
       Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('eventos.swal_aviso'), text: data.message });
     }
-  } catch (error) { 
-    console.error("Error", error); 
+  } catch (error) {
+    console.error("Error", error);
   }
 };
 
@@ -165,12 +168,17 @@ onMounted(cargarEventos);
         <input v-model="formEvento.fecha_evento" type="date" required>
         <input v-model="formEvento.hora_inicio" type="time" required>
         <input v-model="formEvento.aforo_max" type="number" :placeholder="$t('eventos.ph_aforo')" required>
+
         <select v-model="formEvento.estado">
-          <option value="pendiente">{{ $t('eventos.estado_pendiente') }}</option>
+          <option value="pendiente" :disabled="modoEdicion && estadoOriginal === 'confirmado'">
+            {{ $t('eventos.estado_pendiente') }}
+          </option>
           <option value="confirmado">{{ $t('eventos.estado_confirmado') }}</option>
           <option value="cancelado">{{ $t('eventos.estado_cancelado') }}</option>
         </select>
-        <button type="submit" class="btn-submit">{{ modoEdicion ? $t('eventos.btn_actualizar') : $t('eventos.btn_guardar') }}</button>
+
+        <button type="submit" class="btn-submit">{{ modoEdicion ? $t('eventos.btn_actualizar') :
+          $t('eventos.btn_guardar') }}</button>
       </form>
     </div>
 
@@ -185,7 +193,8 @@ onMounted(cargarEventos);
 
         <div class="evento-info">
           <h3>{{ evento.titulo }}</h3>
-          <p class="fecha">📅 {{ evento.fecha_evento }} {{ $t('eventos.fecha') }} 🕒 {{ formatearHora(evento.hora_inicio) }}</p>
+          <p class="fecha">📅 {{ evento.fecha_evento }} {{ $t('eventos.fecha') }} 🕒 {{
+            formatearHora(evento.hora_inicio) }}</p>
           <p class="aforo" :style="{ color: evento.plazas_libres < 10 ? '#ef4444' : '#94a3b8' }">
             👥 {{ $t('eventos.plazas_libres') }} <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}
           </p>
@@ -195,14 +204,25 @@ onMounted(cargarEventos);
         </div>
 
         <template v-if="usuarioActivo">
-          <button v-if="evento.plazas_libres === 0 && !evento.estoy_apuntado" class="btn-lleno" disabled>
-            {{ $t('eventos.aforo_completo') }}
+          <button v-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
+            <div class="anillo-pulso-pequeno"></div> {{ $t('eventos.btn_proximamente') }}
           </button>
-          <button v-else :class="evento.estoy_apuntado ? 'btn-no-asistir' : 'btn-asistir'"
-            @click="toggleAsistencia(evento)">
-            {{ evento.estoy_apuntado ? $t('eventos.btn_no_asistir') : $t('eventos.btn_asistir') }}
+
+          <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>
+            🚫 {{ $t('eventos.estado_cancelado') }}
           </button>
+
+          <template v-else-if="evento.estado === 'confirmado'">
+            <button v-if="evento.plazas_libres <= 0 && !evento.estoy_apuntado" class="btn-lleno" disabled>
+              {{ $t('eventos.aforo_completo') }}
+            </button>
+            <button v-else :class="evento.estoy_apuntado ? 'btn-no-asistir' : 'btn-asistir'"
+              @click="toggleAsistencia(evento)">
+              {{ evento.estoy_apuntado ? $t('eventos.btn_no_asistir') : $t('eventos.btn_asistir') }}
+            </button>
+          </template>
         </template>
+
         <p v-else class="aviso-login">{{ $t('eventos.aviso_login') }}</p>
       </div>
     </div>
@@ -210,7 +230,6 @@ onMounted(cargarEventos);
 </template>
 
 <style scoped>
-/* (Mantenemos todo el CSS anterior y añadimos el estilo para los botones de admin) */
 .eventos-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -311,7 +330,6 @@ h1 {
   border-color: rgba(56, 189, 248, 0.3);
 }
 
-/* NUEVO: Botones de editar y borrar integrados en la tarjeta */
 .admin-actions {
   position: absolute;
   top: 10px;
@@ -427,6 +445,49 @@ h1 {
   color: #94a3b8;
   border: none;
   cursor: not-allowed;
+}
+
+/* NUEVO: Botón Próximamente */
+.btn-proximamente {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: not-allowed;
+}
+
+.anillo-pulso-pequeno {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f59e0b;
+  animation: pulso-naranja 2s infinite;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+@keyframes pulso-naranja {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
 }
 
 .aviso-login {
