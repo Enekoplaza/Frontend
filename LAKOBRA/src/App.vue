@@ -1,4 +1,5 @@
 <script setup>
+import { API_URL } from './config'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import Header from './components/Header.vue'
@@ -26,9 +27,7 @@ const cargarSesionLocal = () => {
 // Verificar sesión en backend y RELLENAR DATOS
 const verificarSesion = async () => {
   try {
-    const res = await fetch('http://localhost/Backend/check_sesion.php', {
-      credentials: 'include'
-    })
+    const res = await fetch(`${API_URL}/check_sesion.php`, { credentials: 'include' })
     const data = await res.json()
 
     if (data.logged_in) {
@@ -63,7 +62,7 @@ const loginExitoso = async () => {
 // Cerrar sesión
 const cerrarSesion = async () => {
   try {
-    await fetch('http://localhost/Backend/logout.php', { credentials: 'include' })
+    await fetch(`${API_URL}/logout.php`, { credentials: 'include' })
     usuarioActivo.value = null
     localStorage.removeItem('usuarioLakobra')
     router.push('/principal')

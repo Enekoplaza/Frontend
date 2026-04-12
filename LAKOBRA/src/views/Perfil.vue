@@ -123,6 +123,7 @@
 </template>
 
 <script setup>
+import { API_URL } from '../config'
 import { ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Swal from 'sweetalert2'
@@ -150,7 +151,7 @@ watch(
 
 const cargarMisEventos = async () => {
   try {
-    const res = await fetch('http://localhost/Backend/api_perfil.php', { credentials: 'include' })
+    const res = await fetch(`${API_URL}/api_perfil.php`, { credentials: 'include' })
     const data = await res.json()
     if (data.success) misEventos.value = data.eventos
   } catch (error) { console.error("Error eventos:", error) }
@@ -165,7 +166,7 @@ const cancelarEdicion = () => {
 
 const guardarCambios = async () => {
   try {
-    const res = await fetch('http://localhost/Backend/api_perfil.php', {
+    const res = await fetch(`${API_URL}/api_perfil.php`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -187,7 +188,7 @@ const confirmarSolicitud = async () => {
   abrirConfirmacion.value = false
   cargando.value = true
   try {
-    const res = await fetch('http://localhost/Backend/api_perfil.php', { method: 'PATCH', credentials: 'include' })
+    const res = await fetch(`${API_URL}/api_perfil.php`, { method: 'PATCH', credentials: 'include' })
     const data = await res.json()
 
     if (data.success) {
@@ -209,7 +210,7 @@ const confirmarSolicitud = async () => {
 // ASIGNAR TURNO
 const asignarTurno = async (evento) => {
   try {
-    const res = await fetch('http://localhost/Backend/api_perfil.php', {
+    const res = await fetch(`${API_URL}/api_perfil.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -230,7 +231,7 @@ const asignarTurno = async (evento) => {
 // Cancelar asistencia y turno
 const cancelarAsistencia = async (id_evento) => {
   try {
-    const res = await fetch('http://localhost/Backend/api_asistir.php', {
+    const res = await fetch(`${API_URL}/api_asistir.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -1,4 +1,5 @@
 <script setup>
+import { API_URL } from '../config'
 import { ref, onMounted, computed } from 'vue';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
@@ -30,7 +31,7 @@ const swalDarkConfig = {
 const cargarSolicitudes = async () => {
   if (!esAdmin.value) return; // Si no es admin, no hace nada
   try {
-    const res = await fetch('http://localhost/Backend/api_artistas.php', { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api_artistas.php`, { credentials: 'include' });
     const data = await res.json();
     if (data.success) {
       solicitudes.value = data.solicitudes;
@@ -43,7 +44,7 @@ const cargarSolicitudes = async () => {
 // 3. Cambiar el estado de la solicitud (Aceptar / Rechazar)
 const cambiarEstado = async (id, nuevoEstado) => {
   try {
-    const res = await fetch('http://localhost/Backend/api_artistas.php', {
+    const res = await fetch(`${API_URL}/api_artistas.php`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -88,7 +89,7 @@ const enviarSolicitud = async () => {
   }
   cargando.value = true;
   try {
-    const res = await fetch('http://localhost/Backend/api_artistas.php', {
+    const res = await fetch(`${API_URL}/api_artistas.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form.value)

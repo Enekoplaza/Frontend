@@ -1,4 +1,5 @@
 <script setup>
+import { API_URL } from '../config'
 import { ref, onMounted, computed } from 'vue';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
@@ -32,7 +33,7 @@ const formatearHora = (horaString) => {
 
 const cargarEventos = async () => {
   try {
-    const res = await fetch('http://localhost/Backend/api_eventos.php', { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api_eventos.php`, { credentials: 'include' });
     const data = await res.json();
     if (data.success) {
       eventos.value = data.eventos;
@@ -72,7 +73,7 @@ const guardarEvento = async () => {
   const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value;
 
   try {
-    const res = await fetch('http://localhost/Backend/api_eventos.php', {
+    const res = await fetch(`${API_URL}/api_eventos.php`, {
       method: method,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -107,7 +108,7 @@ const borrarEvento = async (id) => {
 
   if (confirmacion.isConfirmed) {
     try {
-      const res = await fetch('http://localhost/Backend/api_eventos.php', {
+      const res = await fetch(`${API_URL}/api_eventos.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -128,7 +129,7 @@ const toggleAsistencia = async (evento) => {
   if (evento.estado !== 'confirmado') return; // Seguridad extra
 
   try {
-    const res = await fetch('http://localhost/Backend/api_asistir.php', {
+    const res = await fetch(`${API_URL}/api_asistir.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -1,4 +1,5 @@
 <script setup>
+import { API_URL } from '../config'
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n'; // <-- 1. Importamos la librería
@@ -34,7 +35,7 @@ const handleSubmit = async () => {
   }
 
   const endpoint = esLogin.value ? 'login_api.php' : 'registro_api.php';
-  const url = `http://localhost/Backend/${endpoint}`;
+  const url = `${API_URL}/${endpoint}`;
 
   try {
     const response = await fetch(url, {
