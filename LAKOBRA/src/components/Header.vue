@@ -24,6 +24,7 @@ const toggleIdioma = () => {
 
       <nav class="nav">
         <ul class="lista">
+          <li><RouterLink to="/principal">{{ $t('header.inicio') }}</RouterLink></li>
           <li v-if="!usuario">
             <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">{{ $t('header.login') }}</a>
           </li>
@@ -37,7 +38,7 @@ const toggleIdioma = () => {
           <li><RouterLink to="/artistas">{{ $t('header.artistas') }}</RouterLink></li>
           <li><RouterLink to="/eventos">{{ $t('header.eventos') }}</RouterLink></li>
           <li><RouterLink to="/contacto">{{ $t('header.contacto') }}</RouterLink></li>
-          <li><RouterLink to="/principal">{{ $t('header.inicio') }}</RouterLink></li>
+          
 
           <li v-if="usuario">
             <a href="#" @click.prevent="$emit('logout')" class="btn-logout">{{ $t('header.logout') }}</a>
