@@ -99,7 +99,7 @@ const enviarSolicitud = async () => {
       Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('artistas.swal_ok_titulo'), text: t('artistas.swal_ok_texto') });
       form.value = { nombre_artista: '', email_contacto: '', descripcion: '' };
       mostrarFormulario.value = false;
-      cargarSolicitudes(); // Si el admin mismo envía una, se recarga la lista
+      cargarSolicitudes(); 
     } else {
       Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Oops...', text: data.message });
     }
@@ -157,7 +157,7 @@ const enviarSolicitud = async () => {
       <hr class="separador-admin">
     </div>
 
-    <div class="hero">
+    <div v-if="!esAdmin" class="hero">
       <h1>{{ $t('artistas.titulo') }}</h1>
       <p class="intro">{{ $t('artistas.intro') }}</p>
 
@@ -166,7 +166,7 @@ const enviarSolicitud = async () => {
       </button>
     </div>
 
-    <div v-if="mostrarFormulario" class="formulario-wrapper animate-fade-in">
+    <div v-if="!esAdmin && mostrarFormulario" class="formulario-wrapper animate-fade-in">
       <h2>{{ $t('artistas.form_titulo') }}</h2>
       <form @submit.prevent="enviarSolicitud" class="form-artistas">
 
