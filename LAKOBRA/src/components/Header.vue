@@ -24,6 +24,7 @@ const toggleIdioma = () => {
 
       <nav class="nav">
         <ul class="lista">
+          <li><RouterLink to="/principal">Hasiera</RouterLink></li>
           <li v-if="!usuario">
             <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">Saioa hasi</a>
           </li>
@@ -41,7 +42,7 @@ const toggleIdioma = () => {
           <li><RouterLink to="/artistas">Artistak</RouterLink></li>
           <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
           <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
-          <li><RouterLink to="/principal">Hasiera</RouterLink></li>
+          
 
           <!-- Logout -->
           <li v-if="usuario">
