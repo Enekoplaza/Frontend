@@ -1,11 +1,13 @@
 {
   "header": {
+    "inicio": "Hasiera",
     "login": "Saioa hasi",
     "logout": "Irten",
     "artistas": "Artistak",
-    "eventos": "Ekitaldiak",
-    "contacto": "Kontaktua",
-    "inicio": "Hasiera"
+    "solicitudes": "Eskariak",
+    "eventos": "Ekitaldiak"
+    
+    
   },
   "footer": {
     "desc": "Ekitaldiak eta gehiago ezagutzeko zure ataria. Egin bat komunitatearekin.",

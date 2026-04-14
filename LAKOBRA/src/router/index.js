@@ -1,15 +1,40 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import principal from '@/views/principal.vue'
-import Artistas from '@/views/artistas.vue'
-import Eventos from '@/views/Eventos.vue'
-import Perfil from '@/views/Perfil.vue'  
+
+// Importamos la vista principal de forma directa (es la primera que se ve)
+import Principal from '@/views/principal.vue'
 
 const routes = [
-  { path: '/', redirect: '/principal' }, // ✅ Redirige por defecto a principal
-  { path: '/principal', name: 'principal', component: principal },
-  { path: '/artistas', name: 'artistas', component: Artistas },
-  { path: '/eventos', name: 'eventos', component: Eventos },
-  { path: '/perfil', name: 'perfil', component: Perfil }, 
+  { 
+    path: '/', 
+    redirect: '/principal' 
+  },
+  { 
+    path: '/principal', 
+    name: 'principal', 
+    component: Principal 
+  },
+  { 
+    path: '/artistas', 
+    name: 'artistas', 
+    // Lazy loading: solo carga el código de artistas cuando entras
+    component: () => import('@/views/artistas.vue') 
+  },
+  { 
+    path: '/eventos', 
+    name: 'eventos', 
+    component: () => import('@/views/Eventos.vue') 
+  },
+  { 
+    path: '/perfil', 
+    name: 'perfil', 
+    component: () => import('@/views/Perfil.vue') 
+  },
+  // 🚀 AÑADIMOS LA RUTA QUE FALTABA
+  { 
+    path: '/solicitudes', 
+    name: 'solicitudes', 
+    component: () => import('@/views/solicitudes.vue') 
+  },
 ]
 
 const router = createRouter({

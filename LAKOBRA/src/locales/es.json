@@ -1,11 +1,13 @@
 {
   "header": {
+    "inicio": "Inicio",
     "login": "Iniciar Sesión",
     "logout": "Salir",
     "artistas": "Artistas",
-    "eventos": "Eventos",
-    "contacto": "Contacto",
-    "inicio": "Inicio"
+    "solicitudes": "Solicitudes",
+    "eventos": "Eventos"
+   
+    
   },
   "footer": {
     "desc": "Tu portal para descubrir eventos y mucho más. Únete a la comunidad.",

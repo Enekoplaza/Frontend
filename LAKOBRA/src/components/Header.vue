@@ -1,18 +1,25 @@
 <script setup>
-import { useI18n } from 'vue-i18n' // Importamos la herramienta de idioma
+import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
 const props = defineProps({
   usuario: Object,
   modoOscuro: Boolean,
 })
+
 defineEmits(['abrirModal', 'logout', 'toggleTema'])
 
-const { locale } = useI18n() // Obtenemos el idioma actual
+const { locale } = useI18n()
 
-// Función para alternar el idioma
+// 🔄 Cambiar idioma
 const toggleIdioma = () => {
   locale.value = locale.value === 'es' ? 'eus' : 'es'
 }
+
+// 🔐 Detectar admin (robusto)
+const esAdmin = computed(() => {
+  return props.usuario?.rol?.toLowerCase() === 'admin'
+})
 </script>
 
 <template>
@@ -24,45 +31,85 @@ const toggleIdioma = () => {
 
       <nav class="nav">
         <ul class="lista">
-          <li><RouterLink to="/principal">Hasiera</RouterLink></li>
-          <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">Saioa hasi</a>
-          </li>
-
-          <!-- Usuario logueado -->
-          <li class="user-welcome" v-else>
-            <RouterLink to="/perfil">
-              <strong>{{ usuario.nombre }}</strong>
-              <!-- Opcional: mostrar rol solo si NO es admin -->
-              <span v-if="usuario.rol && usuario.rol !== 'admin'">({{ usuario.rol }})</span>
+          <!-- INICIO -->
+          <li>
+            <RouterLink to="/principal">
+              {{ $t('header.inicio') }}
             </RouterLink>
           </li>
 
-          <!-- Enlaces públicos -->
-          <li><RouterLink to="/artistas">Artistak</RouterLink></li>
-          <li><RouterLink to="/eventos">Ekitaldiak</RouterLink></li>
-          <li><RouterLink to="/contacto">Kontaktua</RouterLink></li>
-          
-
-          <!-- Logout -->
-          <li v-if="usuario">
-            <a href="#" @click.prevent="$emit('logout')" class="btn-logout">{{ $t('header.logout') }}</a>
+          <!-- LOGIN / USUARIO -->
+          <li v-if="!usuario">
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">
+              {{ $t('header.login') }}
+            </a>
           </li>
 
-          <!-- Separador -->
-          <li class="divider"></li>
+          <!-- USUARIO LOGUEADO -->
+          <li class="user-welcome" v-else>
+            <RouterLink to="/perfil">
+              <strong>{{ usuario.nombre }}</strong>
+              <span v-if="usuario.rol && usuario.rol.toLowerCase() !== 'admin'">
+                ({{ usuario.rol }})
+              </span>
+            </RouterLink>
+          </li>
+
+          <!-- ENLACES -->
+          <li v-if="!esAdmin">
+            <RouterLink to="/artistas">
+              {{ $t('header.artistas') }}
+            </RouterLink>
+          </li>
+
+          <li v-if="esAdmin">
+            <RouterLink to="/solicitudes">
+              {{ $t('header.solicitudes') }}
+            </RouterLink>
+          </li>
 
           <li>
-            <button class="btn-idioma" @click="toggleIdioma" title="Cambiar idioma">
+            <RouterLink to="/eventos">
+              {{ $t('header.eventos') }}
+            </RouterLink>
+          </li>
+
+          <!-- LOGOUT -->
+          <li v-if="usuario">
+            <a href="#" @click.prevent="$emit('logout')" class="btn-logout">
+              {{ $t('header.logout') }}
+            </a>
+          </li>
+
+          <!-- SEPARADOR -->
+          <li class="divider"></li>
+
+          <!-- BOTÓN IDIOMA -->
+          <li>
+            <button class="btn-idioma" @click="toggleIdioma" :title="$t('header.cambiar_idioma')">
               {{ locale === 'es' ? 'EUS' : 'ES' }}
             </button>
           </li>
 
+          <!-- BOTÓN TEMA -->
           <li>
-            <button class="btn-tema" @click="$emit('toggleTema')"
-              :title="modoOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-              <svg v-if="modoOscuro" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              class="btn-tema"
+              @click="$emit('toggleTema')"
+              :title="$t('header.cambiar_tema')"
+            >
+              <svg
+                v-if="modoOscuro"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="12" cy="12" r="5"></circle>
                 <line x1="12" y1="1" x2="12" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -73,8 +120,19 @@ const toggleIdioma = () => {
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </button>
@@ -84,7 +142,6 @@ const toggleIdioma = () => {
     </div>
   </header>
 </template>
-
 <style scoped>
 .header {
   --header-bg-start: #1e293b;
