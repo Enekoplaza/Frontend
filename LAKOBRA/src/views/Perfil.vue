@@ -12,24 +12,50 @@
 
       <div class="grid-principal">
         <aside class="barra-lateral">
+          <section class="tarjeta qr-usuario">
+            <h3><i class="icono">📱</i> {{ $t('perfil.qr_titulo') }}</h3>
+
+            <div v-if="usuarioEditar.qr_token" class="qr-contenedor">
+              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
+                alt="Mi Código QR" class="imagen-qr">
+              <p class="descripcion-qr">{{ $t('perfil.qr_desc') }}</p>
+              <button @click="ampliarQR" class="btn-qr">{{ $t('perfil.btn_ampliar_qr') }}</button>
+            </div>
+            <div v-else class="qr-contenedor error">
+              <p>Error: No se encontró el token de acceso.</p>
+            </div>
+          </section>
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
               <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono" title="Editar">✏️</button>
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono"
+                title="Editar">✏️</button>
             </div>
 
             <div v-if="!modoEdicion" class="vista-datos">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><p class="dato-texto">{{ usuarioEditar.nombre }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><p class="dato-texto">{{ usuarioEditar.dni }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><p class="dato-texto">{{ usuarioEditar.email }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><p class="dato-texto">{{ usuarioEditar.direccion }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.nombre }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.dni }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.email }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.direccion }}</p>
+              </div>
             </div>
 
             <div v-else class="formulario-edicion">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text" v-model="usuarioEditar.nombre" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text" v-model="usuarioEditar.dni" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email" v-model="usuarioEditar.email" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text" v-model="usuarioEditar.direccion" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text"
+                  v-model="usuarioEditar.nombre" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text"
+                  v-model="usuarioEditar.dni" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email"
+                  v-model="usuarioEditar.email" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text"
+                  v-model="usuarioEditar.direccion" /></div>
 
               <div class="botones-edicion">
                 <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
@@ -42,7 +68,8 @@
             :class="{ activo: usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1 }">
             <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'" class="estado-activo oficial">
+            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
+              class="estado-activo oficial">
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
                 <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
@@ -50,7 +77,8 @@
               </div>
             </div>
 
-            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1" class="estado-activo pendiente">
+            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1"
+              class="estado-activo pendiente">
               <div class="anillo-pulso azul"></div>
               <div class="texto-estado">
                 <span class="estado-principal" style="color: #38bdf8;">{{ $t('perfil.txan_pendiente') }}</span>
@@ -72,7 +100,8 @@
                 <p>{{ $t('perfil.conf_seguro') }}</p>
                 <div class="botones-modal">
                   <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
-                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar')
+                    }}</button>
                 </div>
               </div>
             </div>
@@ -194,7 +223,7 @@ const confirmarSolicitud = async () => {
     if (data.success) {
       // SOLUCIÓN: Actualizamos ambas variables para asegurar que la interfaz reaccione al instante y se mantenga
       usuarioEditar.value.solicitud_txandalari = 1
-      usuarioEditar.value.solicitudTxandalari = 1 
+      usuarioEditar.value.solicitudTxandalari = 1
       emit('actualizar-usuario', usuarioEditar.value)
       Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'success', title: '¡Solicitud enviada!' })
     } else {
@@ -238,28 +267,53 @@ const cancelarAsistencia = async (id_evento) => {
       body: JSON.stringify({ id_evento })
     })
     const data = await res.json()
-    
+
     if (data.success) {
       cargarMisEventos()
-      
+
       let mensajeAlerta = 'Cancelado';
       if (usuarioEditar.value.rol === 'admin' || usuarioEditar.value.rol === 'txandalari') {
         mensajeAlerta = 'Asistencia y turno cancelados';
       }
-      
-      Swal.fire({ 
-        background: '#1e293b', 
-        color: '#f8fafc', 
-        icon: 'info', 
-        title: mensajeAlerta, 
-        timer: 1500, 
-        showConfirmButton: false 
+
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'info',
+        title: mensajeAlerta,
+        timer: 1500,
+        showConfirmButton: false
       })
     }
-  } catch (error) { 
-    console.error(error) 
+  } catch (error) {
+    console.error(error)
   }
 }
+
+// Función para mostrar el QR en grande
+const ampliarQR = () => {
+  if (!usuarioEditar.value.qr_token) return;
+  
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${usuarioEditar.value.qr_token}`;
+  
+  Swal.fire({
+    background: '#1e293b',
+    color: '#f8fafc',
+    title: t('perfil.qr_titulo'),
+    imageUrl: qrUrl,
+    imageWidth: 300,
+    imageHeight: 300,
+    imageAlt: 'Código QR de acceso',
+    backdrop: 'rgba(0, 0, 0, 0.9)',
+    
+    // --- MAGIA PARA LA 'X' ---
+    showConfirmButton: false, // Quitamos el botón de abajo
+    showCloseButton: true,    // Ponemos la 'X' arriba a la derecha
+    customClass: {
+      closeButton: 'x-roja-modal' // Le damos una clase para pintarla de rojo
+    }
+  });
+};
 </script>
 
 <style scoped>
@@ -727,5 +781,71 @@ const cancelarAsistencia = async (id_evento) => {
 
 .botones-modal .btn-cancelar:hover {
   background: #475569;
+}
+
+/* ESTILOS PARA EL QR */
+.qr-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+.imagen-qr {
+  background: white;
+  /* El QR necesita fondo blanco para que las cámaras lo lean bien */
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.imagen-qr:hover {
+  transform: scale(1.05);
+}
+
+.descripcion-qr {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.btn-qr {
+  width: 100%;
+  padding: 10px;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-qr:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+/* Color rojo para la 'X' del SweetAlert y efecto al pasar el ratón */
+:deep(.x-roja-modal) {
+  color: #ef4444 !important;
+  transition: all 0.2s ease;
+}
+
+:deep(.x-roja-modal:hover) {
+  color: #dc2626 !important;
+  transform: scale(1.2);
+}
+
+/* Quitamos el borde azul feo que a veces sale al hacer click en la X */
+:deep(.x-roja-modal:focus) {
+  box-shadow: none !important;
 }
 </style>

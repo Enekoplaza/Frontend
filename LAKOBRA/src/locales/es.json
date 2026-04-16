@@ -146,6 +146,35 @@
     "turno_puerta": "Puerta",
     "turno_limpieza": "Limpieza",
     "turno_otros": "Otros",
-    "msg_turno_ok": "Turno asignado"
-  }
+    "msg_turno_ok": "Turno asignado",
+    "qr_titulo": "Mi Código de Acceso",
+    "qr_desc": "Muestra este QR en la puerta para acceder a los eventos confirmados.",
+    "btn_ampliar_qr": "Ampliar QR"
+    
+  },
+  "solicitudes": {
+      "titulo": "Panel de Solicitudes",
+      "subtitulo": "Gestiona las peticiones de nuevos artistas y miembros del equipo.",
+      "txan_titulo": "Solicitudes Txandalari",
+      "txan_vacio": "No hay peticiones de Txandalari pendientes.",
+      "dni": "DNI",
+      "estado_pendiente": "Pendiente",
+      "estado_aceptada": "Aceptado",
+      "artistas_titulo": "Solicitudes de Artistas",
+      "artistas_vacio": "No hay propuestas musicales pendientes.",
+      "btn_aceptar": "Aceptar",
+      "btn_rechazar": "Rechazar",
+      "btn_listo": "Listo para evento",
+      "swal_aceptar_txan_tit": "¿Aceptar Txandalari?",
+      "swal_aceptar_txan_msg": "El socio pasará a formar parte del equipo.",
+      "swal_si_aceptar": "Sí, aceptar",
+      "swal_cancelar": "Cancelar",
+      "swal_ok_txan": "¡Ahora es Txandalari!",
+      "swal_rechazar_tit": "¿Rechazar solicitud?",
+      "swal_rechazar_txan_msg": "La solicitud se borrará, pero el usuario seguirá siendo socio.",
+      "swal_si_rechazar": "Sí, rechazar",
+      "swal_ok_rechazo": "Solicitud rechazada",
+      "swal_ok_artista_ac": "Artista aceptado",
+      "swal_ok_artista_re": "Artista eliminado"
+    }
 }

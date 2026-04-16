@@ -35,11 +35,12 @@ const verificarSesion = async () => {
       const datosUsuario = { 
         id: data.id,
         nombre: data.nombre, 
-        dni: data.dni,           // <--- IMPORTANTE: Asegúrate que el PHP mande 'dni'
-        email: data.email,       // <--- IMPORTANTE: Asegúrate que el PHP mande 'email'
-        direccion: data.direccion, // <--- IMPORTANTE: Asegúrate que el PHP mande 'direccion'
+        dni: data.dni,
+        email: data.email,
+        direccion: data.direccion,
         rol: data.rol,
-        solicitudTxandalari: data.solicitud_txandalari || 0 
+        solicitudTxandalari: data.solicitud_txandalari || 0,
+        qr_token: data.qr_token // <--- ¡AQUÍ ESTÁ LA MAGIA! AHORA SÍ ENTRA.
       }
       usuarioActivo.value = datosUsuario
       localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario))

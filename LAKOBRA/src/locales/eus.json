@@ -146,6 +146,34 @@
     "turno_puerta": "Atea",
     "turno_limpieza": "Garbiketa",
     "turno_otros": "Beste batzuk",
-    "msg_turno_ok": "Txanda esleituta"
-  }
+    "msg_turno_ok": "Txanda esleituta",
+    "qr_titulo": "Nire Sarbide Kodea",
+    "qr_desc": "Erakutsi QR hau atean baieztatutako ekitaldietara sartzeko.",
+    "btn_ampliar_qr": "QR-a Handitu"
+  },
+  "solicitudes": {
+      "titulo": "Eskaeren Panela",
+      "subtitulo": "Kudeatu artista berrien eta taldekideen eskaerak.",
+      "txan_titulo": "Txandalari Eskaerak",
+      "txan_vacio": "Ez dago Txandalari eskaera librerik.",
+      "dni": "NAN",
+      "estado_pendiente": "Zain",
+      "estado_aceptada": "Onartua",
+      "artistas_titulo": "Artisten Eskaerak",
+      "artistas_vacio": "Ez dago proposamen musikalik zain.",
+      "btn_aceptar": "Onartu",
+      "btn_rechazar": "Ezetsi",
+      "btn_listo": "Ekitaldirako prest",
+      "swal_aceptar_txan_tit": "Txandalaria onartu?",
+      "swal_aceptar_txan_msg": "Bazkidea taldearen parte izango da.",
+      "swal_si_aceptar": "Bai, onartu",
+      "swal_cancelar": "Utzi",
+      "swal_ok_txan": "Orain Txandalari da!",
+      "swal_rechazar_tit": "Eskaera ezetsi?",
+      "swal_rechazar_txan_msg": "Eskaera ezabatuko da, baina erabiltzaileak bazkide izaten jarraituko du.",
+      "swal_si_rechazar": "Bai, ezetsi",
+      "swal_ok_rechazo": "Eskaera ezetsia",
+      "swal_ok_artista_ac": "Artista onartua",
+      "swal_ok_artista_re": "Artista ezabatua"
+    }
 }

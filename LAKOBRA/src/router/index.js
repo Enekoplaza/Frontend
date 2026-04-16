@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Importamos la vista principal de forma directa (es la primera que se ve)
-import Principal from '@/views/principal.vue'
+import Principal from '@/views/Principal.vue'
 
 const routes = [
   { 
@@ -17,7 +17,7 @@ const routes = [
     path: '/artistas', 
     name: 'artistas', 
     // Lazy loading: solo carga el código de artistas cuando entras
-    component: () => import('@/views/artistas.vue') 
+    component: () => import('@/views/Artistas.vue') 
   },
   { 
     path: '/eventos', 
@@ -33,7 +33,7 @@ const routes = [
   { 
     path: '/solicitudes', 
     name: 'solicitudes', 
-    component: () => import('@/views/solicitudes.vue') 
+    component: () => import('@/views/Solicitudes.vue') 
   },
 ]
 
