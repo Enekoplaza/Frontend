@@ -1,509 +1,286 @@
 <script setup>
 import { API_URL } from '../config'
-import { ref, onMounted, computed } from 'vue';
-import Swal from 'sweetalert2';
-import { useI18n } from 'vue-i18n';
+import { ref, onMounted, computed } from 'vue'
+import Swal from 'sweetalert2'
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const usuarioLocal = localStorage.getItem('usuarioLakobra');
-const usuarioActivo = ref(usuarioLocal ? JSON.parse(usuarioLocal) : null);
-const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin');
+// --- ESTADO Y USUARIO ---
+const usuarioLocal = localStorage.getItem('usuarioLakobra')
+const usuarioActivo = ref(usuarioLocal ? JSON.parse(usuarioLocal) : null)
 
-const eventos = ref([]);
-const mostrarFormulario = ref(false);
-const modoEdicion = ref(false);
-const idEditando = ref(null);
-const estadoOriginal = ref(''); // Para saber si ya estaba confirmado
+const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin')
+const esTxandalari = computed(() => usuarioActivo.value?.rol === 'txandalari')
+
+const eventos = ref([])
+const mostrarFormulario = ref(false)
+const modoEdicion = ref(false)
+const idEditando = ref(null)
 
 const formEvento = ref({
   titulo: '',
   fecha_evento: '',
   hora_inicio: '',
   aforo_max: 120,
-  estado: 'pendiente' // Por defecto lo creamos en pendiente
-});
+  estado: 'pendiente',
+})
 
-const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' };
+const swalDarkConfig = { 
+  background: '#1e293b', 
+  color: '#f8fafc', 
+  confirmButtonColor: '#38bdf8',
+  cancelButtonColor: '#475569' 
+}
 
+// --- FUNCIONES ---
 const formatearHora = (horaString) => {
-  if (!horaString) return '';
-  return horaString.substring(0, 5);
-};
+  if (!horaString) return ''
+  return horaString.substring(0, 5)
+}
 
 const cargarEventos = async () => {
   try {
-    const res = await fetch(`${API_URL}/api_eventos.php`, { credentials: 'include' });
-    const data = await res.json();
+    const res = await fetch(`${API_URL}/api_eventos.php`, { credentials: 'include' })
+    const data = await res.json()
     if (data.success) {
-      eventos.value = data.eventos;
+      eventos.value = data.eventos
     }
   } catch (error) {
-    console.error("Error al cargar eventos", error);
+    console.error('Error al cargar eventos', error)
   }
-};
+}
 
+// POPUP DE AYUDA (TXANDALARIS)
+const abrirPopupAyuda = async (evento) => {
+  const { value: tarea } = await Swal.fire({
+    ...swalDarkConfig,
+    title: 'Selecciona tu tarea',
+    input: 'select',
+    inputOptions: {
+      'Posturik ez(Etorri soilik)': 'Posturik ez(Etorri soilik)',
+      'Atea': 'Atea',
+      'Barra': 'Barra',
+      'Garbiketa': 'Garbiketa',
+      'beste batzuk': 'Beste batzuk',
+    },
+    inputPlaceholder: '¿En qué vas a ayudar?',
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Cancelar',
+    // Arreglo para que el select no sea blanco
+    didOpen: () => {
+      const input = Swal.getInput()
+      input.style.backgroundColor = '#0f172a'
+      input.style.color = '#ffffff'
+      input.style.border = '1px solid #334155'
+    }
+  })
+
+  if (tarea) {
+    try {
+      const res = await fetch(`${API_URL}/api_asistir.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          id_evento: evento.id,
+          tarea: tarea, 
+        }),
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        Swal.fire({ ...swalDarkConfig, icon: 'success', title: '¡Apuntado!', timer: 1500, showConfirmButton: false })
+        cargarEventos()
+      } else {
+        Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: data.message })
+      }
+    } catch (error) {
+      console.error('Error al asignar tarea', error)
+    }
+  }
+}
+
+// --- CRUD ADMIN ---
 const prepararEdicion = (evento) => {
-  modoEdicion.value = true;
-  mostrarFormulario.value = true;
-  idEditando.value = evento.id;
-  estadoOriginal.value = evento.estado; // Guardamos cómo estaba antes de editar
-
-  formEvento.value = {
-    titulo: evento.titulo,
-    fecha_evento: evento.fecha_evento,
-    hora_inicio: evento.hora_inicio,
-    aforo_max: evento.aforo_max,
-    estado: evento.estado
-  };
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+  modoEdicion.value = true
+  mostrarFormulario.value = true
+  idEditando.value = evento.id
+  formEvento.value = { ...evento }
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const cancelarFormulario = () => {
-  mostrarFormulario.value = false;
-  modoEdicion.value = false;
-  idEditando.value = null;
-  estadoOriginal.value = '';
-  formEvento.value = { titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'pendiente' };
-};
+  mostrarFormulario.value = false
+  modoEdicion.value = false
+  idEditando.value = null
+  formEvento.value = { titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'pendiente' }
+}
 
 const guardarEvento = async () => {
-  const method = modoEdicion.value ? 'PUT' : 'POST';
-  const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value;
-
+  const method = modoEdicion.value ? 'PUT' : 'POST'
+  const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
   try {
     const res = await fetch(`${API_URL}/api_eventos.php`, {
       method: method,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-
+      body: JSON.stringify(payload),
+    })
+    const data = await res.json()
     if (data.success) {
-      Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_guardado'), text: data.message, timer: 1500, showConfirmButton: false });
-      cancelarFormulario();
-      cargarEventos();
-    } else {
-      Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: data.message });
+      Swal.fire({ ...swalDarkConfig, icon: 'success', title: 'Evento guardado', timer: 1500, showConfirmButton: false })
+      cancelarFormulario()
+      cargarEventos()
     }
   } catch (error) {
-    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('eventos.swal_err_con') });
+    Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error de conexión' })
   }
-};
+}
 
 const borrarEvento = async (id) => {
   const confirmacion = await Swal.fire({
     ...swalDarkConfig,
     icon: 'warning',
-    title: t('eventos.swal_warn_tit'),
-    text: t('eventos.swal_warn_msg'),
+    title: '¿Estás seguro?',
     showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#334155',
-    confirmButtonText: t('eventos.swal_btn_borrar'),
-    cancelButtonText: t('eventos.swal_btn_cancelar')
-  });
+    confirmButtonText: 'Sí, borrar',
+  })
 
   if (confirmacion.isConfirmed) {
     try {
-      const res = await fetch(`${API_URL}/api_eventos.php`, {
+      await fetch(`${API_URL}/api_eventos.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ id })
-      });
-      const data = await res.json();
-      if (data.success) {
-        Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_borrado'), timer: 1500, showConfirmButton: false });
-        cargarEventos();
-      }
-    } catch (error) {
-      console.error(error);
-    }
+        body: JSON.stringify({ id }),
+      })
+      cargarEventos()
+    } catch (error) { console.error(error) }
   }
-};
+}
 
-const toggleAsistencia = async (evento) => {
-  if (evento.estado !== 'confirmado') return; // Seguridad extra
-
-  try {
-    const res = await fetch(`${API_URL}/api_asistir.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ id_evento: evento.id })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      const esApuntado = data.accion === 'apuntado';
-      Swal.fire({ ...swalDarkConfig, icon: esApuntado ? 'success' : 'info', title: esApuntado ? t('eventos.swal_ok_conf') : t('eventos.swal_ok_canc'), text: data.message, timer: 1500, showConfirmButton: false });
-      cargarEventos();
-    } else {
-      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('eventos.swal_aviso'), text: data.message });
-    }
-  } catch (error) {
-    console.error("Error", error);
-  }
-};
-
-onMounted(cargarEventos);
+onMounted(cargarEventos)
 </script>
 
 <template>
   <div class="eventos-container">
-    <div class="header-eventos">
-      <h1>{{ $t('eventos.titulo') }}</h1>
-      <button v-if="esAdmin" class="btn-admin"
-        @click="mostrarFormulario ? cancelarFormulario() : (mostrarFormulario = true)">
-        {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
-      </button>
-    </div>
-
-    <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
-      <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
-      <form @submit.prevent="guardarEvento" class="form-grid">
-        <input v-model="formEvento.titulo" type="text" :placeholder="$t('eventos.ph_titulo')" required>
-        <input v-model="formEvento.fecha_evento" type="date" required>
-        <input v-model="formEvento.hora_inicio" type="time" required>
-        <input v-model="formEvento.aforo_max" type="number" :placeholder="$t('eventos.ph_aforo')" required>
-
-        <select v-model="formEvento.estado">
-          <option value="pendiente" :disabled="modoEdicion && estadoOriginal === 'confirmado'">
-            {{ $t('eventos.estado_pendiente') }}
-          </option>
-          <option value="confirmado">{{ $t('eventos.estado_confirmado') }}</option>
-          <option value="cancelado">{{ $t('eventos.estado_cancelado') }}</option>
-        </select>
-
-        <button type="submit" class="btn-submit">{{ modoEdicion ? $t('eventos.btn_actualizar') :
-          $t('eventos.btn_guardar') }}</button>
-      </form>
-    </div>
-
-    <div class="grid-eventos">
-      <p v-if="eventos.length === 0" class="no-eventos">{{ $t('eventos.vacio') }}</p>
-
-      <div v-for="evento in eventos" :key="evento.id" class="tarjeta-evento">
-        <div v-if="esAdmin" class="admin-actions">
-          <button @click="prepararEdicion(evento)" class="btn-icon" title="Editar">✏️</button>
-          <button @click="borrarEvento(evento.id)" class="btn-icon delete" title="Borrar">🗑️</button>
-        </div>
-
-        <div class="evento-info">
-          <h3>{{ evento.titulo }}</h3>
-          <p class="fecha">📅 {{ evento.fecha_evento }} {{ $t('eventos.fecha') }} 🕒 {{
-            formatearHora(evento.hora_inicio) }}</p>
-          <p class="aforo" :style="{ color: evento.plazas_libres < 10 ? '#ef4444' : '#94a3b8' }">
-            👥 {{ $t('eventos.plazas_libres') }} <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}
-          </p>
-          <span :class="['badge', evento.estado]">
-            {{ $t('eventos.estado_' + evento.estado) }}
-          </span>
-        </div>
-
-        <template v-if="usuarioActivo">
-          <button v-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
-            <div class="anillo-pulso-pequeno"></div> {{ $t('eventos.btn_proximamente') }}
-          </button>
-
-          <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>
-            🚫 {{ $t('eventos.estado_cancelado') }}
-          </button>
-
-          <template v-else-if="evento.estado === 'confirmado'">
-            <button v-if="evento.plazas_libres <= 0 && !evento.estoy_apuntado" class="btn-lleno" disabled>
-              {{ $t('eventos.aforo_completo') }}
-            </button>
-            <button v-else :class="evento.estoy_apuntado ? 'btn-no-asistir' : 'btn-asistir'"
-              @click="toggleAsistencia(evento)">
-              {{ evento.estoy_apuntado ? $t('eventos.btn_no_asistir') : $t('eventos.btn_asistir') }}
-            </button>
-          </template>
-        </template>
-
-        <p v-else class="aviso-login">{{ $t('eventos.aviso_login') }}</p>
+    
+    <template v-if="usuarioActivo">
+      <div class="header-eventos">
+        <h1>{{ $t('eventos.titulo') }}</h1>
+        <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
+          {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
+        </button>
       </div>
+
+      <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
+        <h2>{{ modoEdicion ? 'Editar Evento' : 'Nuevo Evento' }}</h2>
+        <form @submit.prevent="guardarEvento" class="form-grid">
+          <input v-model="formEvento.titulo" type="text" placeholder="Título" required />
+          <input v-model="formEvento.fecha_evento" type="date" required />
+          <input v-model="formEvento.hora_inicio" type="time" required />
+          <input v-model="formEvento.aforo_max" type="number" placeholder="Aforo" required />
+          <select v-model="formEvento.estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <button type="submit" class="btn-submit">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="grid-eventos">
+        <p v-if="eventos.length === 0" class="no-eventos">{{ $t('eventos.vacio') }}</p>
+
+        <div v-for="evento in eventos" :key="evento.id" class="tarjeta-evento">
+          <div v-if="esAdmin" class="admin-actions">
+            <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
+            <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
+          </div>
+
+          <div class="evento-info">
+            <h3>{{ evento.titulo }}</h3>
+            <p class="fecha">📅 {{ evento.fecha_evento }} 🕒 {{ formatearHora(evento.hora_inicio) }}</p>
+            <p class="aforo">👥 Plazas: <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}</p>
+            <span :class="['badge', evento.estado]">{{ evento.estado }}</span>
+          </div>
+
+          <div class="footer-tarjeta">
+            <template v-if="evento.estado === 'pendiente'">
+              <button v-if="esTxandalari" class="btn-ayuda" @click="abrirPopupAyuda(evento)">
+                🙋‍♂️ Ayuda
+              </button>
+              <button v-else class="btn-proximamente" disabled>
+                <div class="anillo-pulso-pequeno"></div> {{ $t('eventos.btn_proximamente') }}
+              </button>
+            </template>
+
+            <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>🚫 Cancelado</button>
+
+            <div v-else class="msg-abierto">Evento Abierto</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <div v-else class="aviso-privado">
+      <div class="icon-lock">🔒</div>
+      <h2>Contenido Privado</h2>
+      <p>Debes estar registrado para ver los eventos.</p>
+      <router-link to="/login" class="btn-login-link">Ir a Iniciar Sesión</router-link>
     </div>
+
   </div>
 </template>
 
 <style scoped>
-.eventos-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding-bottom: 3rem;
-}
+.eventos-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+.header-eventos { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid rgba(148, 163, 184, 0.2); padding-bottom: 1rem; }
+.btn-admin { background: #10b981; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-.header-eventos {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid rgba(148, 163, 184, 0.2);
-  padding-bottom: 1rem;
-}
+.admin-panel { background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #38bdf8; }
+.form-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.form-grid input, .form-grid select { flex: 1; min-width: 150px; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; }
+.btn-submit { background: #38bdf8; color: #0f172a; font-weight: bold; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
-h1 {
-  font-size: 2rem;
-  color: var(--titulo);
-}
+.grid-eventos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.tarjeta-evento { background: #1e293b; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; border: 1px solid rgba(255, 255, 255, 0.05); }
 
-.btn-admin {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
+.admin-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+.btn-icon { background: rgba(255, 255, 255, 0.1); border: none; border-radius: 5px; padding: 5px; cursor: pointer; }
+.evento-info h3 { color: #f8fafc; margin-bottom: 10px; font-size: 1.3rem; }
+.evento-info p { color: #94a3b8; font-size: 0.95rem; }
 
-.btn-admin:hover {
-  transform: scale(1.05);
-}
+.badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; text-transform: uppercase; }
+.badge.confirmado { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.badge.pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.badge.cancelado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
-.admin-panel {
-  background: #1e293b;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  border: 1px solid #38bdf8;
-}
+.btn-ayuda { margin-top: 15px; width: 100%; background: #38bdf8; color: #0f172a; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-lleno { margin-top: 15px; width: 100%; padding: 12px; border-radius: 8px; background: #334155; color: #94a3b8; border: none; cursor: not-allowed; }
+.btn-proximamente { margin-top: 15px; width: 100%; padding: 12px; border-radius: 8px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.msg-abierto { margin-top: 15px; text-align: center; color: #10b981; font-weight: bold; }
 
-.admin-panel h2 {
-  color: #38bdf8;
-  margin-bottom: 1rem;
-  text-align: center;
-}
+.anillo-pulso-pequeno { width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; animation: pulso-naranja 2s infinite; }
 
-.form-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.form-grid input,
-.form-grid select {
-  flex: 1;
-  min-width: 150px;
-  padding: 10px;
-  background: #0f172a;
-  border: 1px solid #334155;
-  color: white;
-  border-radius: 6px;
-}
-
-.btn-submit {
-  background: #38bdf8;
-  color: #0f172a;
-  font-weight: bold;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.grid-eventos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.tarjeta-evento {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.tarjeta-evento:hover {
-  transform: translateY(-5px);
-  border-color: rgba(56, 189, 248, 0.3);
-}
-
-.admin-actions {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  gap: 5px;
-}
-
-.btn-icon {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 5px;
-  padding: 5px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-icon:hover {
-  background: #38bdf8;
-}
-
-.btn-icon.delete:hover {
-  background: #ef4444;
-}
-
-.evento-info {
-  margin-top: 15px;
-}
-
-.evento-info h3 {
-  color: #f8fafc;
-  margin-bottom: 10px;
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.evento-info p {
-  color: #94a3b8;
-  margin-bottom: 5px;
-  font-size: 0.95rem;
-}
-
-.badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-top: 10px;
-}
-
-.badge.confirmado {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
-}
-
-.badge.pendiente {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
-}
-
-.badge.cancelado {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-}
-
-.btn-asistir {
-  margin-top: 15px;
-  width: 100%;
-  background: transparent;
-  border: 2px solid #38bdf8;
-  color: #38bdf8;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1rem;
-}
-
-.btn-asistir:hover {
-  background: #38bdf8;
-  color: #0f172a;
-}
-
-.btn-no-asistir {
-  margin-top: 15px;
-  width: 100%;
-  background: #ef4444;
-  color: white;
-  border: 2px solid #ef4444;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1rem;
-}
-
-.btn-no-asistir:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
-}
-
-.btn-lleno {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  background: #334155;
-  color: #94a3b8;
-  border: none;
-  cursor: not-allowed;
-}
-
-/* NUEVO: Botón Próximamente */
-.btn-proximamente {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  border: 1px solid #f59e0b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: not-allowed;
-}
-
-.anillo-pulso-pequeno {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #f59e0b;
-  animation: pulso-naranja 2s infinite;
-  box-shadow: 0 0 8px #f59e0b;
-}
+/* Estilos aviso no registrado */
+.aviso-privado { text-align: center; padding: 5rem 2rem; background: #1e293b; border-radius: 20px; border: 2px dashed #334155; margin-top: 2rem; }
+.icon-lock { font-size: 4rem; margin-bottom: 1rem; }
+.btn-login-link { display: inline-block; margin-top: 2rem; background: #38bdf8; color: #0f172a; padding: 1rem 2rem; border-radius: 10px; font-weight: bold; text-decoration: none; }
 
 @keyframes pulso-naranja {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  }
-
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-  }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
-.aviso-login {
-  margin-top: 15px;
-  text-align: center;
-  font-size: 0.85rem;
-  color: #ef4444;
-  font-weight: bold;
-}
-
-.no-eventos {
-  color: var(--texto);
-  font-style: italic;
-  text-align: center;
-  grid-column: 1 / -1;
-  margin-top: 2rem;
+/* Fix para el popup de SweetAlert2 */
+:deep(.swal2-select) {
+  background-color: #0f172a !important;
+  color: white !important;
 }
 </style>
