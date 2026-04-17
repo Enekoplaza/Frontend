@@ -5,9 +5,8 @@
     "logout": "Salir",
     "artistas": "Artistas",
     "solicitudes": "Solicitudes",
-    "eventos": "Eventos"
-   
-    
+    "eventos": "Eventos",
+    "puerta": "🚪 Control Puerta"
   },
   "footer": {
     "desc": "Tu portal para descubrir eventos y mucho más. Únete a la comunidad.",
@@ -97,8 +96,9 @@
     "btn_guardar": "Guardar Evento",
     "vacio": "Actualmente no hay eventos programados.",
     "fecha": "a las",
-    "plazas_libres": "Plazas libres:",
+    "plazas": "Plazas:",
     "aforo_completo": "Aforo Completo",
+    "evento_abierto": "Evento Abierto",
     "btn_no_asistir": "No asistir",
     "btn_asistir": "Asistir",
     "aviso_login": "Inicia sesión para asistir",
@@ -112,7 +112,22 @@
     "swal_ok_conf": "¡Confirmado!",
     "swal_ok_canc": "Cancelado",
     "swal_aviso": "Aviso",
-    "btn_proximamente": "Próximamente"
+    "btn_proximamente": "Próximamente",
+    "titulo_ayuda": "Selecciona tu tarea",
+    "ph_ayuda": "¿En qué vas a ayudar?",
+    "opt_sin_puesto": "Posturik ez (Asistir solo)",
+    "opt_puerta": "Atea (Puerta)",
+    "opt_barra": "Barra",
+    "opt_limpieza": "Garbiketa (Limpieza)",
+    "opt_otros": "Beste batzuk (Otros)",
+    "btn_confirmar": "Confirmar",
+    "btn_ayuda": "Ayuda",
+    "btn_apuntado": "✅ Contamos contigo",
+    "privado_tit": "Contenido Privado",
+    "privado_msg": "Debes estar registrado para ver los eventos.",
+    "privado_btn": "Ir a Iniciar Sesión",
+    "estado_finalizado": "Finalizado",
+    "evento_finalizado": "🏁 Evento Finalizado"
   },
   "perfil": {
     "bienvenido": "Bienvenido a LAKOBRA",

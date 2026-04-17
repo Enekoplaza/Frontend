@@ -1,0 +1,199 @@
+<script setup>
+import { ref } from 'vue'
+import { API_URL } from '../config'
+
+const tokenInput = ref('')
+const cargando = ref(false)
+const resultado = ref(null)
+
+const validarToken = async () => {
+  if (tokenInput.value.trim() === '') return
+  
+  cargando.value = true
+  resultado.value = null
+
+  try {
+    const res = await fetch(`${API_URL}/api_validar_acceso.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ qr_token: tokenInput.value.trim() })
+    })
+    
+    const data = await res.json()
+    resultado.value = data
+    
+    // Limpiamos el input si ha ido bien para leer el siguiente rápido
+    if (data.estado === 'OK') {
+      tokenInput.value = ''
+    }
+
+  } catch (error) {
+    resultado.value = { estado: 'error', mensaje: 'Error de conexión' }
+  } finally {
+    cargando.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="control-acceso">
+    <div class="contenedor-herramienta">
+      
+      <header class="cabecera">
+        <h1>🛡️ Control de Puerta</h1>
+        <p>Validador de Tokens de Acceso</p>
+      </header>
+
+      <div class="formulario-validacion">
+        <label>Introduce el Token del usuario:</label>
+        <div class="input-grupo">
+          <input 
+            type="text" 
+            v-model="tokenInput" 
+            placeholder="Ej: a1b2c3d4e5f6..."
+            @keyup.enter="validarToken"
+            :disabled="cargando"
+          >
+          <button @click="validarToken" :disabled="cargando || tokenInput === ''" class="btn-validar">
+            {{ cargando ? '...' : 'Comprobar' }}
+          </button>
+        </div>
+      </div>
+
+      <transition name="fade">
+        <div v-if="resultado" class="panel-resultado" :class="resultado.estado.toLowerCase().replace(' ', '-')">
+          
+          <div v-if="resultado.estado === 'OK'" class="estado-ok">
+            <span class="icono">✅</span>
+            <h2>ACCESO PERMITIDO</h2>
+            <p><strong>{{ resultado.nombre }}</strong> puede pasar.</p>
+            <p class="aforo">Aforo: {{ resultado.ocupacion }}</p>
+          </div>
+
+          <div v-else-if="resultado.estado === 'Ya entró'" class="estado-aviso">
+            <span class="icono">⚠️</span>
+            <h2>ENTRADA DUPLICADA</h2>
+            <p><strong>{{ resultado.nombre }}</strong> ya ha registrado su entrada hoy.</p>
+          </div>
+
+          <div v-else-if="resultado.estado === 'Aforo completo'" class="estado-error">
+            <span class="icono">⛔</span>
+            <h2>AFORO COMPLETO</h2>
+            <p>No se admiten más personas.</p>
+          </div>
+
+          <div v-else-if="resultado.estado === 'Sin evento'" class="estado-error">
+            <span class="icono">📅</span>
+            <h2>SIN EVENTO</h2>
+            <p>No hay ningún evento confirmado para la fecha de hoy.</p>
+          </div>
+
+          <div v-else class="estado-error">
+            <span class="icono">❌</span>
+            <h2>TOKEN INVÁLIDO</h2>
+            <p>Este código no existe o no es válido.</p>
+          </div>
+
+        </div>
+      </transition>
+
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.control-acceso {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 80vh;
+  padding: 2rem 1rem;
+}
+
+.contenedor-herramienta {
+  background: #1e293b;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid #334155;
+  text-align: center;
+}
+
+.cabecera h1 { color: #facc15; font-size: 1.8rem; margin-bottom: 0.5rem; }
+.cabecera p { color: #94a3b8; margin-bottom: 2rem; }
+
+.formulario-validacion {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.formulario-validacion label {
+  display: block;
+  color: #cbd5e1;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.input-grupo {
+  display: flex;
+  gap: 10px;
+}
+
+.input-grupo input {
+  flex: 1;
+  background: #0f172a;
+  border: 2px solid #334155;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  outline: none;
+  font-family: monospace;
+}
+
+.input-grupo input:focus { border-color: #facc15; }
+
+.btn-validar {
+  background: #facc15;
+  color: #0f172a;
+  border: none;
+  padding: 0 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-validar:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-validar:hover:not(:disabled) { background: #eab308; }
+
+/* ESTILOS DE ESTADOS DEL PROFESOR */
+.panel-resultado {
+  padding: 1.5rem;
+  border-radius: 8px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icono { font-size: 3rem; display: block; margin-bottom: 10px; }
+.panel-resultado h2 { margin-bottom: 5px; font-size: 1.4rem; }
+.panel-resultado p { margin: 0; font-size: 1.1rem; }
+.aforo { margin-top: 10px !important; font-size: 0.9rem !important; opacity: 0.8; }
+
+/* VERDE */
+.ok { background: rgba(16, 185, 129, 0.2); border: 2px solid #10b981; color: #34d399; }
+/* AMARILLO */
+.ya-entró { background: rgba(245, 158, 11, 0.2); border: 2px solid #f59e0b; color: #fbbf24; }
+/* ROJO */
+.aforo-completo, .sin-evento, .error { background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; color: #f87171; }
+
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

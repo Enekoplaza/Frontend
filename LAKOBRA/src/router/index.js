@@ -35,6 +35,11 @@ const routes = [
     name: 'solicitudes', 
     component: () => import('@/views/Solicitudes.vue') 
   },
+  {
+  path: '/puerta',
+  name: 'puerta',
+  component: () => import('../views/ControlAcceso.vue')
+  },
 ]
 
 const router = createRouter({
