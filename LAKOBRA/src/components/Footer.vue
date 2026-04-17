@@ -28,6 +28,20 @@ defineEmits(['abrirModal'])
       </nav>
 
       <div class="col">
+        <h3>{{ $t('kontaktua' || 'Contacto') }}</h3>
+        <ul class="footer-links">
+          <li>
+            <a href="mailto:lakobrakolektiboa@gmail.com" class="contact-link">
+              lakobrakolektiboa@gmail.com
+            </a>
+          </li>
+          <li>
+            <router-link to="/sitemap">{{ $t('footer.sitemap' || 'Mapa del sitio') }}</router-link>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col">
         <h3>{{ $t('footer.jarraitu') }}</h3>
         <div class="socials">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar nuestro Facebook" class="social-icon">
@@ -56,9 +70,8 @@ defineEmits(['abrirModal'])
 </template>
 
 <style scoped>
-/* Definición de variables específicas para el componente */
+/* (Mantenemos tus estilos originales, solo añadí un pequeño ajuste para el enlace de contacto) */
 .footer {
-  /* Colores */
   --footer-bg-start: #1e293b;
   --footer-bg-end: #0f172a;
   --footer-accent: #38bdf8;
@@ -66,14 +79,11 @@ defineEmits(['abrirModal'])
   --footer-text-muted: #94a3b8;
   --footer-text-links: #cbd5e1;
   --footer-border: rgba(255, 255, 255, 0.1);
-
-  /* Espaciados y Medidas */
   --footer-padding-top: 60px;
   --container-max-width: 1200px;
   --gap-large: 40px;
   --gap-small: 12px;
 
-  /* Aplicación de las variables */
   width: 100%;
   background: linear-gradient(135deg, var(--footer-bg-start), var(--footer-bg-end));
   color: var(--footer-text-main);
@@ -85,7 +95,8 @@ defineEmits(['abrirModal'])
   margin: 0 auto;
   padding: 0 25px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* He ajustado el minmax para que quepan bien las 4 columnas */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--gap-large);
 }
 
@@ -130,6 +141,7 @@ h3 {
   cursor: pointer;
   font-size: 15px;
   transition: color 0.3s ease, transform 0.2s ease;
+  word-break: break-all; /* Para que el email no rompa el diseño en móviles */
 }
 
 .footer-links a:hover,
@@ -137,7 +149,6 @@ h3 {
   color: var(--footer-accent);
 }
 
-/* Redes Sociales */
 .socials {
   display: flex;
   flex-direction: row;
@@ -179,13 +190,11 @@ h3 {
   .container {
     text-align: center;
   }
-
   .description {
     margin: 0 auto;
   }
-
   .socials {
-    align-items: center;
+    justify-content: center;
   }
 }
 </style>
