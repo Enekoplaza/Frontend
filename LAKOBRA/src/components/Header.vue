@@ -26,7 +26,9 @@ const esAdmin = computed(() => {
   <header class="header">
     <div class="header-container">
       <div class="logo-container">
-        <h2 class="logo">Lakobra</h2>
+        <router-link to="/principal">
+          <h2 class="logo">Lakobra</h2>
+        </router-link>
       </div>
 
       <nav class="nav">
@@ -97,9 +99,23 @@ const esAdmin = computed(() => {
 
           <!-- BOTÓN TEMA -->
           <li>
-            <button class="btn-tema" @click="$emit('toggleTema')" :title="$t('header.cambiar_tema')">
-              <svg v-if="modoOscuro" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              class="btn-tema"
+              @click="$emit('toggleTema')"
+              :title="$t('header.cambiar_tema')"
+            >
+              <svg
+                v-if="modoOscuro"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="12" cy="12" r="5"></circle>
                 <line x1="12" y1="1" x2="12" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -111,8 +127,18 @@ const esAdmin = computed(() => {
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
 
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </button>
@@ -248,13 +274,13 @@ a:hover {
 }
 
 /* Transiciones para todas las partes del icono */
-.theme-toggle .sun-and-moon> :is(.moon, .sun, .sun-beams) {
+.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) {
   transform-origin: center center;
   transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25),
     opacity 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
 }
 
-.theme-toggle .sun-and-moon .moon>circle {
+.theme-toggle .sun-and-moon .moon > circle {
   transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
 }
 
@@ -279,7 +305,7 @@ a:hover {
 }
 
 /* 4. El círculo de la máscara se mueve hacia la izquierda para "comerse" el sol */
-.theme-toggle.is-dark .sun-and-moon .moon>circle {
+.theme-toggle.is-dark .sun-and-moon .moon > circle {
   transform: translateX(-7px);
 }
 </style>

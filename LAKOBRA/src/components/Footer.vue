@@ -10,7 +10,9 @@ defineEmits(['abrirModal'])
   <footer class="footer">
     <div class="container">
       <div class="col">
-        <h2 class="logo">Lakobra</h2>
+        <router-link to="/principal">
+          <h2 class="logo">Lakobra</h2>
+        </router-link>
         <p class="description">{{ $t('footer.desc') }}</p>
       </div>
 
