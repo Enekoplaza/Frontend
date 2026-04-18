@@ -285,6 +285,7 @@ onMounted(cargarEventos)
   padding: 2rem;
 }
 
+/* HEADER */
 .header-eventos {
   display: flex;
   justify-content: space-between;
@@ -292,6 +293,7 @@ onMounted(cargarEventos)
   margin-bottom: 2rem;
   border-bottom: 2px solid rgba(148, 163, 184, 0.2);
   padding-bottom: 1rem;
+  gap: 1rem;
 }
 
 .btn-admin {
@@ -304,6 +306,7 @@ onMounted(cargarEventos)
   cursor: pointer;
 }
 
+/* ADMIN PANEL */
 .admin-panel {
   background: #1e293b;
   padding: 1.5rem;
@@ -339,18 +342,14 @@ onMounted(cargarEventos)
   cursor: pointer;
 }
 
+/* GRID EVENTOS */
 .grid-eventos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 
-@media (min-width: 1024px) {
-  .grid-eventos {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
+/* TARJETA */
 .tarjeta-evento {
   background: #1e293b;
   border-radius: 12px;
@@ -362,6 +361,7 @@ onMounted(cargarEventos)
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* ADMIN ACTIONS */
 .admin-actions {
   position: absolute;
   top: 10px;
@@ -378,6 +378,7 @@ onMounted(cargarEventos)
   cursor: pointer;
 }
 
+/* INFO EVENTO */
 .evento-info h3 {
   color: #f8fafc;
   margin-bottom: 10px;
@@ -389,6 +390,7 @@ onMounted(cargarEventos)
   font-size: 0.95rem;
 }
 
+/* BADGES */
 .badge {
   display: inline-block;
   padding: 3px 8px;
@@ -399,21 +401,12 @@ onMounted(cargarEventos)
   text-transform: uppercase;
 }
 
-.badge.confirmado {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
-}
+.badge.confirmado { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.badge.pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.badge.cancelado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.badge.finalizado { background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid #475569; }
 
-.badge.pendiente {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
-}
-
-.badge.cancelado {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-}
-
+/* BOTONES */
 .btn-ayuda {
   margin-top: 15px;
   width: 100%;
@@ -425,19 +418,14 @@ onMounted(cargarEventos)
   font-weight: bold;
   cursor: pointer;
   display: flex;
-  /* Para centrar el círculo y el texto */
   align-items: center;
-  /* Centrado vertical */
   justify-content: center;
-  /* Centrado horizontal */
   gap: 10px;
-  /* Espacio entre el círculo y la palabra */
   transition: all 0.2s ease;
 }
 
 .btn-ayuda:hover:not(:disabled) {
   background: #a3af04;
-  /* Tono un pelín más oscuro al pasar el ratón */
   transform: scale(1.02);
 }
 
@@ -446,8 +434,6 @@ onMounted(cargarEventos)
   color: #10b981 !important;
   border: 1px solid #10b981 !important;
   cursor: default !important;
-  opacity: 1 !important;
-  /* Evita que el navegador lo ponga gris al estar disabled */
 }
 
 .btn-lleno {
@@ -475,13 +461,7 @@ onMounted(cargarEventos)
   gap: 10px;
 }
 
-.msg-abierto {
-  margin-top: 15px;
-  text-align: center;
-  color: #10b981;
-  font-weight: bold;
-}
-
+/* PULSOS */
 .anillo-pulso-pequeno {
   width: 10px;
   height: 10px;
@@ -490,7 +470,16 @@ onMounted(cargarEventos)
   animation: pulso-naranja 2s infinite;
 }
 
-/* Estilos aviso no registrado */
+.anillo-pulso-verde {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulso-verde-anim 2s infinite;
+}
+
+/* AVISO PRIVADO */
 .aviso-privado {
   text-align: center;
   padding: 5rem 2rem;
@@ -516,58 +505,116 @@ onMounted(cargarEventos)
   text-decoration: none;
 }
 
+/* ANIMACIONES */
 @keyframes pulso-naranja {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-  }
-
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-  }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
-/* Fix para el popup de SweetAlert2 */
+@keyframes pulso-verde-anim {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* SWEETALERT FIX */
 :deep(.swal2-select) {
   background-color: #0f172a !important;
   color: white !important;
 }
 
-.anillo-pulso-verde {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
-  animation: pulso-verde-anim 2s infinite;
-}
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
 
-@keyframes pulso-verde-anim {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  .eventos-container {
+    padding: 1.5rem;
   }
 
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  .grid-eventos {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
   }
 
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  .evento-info h3 {
+    font-size: 1.2rem;
   }
 }
 
-.badge.finalizado {
-  background: rgba(148, 163, 184, 0.2);
-  color: #94a3b8;
-  border: 1px solid #475569;
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .eventos-container {
+    padding: 1rem;
+  }
+
+  .header-eventos {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-admin {
+    width: 100%;
+  }
+
+  .grid-eventos {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .tarjeta-evento {
+    padding: 1.2rem;
+  }
+
+  .form-grid {
+    flex-direction: column;
+  }
+
+  .form-grid input,
+  .form-grid select {
+    min-width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .btn-submit {
+    width: 100%;
+  }
+
+  .evento-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .evento-info p {
+    font-size: 0.9rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .eventos-container {
+    padding: 0.8rem;
+  }
+
+  .tarjeta-evento {
+    padding: 1rem;
+  }
+
+  .btn-ayuda,
+  .btn-lleno,
+  .btn-proximamente {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+  }
 }
 </style>

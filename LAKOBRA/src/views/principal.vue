@@ -29,6 +29,7 @@
   font-weight: 800;
   margin-bottom: 2rem;
   color: var(--titulo);
+  line-height: 1.1;
 }
 
 /* TEXTO */
@@ -48,12 +49,53 @@
   font-size: 1.2rem;
 }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
+
   .titulo {
-    font-size: 2.2rem;
+    font-size: 2.6rem;
   }
 
- 
+  .descripcion p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .titulo {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .descripcion p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .titulo {
+    font-size: 1.9rem;
+  }
+
+  .descripcion p {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
 }
 </style>

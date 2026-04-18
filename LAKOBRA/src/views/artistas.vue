@@ -206,4 +206,101 @@ textarea:focus {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  .intro {
+    font-size: 1.05rem;
+  }
+
+  .formulario-wrapper {
+    padding: 1.8rem;
+  }
+
+  .btn-llamada {
+    font-size: 1.1rem;
+    padding: 0.9rem 1.8rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .artistas-container {
+    padding: 1.5rem 1rem;
+  }
+
+  h1 {
+    font-size: 1.9rem;
+  }
+
+  .intro {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .btn-llamada {
+    width: 100%;
+    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  .formulario-wrapper {
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  input,
+  textarea {
+    font-size: 0.95rem;
+    padding: 11px;
+  }
+
+  .btn-submit {
+    font-size: 1rem;
+    padding: 13px;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  .intro {
+    font-size: 0.95rem;
+  }
+
+  .formulario-wrapper {
+    padding: 1.2rem;
+    border-radius: 10px;
+  }
+
+  label {
+    font-size: 0.9rem;
+  }
+
+  input,
+  textarea {
+    font-size: 0.9rem;
+  }
+
+  .btn-submit {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
 </style>

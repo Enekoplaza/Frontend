@@ -122,8 +122,16 @@ const validarToken = async () => {
   text-align: center;
 }
 
-.cabecera h1 { color: #facc15; font-size: 1.8rem; margin-bottom: 0.5rem; }
-.cabecera p { color: #94a3b8; margin-bottom: 2rem; }
+.cabecera h1 { 
+  color: #facc15; 
+  font-size: 1.8rem; 
+  margin-bottom: 0.5rem; 
+}
+
+.cabecera p { 
+  color: #94a3b8; 
+  margin-bottom: 2rem; 
+}
 
 .formulario-validacion {
   text-align: left;
@@ -154,7 +162,9 @@ const validarToken = async () => {
   font-family: monospace;
 }
 
-.input-grupo input:focus { border-color: #facc15; }
+.input-grupo input:focus { 
+  border-color: #facc15; 
+}
 
 .btn-validar {
   background: #facc15;
@@ -167,33 +177,176 @@ const validarToken = async () => {
   transition: 0.2s;
 }
 
-.btn-validar:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-validar:hover:not(:disabled) { background: #eab308; }
+.btn-validar:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+}
 
-/* ESTILOS DE ESTADOS DEL PROFESOR */
+.btn-validar:hover:not(:disabled) { 
+  background: #eab308; 
+}
+
+/* RESULTADOS */
 .panel-resultado {
   padding: 1.5rem;
   border-radius: 8px;
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.icono { font-size: 3rem; display: block; margin-bottom: 10px; }
-.panel-resultado h2 { margin-bottom: 5px; font-size: 1.4rem; }
-.panel-resultado p { margin: 0; font-size: 1.1rem; }
-.aforo { margin-top: 10px !important; font-size: 0.9rem !important; opacity: 0.8; }
+.icono { 
+  font-size: 3rem; 
+  display: block; 
+  margin-bottom: 10px; 
+}
 
-/* VERDE */
-.ok { background: rgba(16, 185, 129, 0.2); border: 2px solid #10b981; color: #34d399; }
-/* AMARILLO */
-.ya-entró { background: rgba(245, 158, 11, 0.2); border: 2px solid #f59e0b; color: #fbbf24; }
-/* ROJO */
-.aforo-completo, .sin-evento, .error { background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; color: #f87171; }
+.panel-resultado h2 { 
+  margin-bottom: 5px; 
+  font-size: 1.4rem; 
+}
+
+.panel-resultado p { 
+  margin: 0; 
+  font-size: 1.1rem; 
+}
+
+.aforo { 
+  margin-top: 10px !important; 
+  font-size: 0.9rem !important; 
+  opacity: 0.8; 
+}
+
+/* ESTADOS */
+.ok { 
+  background: rgba(16, 185, 129, 0.2); 
+  border: 2px solid #10b981; 
+  color: #34d399; 
+}
+
+.ya-entró { 
+  background: rgba(245, 158, 11, 0.2); 
+  border: 2px solid #f59e0b; 
+  color: #fbbf24; 
+}
+
+.aforo-completo, 
+.sin-evento, 
+.error { 
+  background: rgba(239, 68, 68, 0.2); 
+  border: 2px solid #ef4444; 
+  color: #f87171; 
+}
 
 @keyframes popIn {
   0% { transform: scale(0.9); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-active { 
+  transition: opacity 0.3s; 
+}
+
+.fade-enter-from, .fade-leave-to { 
+  opacity: 0; 
+}
+
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
+
+  .contenedor-herramienta {
+    max-width: 450px;
+    padding: 1.8rem;
+  }
+
+  .cabecera h1 {
+    font-size: 1.7rem;
+  }
+
+  .input-grupo input {
+    font-size: 1rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .control-acceso {
+    align-items: center;
+    padding: 1.5rem 1rem;
+  }
+
+  .contenedor-herramienta {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 10px;
+  }
+
+  .cabecera h1 {
+    font-size: 1.5rem;
+  }
+
+  .cabecera p {
+    font-size: 0.95rem;
+  }
+
+  .input-grupo {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .input-grupo input {
+    font-size: 1rem;
+    padding: 13px;
+  }
+
+  .btn-validar {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .panel-resultado {
+    padding: 1.2rem;
+  }
+
+  .icono {
+    font-size: 2.5rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .contenedor-herramienta {
+    padding: 1.2rem;
+  }
+
+  .cabecera h1 {
+    font-size: 1.3rem;
+  }
+
+  .cabecera p {
+    font-size: 0.9rem;
+  }
+
+  .input-grupo input {
+    font-size: 0.95rem;
+  }
+
+  .panel-resultado h2 {
+    font-size: 1.2rem;
+  }
+
+  .panel-resultado p {
+    font-size: 1rem;
+  }
+
+  .aforo {
+    font-size: 0.85rem !important;
+  }
+}
 </style>

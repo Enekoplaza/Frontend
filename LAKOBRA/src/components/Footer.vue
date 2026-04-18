@@ -133,7 +133,6 @@ defineEmits(['abrirModal'])
 </template>
 
 <style scoped>
-/* (Mantenemos tus estilos originales, solo añadí un pequeño ajuste para el enlace de contacto) */
 .footer {
   --footer-bg-start: #1e293b;
   --footer-bg-end: #0f172a;
@@ -158,7 +157,6 @@ defineEmits(['abrirModal'])
   margin: 0 auto;
   padding: 0 25px;
   display: grid;
-  /* He ajustado el minmax para que quepan bien las 4 columnas */
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--gap-large);
 }
@@ -184,6 +182,7 @@ h3 {
   margin-bottom: 20px;
   color: white;
 }
+
 .mapa {
   margin-top: 10px;
   border-radius: 10px;
@@ -209,7 +208,7 @@ h3 {
   cursor: pointer;
   font-size: 15px;
   transition: color 0.3s ease, transform 0.2s ease;
-  word-break: break-all; /* Para que el email no rompa el diseño en móviles */
+  word-break: break-word;
 }
 
 .footer-links a:hover,
@@ -254,15 +253,97 @@ h3 {
   color: var(--footer-text-muted);
 }
 
-@media (max-width: 600px) {
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
   .container {
+    gap: 30px;
+    padding: 0 20px;
+  }
+
+  .logo {
+    font-size: 26px;
+  }
+
+  h3 {
+    font-size: 15px;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .container {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 25px;
     text-align: center;
   }
+
   .description {
     margin: 0 auto;
+    max-width: 100%;
   }
+
   .socials {
     justify-content: center;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 14px;
+  }
+
+  .footer-links a,
+  .btn-login {
+    font-size: 14px;
+  }
+
+  .bottom-bar {
+    margin-top: 35px;
+    padding: 20px 0;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 15px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  h3 {
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+
+  .footer-links li {
+    margin-bottom: 8px;
+  }
+
+  .socials {
+    gap: 1rem;
+  }
+
+  .bottom-bar p {
+    font-size: 13px;
   }
 }
 </style>

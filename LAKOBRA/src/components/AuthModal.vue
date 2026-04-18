@@ -98,7 +98,6 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-/* (Mantener tus estilos de modal-overlay y modal-content que ya estaban correctos) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -110,6 +109,7 @@ const handleSubmit = async () => {
     align-items: center;
     justify-content: center;
     z-index: 1050;
+    padding: 15px; /* mejora en móvil */
 }
 
 .modal-content {
@@ -120,6 +120,11 @@ const handleSubmit = async () => {
     width: 95%;
     max-width: 420px;
     position: relative;
+
+    /* mejora UX */
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .btn-close {
@@ -132,6 +137,7 @@ const handleSubmit = async () => {
     cursor: pointer;
 }
 
+/* FORM */
 form {
     display: flex;
     flex-direction: column;
@@ -145,6 +151,7 @@ select {
     padding: 10px;
     border: 1px solid #334155;
     border-radius: 8px;
+    font-size: 14px;
 }
 
 .btn-submit {
@@ -155,6 +162,11 @@ select {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    filter: brightness(1.1);
 }
 
 .toggle-auth {
@@ -163,5 +175,64 @@ select {
     cursor: pointer;
     margin-top: 20px;
     text-decoration: underline;
+}
+
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
+    .modal-content {
+        max-width: 380px;
+        padding: 35px;
+    }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 14px;
+        padding: 30px 20px;
+    }
+
+    input,
+    select {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    .btn-submit {
+        padding: 14px;
+        font-size: 15px;
+    }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+    .modal-content {
+        padding: 25px 15px;
+        border-radius: 12px;
+    }
+
+    form {
+        gap: 12px;
+    }
+
+    input,
+    select {
+        font-size: 14px;
+        padding: 11px;
+    }
+
+    .toggle-auth {
+        font-size: 14px;
+    }
 }
 </style>

@@ -170,6 +170,7 @@ onMounted(cargarSolicitudes)
   padding: 2rem 1rem;
 }
 
+/* HEADER */
 .header-admin {
   margin-bottom: 2rem;
   border-bottom: 2px solid rgba(148, 163, 184, 0.2);
@@ -187,6 +188,7 @@ onMounted(cargarSolicitudes)
   color: #94a3b8;
 }
 
+/* SECCIÓN */
 .admin-seccion h2 {
   font-size: 1.5rem;
   color: var(--titulo);
@@ -202,21 +204,21 @@ onMounted(cargarSolicitudes)
   border-radius: 8px;
 }
 
+/* GRID */
 .grid-solicitudes {
   display: grid;
-  /* Bajamos el tamaño mínimo a 280px para que quepan 3 sin problema */
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   margin-bottom: 2rem;
 }
 
-/* Opcional: Si quieres asegurar 100% que sean 3 columnas en PC pase lo que pase */
 @media (min-width: 1024px) {
   .grid-solicitudes {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
+/* TARJETAS */
 .tarjeta-solicitud {
   background: #1e293b;
   border-radius: 12px;
@@ -232,13 +234,16 @@ onMounted(cargarSolicitudes)
   border-color: rgba(250, 204, 21, 0.3);
 }
 
+/* INFO */
 .info-solicitud h3 {
   color: #f8fafc;
   font-size: 1.2rem;
   margin-bottom: 10px;
 }
 
-.email, .fecha, .dni {
+.email,
+.fecha,
+.dni {
   color: #94a3b8;
   font-size: 0.9rem;
   margin-bottom: 5px;
@@ -255,6 +260,7 @@ onMounted(cargarSolicitudes)
   overflow-y: auto;
 }
 
+/* ACCIONES */
 .estado-acciones {
   margin-top: 1.5rem;
   display: flex;
@@ -271,9 +277,17 @@ onMounted(cargarSolicitudes)
   text-transform: uppercase;
 }
 
-.badge.pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-.badge.aceptada { background: rgba(250, 204, 21, 0.2); color: #facc15; }
+.badge.pendiente {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
 
+.badge.aceptada {
+  background: rgba(250, 204, 21, 0.2);
+  color: #facc15;
+}
+
+/* BOTONES */
 .botones-admin {
   display: flex;
   width: 100%;
@@ -294,8 +308,16 @@ onMounted(cargarSolicitudes)
   transform: scale(1.05);
 }
 
-.btn-aceptar { background: #10b981; color: white; }
-.btn-rechazar { background: #ef4444; color: white; }
+.btn-aceptar {
+  background: #10b981;
+  color: white;
+}
+
+.btn-rechazar {
+  background: #ef4444;
+  color: white;
+}
+
 .btn-listo {
   background: rgba(250, 204, 21, 0.1) !important;
   color: #facc15 !important;
@@ -309,5 +331,94 @@ onMounted(cargarSolicitudes)
   height: 1px;
   background: rgba(148, 163, 184, 0.2);
   margin: 3rem 0;
+}
+
+/* =========================================
+   📱 TABLET
+   ========================================= */
+@media (max-width: 1024px) {
+
+  .header-admin h1 {
+    font-size: 1.8rem;
+  }
+
+  .admin-seccion h2 {
+    font-size: 1.4rem;
+  }
+
+  .tarjeta-solicitud {
+    padding: 1.3rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .solicitudes-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .header-admin h1 {
+    font-size: 1.6rem;
+  }
+
+  .header-admin p {
+    font-size: 0.95rem;
+  }
+
+  .grid-solicitudes {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .tarjeta-solicitud {
+    padding: 1.2rem;
+  }
+
+  .info-solicitud h3 {
+    font-size: 1.1rem;
+  }
+
+  .email,
+  .fecha,
+  .dni {
+    font-size: 0.85rem;
+  }
+
+  .botones-admin {
+    flex-direction: column;
+  }
+
+  .botones-admin button {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .solicitudes-container {
+    padding: 1rem;
+  }
+
+  .header-admin h1 {
+    font-size: 1.4rem;
+  }
+
+  .tarjeta-solicitud {
+    padding: 1rem;
+  }
+
+  .descripcion-box {
+    font-size: 0.85rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+  }
 }
 </style>

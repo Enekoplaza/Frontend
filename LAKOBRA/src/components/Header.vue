@@ -149,163 +149,283 @@ const esAdmin = computed(() => {
   </header>
 </template>
 <style scoped>
+/* =========================================
+   🌌 HEADER BASE (MODERNO)
+   ========================================= */
+
 .header {
   --header-bg-start: #1e293b;
   --header-bg-end: #0f172a;
   --header-accent: #38bdf8;
   --header-text: #f8fafc;
+
   width: 100%;
-  background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+/* =========================================
+   🧱 CONTAINER
+   ========================================= */
 
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem 25px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
+
+/* =========================================
+   🔥 LOGO (más branding)
+   ========================================= */
 
 .logo {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--header-accent);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.15);
 }
+
+/* =========================================
+   📍 NAV
+   ========================================= */
 
 .lista {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   list-style: none;
   align-items: center;
+  flex-wrap: wrap;
 }
 
+/* LINKS MÁS MODERNOS */
 a {
   color: var(--header-text);
   text-decoration: none;
   font-weight: 600;
-  transition: 0.3s;
+
+  padding: 6px 10px;
+  border-radius: 8px;
+
+  transition: all 0.25s ease;
+  position: relative;
 }
 
+/* HOVER PRO */
 a:hover {
   color: var(--header-accent);
+  background: rgba(56, 189, 248, 0.08);
+  transform: translateY(-1px);
 }
+
+/* ACTIVE MÁS LIMPIO */
+.router-link-active {
+  color: var(--header-accent);
+  background: rgba(56, 189, 248, 0.12);
+  border-bottom: none;
+}
+
+/* =========================================
+   👤 USER
+   ========================================= */
 
 .user-welcome {
   color: var(--header-text);
   font-size: 0.9rem;
+  white-space: nowrap;
+  opacity: 0.9;
 }
 
 .user-welcome strong {
   color: var(--header-accent);
 }
 
+/* logout más limpio */
 .btn-logout {
   color: #ff4d4d !important;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
+  transition: 0.2s;
 }
 
-.router-link-active {
-  border-bottom: 2px solid var(--header-accent);
+.btn-logout:hover {
+  opacity: 0.8;
 }
+
+/* =========================================
+   ➖ DIVIDER
+   ========================================= */
 
 .divider {
   width: 1px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.2);
-  margin: 0 0.5rem;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
+/* =========================================
+   🎨 BOTONES
+   ========================================= */
+
 .btn-tema {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
   color: var(--header-text);
   cursor: pointer;
-  padding: 5px;
+
+  padding: 6px;
+  border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s ease;
+
+  transition: all 0.25s ease;
 }
 
 .btn-tema:hover {
   color: var(--header-accent);
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(15deg);
+  background: rgba(56, 189, 248, 0.12);
+  transform: scale(1.05);
 }
 
 .btn-idioma {
-  background: none;
-  border: 1px solid var(--header-text);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
   color: var(--header-text);
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
+
+  padding: 3px 8px;
+  border-radius: 6px;
+
   font-weight: bold;
-  transition: 0.3s;
+  transition: all 0.25s ease;
 }
 
 .btn-idioma:hover {
   color: var(--header-accent);
   border-color: var(--header-accent);
+  background: rgba(56, 189, 248, 0.1);
 }
 
 /* =========================================
-   ANIMACIÓN DEL TEMA (SUN & MOON MORPH)
+   🌗 ANIMACIÓN TEMA
    ========================================= */
 
-/* Eliminamos la rotación antigua que tenías en :hover para que no estropee la nueva */
-.btn-tema:hover {
-  color: var(--header-accent);
-  background: rgba(255, 255, 255, 0.1);
-  /* Hemos quitado el transform: rotate(15deg); de aquí */
-}
-
-/* Configuramos el contenedor del SVG */
 .theme-toggle .sun-and-moon {
   transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
   overflow: visible;
 }
 
-/* Transiciones para todas las partes del icono */
 .theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) {
-  transform-origin: center center;
-  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25),
-    opacity 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+  transform-origin: center;
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .theme-toggle .sun-and-moon .moon > circle {
-  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+  transition: transform 0.5s ease;
 }
 
-/* =========================================
-   ESTADO: MODO OSCURO (LUNA)
-   ========================================= */
-
-/* 1. Giramos todo el icono un poco hacia la izquierda */
 .theme-toggle.is-dark .sun-and-moon {
   transform: rotate(-100deg);
 }
 
-/* 2. El círculo central se hace más grande */
 .theme-toggle.is-dark .sun-and-moon .sun {
   transform: scale(1.75);
 }
 
-/* 3. Los rayos del sol se encogen, giran y desaparecen */
 .theme-toggle.is-dark .sun-and-moon .sun-beams {
   opacity: 0;
   transform: rotate(-25deg) scale(0.5);
 }
 
-/* 4. El círculo de la máscara se mueve hacia la izquierda para "comerse" el sol */
 .theme-toggle.is-dark .sun-and-moon .moon > circle {
   transform: translateX(-7px);
+}
+
+/* =========================================
+   📱 TABLET
+   ========================================= */
+
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 1rem 20px;
+  }
+
+  .lista {
+    gap: 0.9rem;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL (MODERNO DE VERDAD)
+   ========================================= */
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0.9rem 15px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .lista {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  a {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+  }
+
+  .user-welcome {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .divider {
+    display: none;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+
+@media (max-width: 480px) {
+  .lista {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  a {
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>

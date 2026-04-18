@@ -1030,4 +1030,118 @@ const eliminarCuenta = async () => {
 :deep(.x-roja-modal:focus) {
   box-shadow: none !important;
 }
+/* =========================================
+   📱 TABLET (mantiene diseño original)
+   ========================================= */
+@media (max-width: 1024px) {
+
+  .grid-principal {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .cabecera-perfil h1 {
+    font-size: 1.8rem;
+  }
+
+  .tarjeta {
+    padding: 1.3rem;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+
+  .perfil {
+    padding: 1.5rem 1rem;
+  }
+
+  .cabecera-perfil {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cabecera-perfil h1 {
+    font-size: 1.6rem;
+  }
+
+  .etiqueta {
+    font-size: 0.75rem;
+    padding: 5px 12px;
+  }
+
+  .grid-principal {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tarjeta {
+    padding: 1.2rem;
+  }
+
+  .tarjeta h3 {
+    font-size: 1.1rem;
+  }
+
+  .dato-texto {
+    font-size: 0.95rem;
+  }
+
+  .botones-edicion {
+    flex-direction: column;
+  }
+
+  .botones-edicion button {
+    width: 100%;
+  }
+
+  .evento-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .fecha-evento {
+    flex-direction: row;
+    gap: 10px;
+    min-width: auto;
+  }
+}
+
+/* =========================================
+   📱 MÓVIL PEQUEÑO
+   ========================================= */
+@media (max-width: 480px) {
+
+  .cabecera-perfil h1 {
+    font-size: 1.4rem;
+  }
+
+  .tarjeta {
+    padding: 1rem;
+  }
+
+  .grupo-dato label {
+    font-size: 0.8rem;
+  }
+
+  .dato-texto {
+    font-size: 0.9rem;
+  }
+
+  .evento-item {
+    padding: 0.8rem;
+  }
+
+  .fecha-evento {
+    padding: 8px;
+  }
+
+  .dia {
+    font-size: 1.2rem;
+  }
+}
 </style>
