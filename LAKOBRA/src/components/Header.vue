@@ -213,7 +213,6 @@ const esAdmin = computed(() => {
 
 /* LINKS MÁS MODERNOS */
 a {
-  color: var(--header-text);
   text-decoration: none;
   font-weight: 600;
 
@@ -224,19 +223,8 @@ a {
   position: relative;
 }
 
-/* HOVER PRO */
-a:hover {
-  color: var(--header-accent);
-  background: rgba(56, 189, 248, 0.08);
-  transform: translateY(-1px);
-}
 
-/* ACTIVE MÁS LIMPIO */
-.router-link-active {
-  color: var(--header-accent);
-  background: rgba(56, 189, 248, 0.12);
-  border-bottom: none;
-}
+
 
 /* =========================================
    👤 USER
