@@ -26,28 +26,25 @@ const esAdmin = computed(() => {
   <header class="header">
     <div class="header-container">
       <div class="logo-container">
-        <router-link to="/principal">
+        <router-link to="/principal" style="border: none; padding: 0;">
           <h2 class="logo">Lakobra</h2>
         </router-link>
       </div>
 
       <nav class="nav">
         <ul class="lista">
-          <!-- INICIO -->
           <li>
             <RouterLink to="/principal">
               {{ $t('header.inicio') }}
             </RouterLink>
           </li>
 
-          <!-- LOGIN / USUARIO -->
           <li v-if="!usuario">
             <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">
               {{ $t('header.login') }}
             </a>
           </li>
 
-          <!-- USUARIO LOGUEADO -->
           <li class="user-welcome" v-else>
             <RouterLink to="/perfil">
               <strong>{{ usuario.nombre }}</strong>
@@ -57,7 +54,6 @@ const esAdmin = computed(() => {
             </RouterLink>
           </li>
 
-          <!-- ENLACES -->
           <li v-if="!esAdmin">
             <RouterLink to="/artistas">
               {{ $t('header.artistas') }}
@@ -80,66 +76,43 @@ const esAdmin = computed(() => {
             <RouterLink to="/puerta">{{ $t('header.puerta') }}</RouterLink>
           </li>
 
-          <!-- LOGOUT -->
           <li v-if="usuario">
             <a href="#" @click.prevent="$emit('logout')" class="btn-logout">
               {{ $t('header.logout') }}
             </a>
           </li>
 
-          <!-- SEPARADOR -->
           <li class="divider"></li>
 
-          <!-- BOTÓN IDIOMA -->
           <li>
             <button class="btn-idioma" @click="toggleIdioma" :title="$t('header.cambiar_idioma')">
               {{ locale === 'es' ? 'EUS' : 'ES' }}
             </button>
           </li>
 
-          <!-- BOTÓN TEMA -->
           <li>
             <button
-              class="btn-tema"
+              class="btn-tema theme-toggle"
+              :class="{ 'is-dark': modoOscuro }"
               @click="$emit('toggleTema')"
               :title="$t('header.cambiar_tema')"
             >
-              <svg
-                v-if="modoOscuro"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
+                <mask class="moon" id="moon-mask">
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  <circle cx="24" cy="10" r="6" fill="black" />
+                </mask>
+                <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)" fill="currentColor" />
+                <g class="sun-beams" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </g>
               </svg>
             </button>
           </li>
@@ -148,6 +121,7 @@ const esAdmin = computed(() => {
     </div>
   </header>
 </template>
+
 <style scoped>
 /* =========================================
    🌌 HEADER BASE (MODERNO)
@@ -213,6 +187,7 @@ const esAdmin = computed(() => {
 
 /* LINKS MÁS MODERNOS */
 a {
+  color: var(--header-text);
   text-decoration: none;
   font-weight: 600;
 
@@ -223,8 +198,16 @@ a {
   position: relative;
 }
 
+a:hover {
+  color: var(--header-accent);
+}
 
-
+/* LA LÍNEA AZUL RECUPERADA */
+.router-link-active {
+  color: var(--header-accent);
+  border-bottom: 2px solid var(--header-accent);
+  border-radius: 0;
+}
 
 /* =========================================
    👤 USER
@@ -251,6 +234,7 @@ a {
 
 .btn-logout:hover {
   opacity: 0.8;
+  border-bottom: none; /* Quitamos la línea activa en caso de error */
 }
 
 /* =========================================

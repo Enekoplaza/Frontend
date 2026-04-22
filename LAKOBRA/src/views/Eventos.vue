@@ -1,5 +1,6 @@
 <script setup>
-import { API_URL } from '../config'
+// 1. Importamos el nuevo servicio
+import { apiFetch } from '@/services/apiFetch'
 import { ref, onMounted, computed } from 'vue'
 import Swal from 'sweetalert2'
 import { useI18n } from 'vue-i18n'
@@ -26,8 +27,7 @@ const formEvento = ref({
   estado: 'pendiente',
 })
 
-// --- LÓGICA DE FECHAS (NUEVO) ---
-// Obtenemos la fecha de hoy en formato YYYY-MM-DD para bloquear el calendario
+// --- LÓGICA DE FECHAS ---
 const obtenerFechaHoy = () => {
   const hoy = new Date();
   const year = hoy.getFullYear();
@@ -37,7 +37,6 @@ const obtenerFechaHoy = () => {
 };
 const fechaHoy = obtenerFechaHoy();
 
-// Función que comprueba si un evento ya es cosa del pasado
 const esEventoFinalizado = (fechaEvento) => {
   return fechaEvento < fechaHoy;
 };
@@ -57,8 +56,8 @@ const formatearHora = (horaString) => {
 
 const cargarEventos = async () => {
   try {
-    const res = await fetch(`${API_URL}/api_eventos.php`, { credentials: 'include' })
-    const data = await res.json()
+    // 2. Uso de apiFetch para GET (súper corto)
+    const data = await apiFetch('api_eventos.php')
     if (data.success) {
       eventos.value = data.eventos
     }
@@ -94,16 +93,14 @@ const abrirPopupAyuda = async (evento) => {
 
   if (tarea) {
     try {
-      const res = await fetch(`${API_URL}/api_asistir.php`, {
+      // 3. Uso de apiFetch para POST
+      const data = await apiFetch('api_asistir.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           id_evento: evento.id,
           tarea: tarea,
         }),
       })
-      const data = await res.json()
 
       if (data.success) {
         Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_guardado'), timer: 1500, showConfirmButton: false })
@@ -136,14 +133,14 @@ const cancelarFormulario = () => {
 const guardarEvento = async () => {
   const method = modoEdicion.value ? 'PUT' : 'POST'
   const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
+  
   try {
-    const res = await fetch(`${API_URL}/api_eventos.php`, {
+    // 4. Uso de apiFetch para guardar (PUT o POST dinámico)
+    const data = await apiFetch('api_eventos.php', {
       method: method,
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify(payload),
     })
-    const data = await res.json()
+    
     if (data.success) {
       Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_guardado'), timer: 1500, showConfirmButton: false })
       cancelarFormulario()
@@ -167,14 +164,15 @@ const borrarEvento = async (id) => {
 
   if (confirmacion.isConfirmed) {
     try {
-      await fetch(`${API_URL}/api_eventos.php`, {
+      // 5. Uso de apiFetch para DELETE
+      await apiFetch('api_eventos.php', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ id }),
       })
       cargarEventos()
-    } catch (error) { console.error(error) }
+    } catch (error) { 
+      console.error(error) 
+    }
   }
 }
 

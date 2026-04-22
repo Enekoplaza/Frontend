@@ -1,6 +1,7 @@
 <script setup>
+// 1. Importamos el nuevo servicio
+import { apiFetch } from '@/services/apiFetch'
 import { ref } from 'vue'
-import { API_URL } from '../config'
 
 const tokenInput = ref('')
 const cargando = ref(false)
@@ -13,14 +14,12 @@ const validarToken = async () => {
   resultado.value = null
 
   try {
-    const res = await fetch(`${API_URL}/api_validar_acceso.php`, {
+    // 2. Usamos apiFetch (mucho más corto y limpio)
+    const data = await apiFetch('api_validar_acceso.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ qr_token: tokenInput.value.trim() })
     })
     
-    const data = await res.json()
     resultado.value = data
     
     // Limpiamos el input si ha ido bien para leer el siguiente rápido

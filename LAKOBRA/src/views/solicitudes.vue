@@ -1,7 +1,8 @@
 <script setup>
+// 1. Importamos la nueva función y quitamos config
+import { apiFetch } from '@/services/apiFetch'
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { API_URL } from '../config'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -17,8 +18,8 @@ const swalConfig = {
 
 const cargarSolicitudes = async () => {
   try {
-    const res = await fetch(`${API_URL}/api_solicitudes.php`, { credentials: 'include' })
-    const data = await res.json()
+    // 2. GET súper limpio
+    const data = await apiFetch('api_solicitudes.php')
     artistas.value = data.artistas || []
     txandalaris.value = data.txandalaris || []
   } catch (error) {
@@ -29,12 +30,12 @@ const cargarSolicitudes = async () => {
 // 🛠️ Función genérica: Conecta con el PHP
 const gestionar = async (id, tipo, metodo, titulo) => {
   try {
-    const res = await fetch(`${API_URL}/api_solicitudes.php`, {
+    // 3. Petición dinámica limpia
+    const data = await apiFetch('api_solicitudes.php', {
       method: metodo,
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usuario_id: id, tipo: tipo })
     })
-    const data = await res.json()
+    
     if (data.success) {
       await Swal.fire({ ...swalConfig, icon: 'success', title: titulo, timer: 1500, showConfirmButton: false })
       cargarSolicitudes() 

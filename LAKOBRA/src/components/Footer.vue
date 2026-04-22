@@ -31,9 +31,6 @@ defineEmits(['abrirModal'])
           <li>
             <router-link to="/eventos">{{ $t('header.eventos') }}</router-link>
           </li>
-          <li>
-            <router-link to="/contacto">{{ $t('header.contacto') }}</router-link>
-          </li>
         </ul>
       </nav>
 

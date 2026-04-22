@@ -1,5 +1,6 @@
 <script setup>
-import { API_URL } from '../config'
+// 1. Importamos el nuevo servicio
+import { apiFetch } from '@/services/apiFetch';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
@@ -26,14 +27,16 @@ const enviarSolicitud = async () => {
     Swal.fire({ ...swalDarkConfig, icon: 'warning', title: t('artistas.swal_inc_titulo'), text: t('artistas.swal_inc_texto') });
     return;
   }
+  
   cargando.value = true;
+  
   try {
-    const res = await fetch(`${API_URL}/api_artistas.php`, {
+    // 2. Usamos apiFetch. Le pasamos el archivo, el método y el body.
+    const data = await apiFetch('api_artistas.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form.value)
     });
-    const data = await res.json();
+    
     if (data.success) {
       Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('artistas.swal_ok_titulo'), text: t('artistas.swal_ok_texto') });
       form.value = { nombre_artista: '', email_contacto: '', descripcion: '' };

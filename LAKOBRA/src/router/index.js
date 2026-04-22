@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Importamos la vista principal de forma directa (es la primera que se ve)
-import Principal from '@/views/Principal.vue'
+import Principal from '@/views/principal.vue'
 
 const routes = [
   { 
@@ -17,7 +17,7 @@ const routes = [
     path: '/artistas', 
     name: 'artistas', 
     // Lazy loading: solo carga el código de artistas cuando entras
-    component: () => import('@/views/Artistas.vue') 
+    component: () => import('@/views/artistas.vue') 
   },
   { 
     path: '/eventos', 
@@ -33,7 +33,7 @@ const routes = [
   { 
     path: '/solicitudes', 
     name: 'solicitudes', 
-    component: () => import('@/views/Solicitudes.vue') 
+    component: () => import('@/views/solicitudes.vue') 
   },
   {
   path: '/puerta',
@@ -43,7 +43,8 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // 🔴 AQUÍ ESTÁ EL CAMBIO: Le pasamos nuestra variable de entorno VITE_BASE_URL
+  history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes
 })
 

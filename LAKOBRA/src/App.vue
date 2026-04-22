@@ -1,5 +1,5 @@
 <script setup>
-import { API_URL } from './config'
+import { apiFetch } from '@/services/apiFetch'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import Header from './components/Header.vue'
@@ -27,11 +27,10 @@ const cargarSesionLocal = () => {
 // Verificar sesión en backend y RELLENAR DATOS
 const verificarSesion = async () => {
   try {
-    const res = await fetch(`${API_URL}/check_sesion.php`, { credentials: 'include' })
-    const data = await res.json()
+    // 2. USAMOS APIFETCH DIRECTAMENTE (Mucho más limpio, ya hace el res.json y manda credenciales)
+    const data = await apiFetch('check_sesion.php')
 
     if (data.logged_in) {
-      // MAPEAREMOS EXACTAMENTE LOS NOMBRES DE TU BBDD
       const datosUsuario = { 
         id: data.id,
         nombre: data.nombre, 
@@ -40,7 +39,7 @@ const verificarSesion = async () => {
         direccion: data.direccion,
         rol: data.rol,
         solicitudTxandalari: data.solicitud_txandalari || 0,
-        qr_token: data.qr_token // <--- ¡AQUÍ ESTÁ LA MAGIA! AHORA SÍ ENTRA.
+        qr_token: data.qr_token
       }
       usuarioActivo.value = datosUsuario
       localStorage.setItem('usuarioLakobra', JSON.stringify(datosUsuario))
@@ -56,14 +55,17 @@ const verificarSesion = async () => {
 
 // Login exitoso
 const loginExitoso = async () => {
-  await verificarSesion() // <--- Descarga el perfil COMPLETO desde PHP
+  await verificarSesion() 
   mostrarModal.value = false
+  router.push('/principal')
 }
 
 // Cerrar sesión
 const cerrarSesion = async () => {
   try {
-    await fetch(`${API_URL}/logout.php`, { credentials: 'include' })
+    // 3. OTRA VEZ APIFETCH (Solo le pasamos el nombre del archivo PHP)
+    await apiFetch('logout.php')
+    
     usuarioActivo.value = null
     localStorage.removeItem('usuarioLakobra')
     router.push('/principal')
@@ -89,14 +91,12 @@ onMounted(() => {
 })
 
 function toggleModo() {
-  // Si el navegador es antiguo y no soporta esta tecnología, hace el cambio normal
   if (!document.startViewTransition) {
     modoOscuro.value = !modoOscuro.value;
     localStorage.setItem('modoOscuro', modoOscuro.value);
     return;
   }
 
-  // Si lo soporta, hace la magia de la transición "tomando fotos" de la pantalla
   document.startViewTransition(() => {
     modoOscuro.value = !modoOscuro.value;
     localStorage.setItem('modoOscuro', modoOscuro.value);

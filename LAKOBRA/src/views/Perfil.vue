@@ -1,3 +1,242 @@
+<script setup>
+// 1. Importamos la nueva función
+import { apiFetch } from '@/services/apiFetch'
+import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import Swal from 'sweetalert2'
+
+const { t } = useI18n()
+
+const props = defineProps({
+  usuario: { type: Object, required: true },
+})
+const emit = defineEmits(['actualizar-usuario'])
+
+const cargando = ref(false)
+const modoEdicion = ref(false)
+const abrirConfirmacion = ref(false)
+const usuarioEditar = ref({})
+const misEventos = ref([])
+
+watch(
+  () => props.usuario,
+  (nuevoUsuario) => {
+    if (nuevoUsuario) usuarioEditar.value = { ...nuevoUsuario }
+  },
+  { immediate: true, deep: true }
+)
+
+const cargarMisEventos = async () => {
+  try {
+    const data = await apiFetch('api_perfil.php')
+    if (data.success) misEventos.value = data.eventos
+  } catch (error) {
+    console.error('Error eventos:', error)
+  }
+}
+
+onMounted(cargarMisEventos)
+
+const cancelarEdicion = () => {
+  usuarioEditar.value = { ...props.usuario }
+  modoEdicion.value = false
+}
+
+const guardarCambios = async () => {
+  try {
+    const data = await apiFetch('api_perfil.php', {
+      method: 'PUT',
+      body: JSON.stringify(usuarioEditar.value),
+    })
+
+    if (data.success) {
+      emit('actualizar-usuario', usuarioEditar.value)
+      modoEdicion.value = false
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'success',
+        title: t('perfil.msg_datos_ok'),
+        timer: 1500,
+        showConfirmButton: false,
+      })
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const confirmarSolicitud = async () => {
+  abrirConfirmacion.value = false
+  cargando.value = true
+  try {
+    const data = await apiFetch('api_perfil.php', { method: 'PATCH' })
+
+    if (data.success) {
+      usuarioEditar.value.solicitud_txandalari = 1
+      usuarioEditar.value.solicitudTxandalari = 1
+      emit('actualizar-usuario', usuarioEditar.value)
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'success',
+        title: '¡Solicitud enviada!',
+      })
+    } else {
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'error',
+        title: t('perfil.msg_err_enviar'),
+      })
+    }
+  } catch (error) {
+    Swal.fire({
+      background: '#1e293b',
+      color: '#f8fafc',
+      icon: 'error',
+      title: t('perfil.msg_err_conexion'),
+    })
+  } finally {
+    cargando.value = false
+  }
+}
+
+// ASIGNAR TURNO
+const asignarTurno = async (evento) => {
+  try {
+    const data = await apiFetch('api_perfil.php', {
+      method: 'POST',
+      body: JSON.stringify({
+        accion: 'asignar_turno',
+        id_evento: evento.id,
+        puesto: evento.puesto || '',
+      }),
+    })
+    
+    if (data.success) {
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 2000,
+        background: '#1e293b',
+        color: '#facc15',
+      })
+      Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+// Cancelar asistencia y turno
+const cancelarAsistencia = async (id_evento) => {
+  try {
+    const data = await apiFetch('api_asistir.php', {
+      method: 'POST',
+      body: JSON.stringify({ id_evento }),
+    })
+
+    if (data.success) {
+      cargarMisEventos()
+
+      let mensajeAlerta = 'Cancelado'
+      if (usuarioEditar.value.rol === 'admin' || usuarioEditar.value.rol === 'txandalari') {
+        mensajeAlerta = 'Asistencia y turno cancelados'
+      }
+
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'info',
+        title: mensajeAlerta,
+        timer: 1500,
+        showConfirmButton: false,
+      })
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+// Función para mostrar el QR en grande
+const ampliarQR = () => {
+  if (!usuarioEditar.value.qr_token) return
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${usuarioEditar.value.qr_token}`
+
+  Swal.fire({
+    background: '#1e293b',
+    color: '#f8fafc',
+    title: t('perfil.qr_titulo'),
+    imageUrl: qrUrl,
+    imageWidth: 300,
+    imageHeight: 300,
+    imageAlt: 'Código QR de acceso',
+    backdrop: 'rgba(0, 0, 0, 0.9)',
+    showConfirmButton: false, 
+    showCloseButton: true, 
+    customClass: {
+      closeButton: 'x-roja-modal', 
+    },
+  })
+}
+
+//////////////////////////
+// 🔴 CANCELAR CUENTA
+//////////////////////////
+
+const confirmarBaja = async () => {
+  const result = await Swal.fire({
+    background: '#1e293b',
+    color: '#f8fafc',
+    icon: 'warning',
+    title: '¿Estás seguro?',
+    text: 'Esta acción eliminará tu cuenta definitivamente',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#334155',
+    confirmButtonText: 'Sí, eliminar cuenta',
+    cancelButtonText: 'Cancelar',
+  })
+
+  if (result.isConfirmed) {
+    eliminarCuenta()
+  }
+}
+
+const eliminarCuenta = async () => {
+  try {
+    const data = await apiFetch('api_perfil.php', { method: 'DELETE' })
+
+    if (data.success) {
+      await Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'success',
+        title: 'Cuenta eliminada',
+      })
+      window.location.href = '/'
+    } else {
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'error',
+        title: 'Error al eliminar la cuenta',
+      })
+    }
+  } catch (error) {
+    Swal.fire({
+      background: '#1e293b',
+      color: '#f8fafc',
+      icon: 'error',
+      title: 'Error de conexión',
+    })
+  }
+}
+</script>
+
 <template>
   <div class="perfil">
     <div class="contenedor">
@@ -16,11 +255,8 @@
             <h3><i class="icono">📱</i> {{ $t('perfil.qr_titulo') }}</h3>
 
             <div v-if="usuarioEditar.qr_token" class="qr-contenedor">
-              <img
-                :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
-                alt="Mi Código QR"
-                class="imagen-qr"
-              />
+              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
+                alt="Mi Código QR" class="imagen-qr" />
               <p class="descripcion-qr">{{ $t('perfil.qr_desc') }}</p>
               <button @click="ampliarQR" class="btn-qr">{{ $t('perfil.btn_ampliar_qr') }}</button>
             </div>
@@ -33,12 +269,7 @@
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
               <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
-              <button
-                v-if="!modoEdicion"
-                @click="modoEdicion = true"
-                class="boton-editar-icono"
-                title="Editar"
-              >
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono" title="Editar">
                 ✏️
               </button>
             </div>
@@ -89,8 +320,7 @@
                 </button>
               </div>
 
-              <!-- 🔴 BOTÓN AÑADIDO: ELIMINAR CUENTA -->
-              <div class="zona-baja-cuenta">
+              <div class="zona-baja-cuenta" v-if="usuarioEditar.rol !== 'admin'">
                 <button class="btn-cancelar-suscripcion" @click="confirmarBaja">
                   Eliminar cuenta
                 </button>
@@ -98,21 +328,16 @@
             </div>
           </section>
 
-          <section
-            class="tarjeta estado-txandalari"
-            :class="{
-              activo:
-                usuarioEditar.rol === 'txandalari' ||
-                usuarioEditar.solicitud_txandalari == 1 ||
-                usuarioEditar.solicitudTxandalari == 1,
-            }"
-          >
+          <section class="tarjeta estado-txandalari" :class="{
+            activo:
+              usuarioEditar.rol === 'txandalari' ||
+              usuarioEditar.solicitud_txandalari == 1 ||
+              usuarioEditar.solicitudTxandalari == 1,
+          }">
             <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-            <div
-              v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
-              class="estado-activo oficial"
-            >
+            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
+              class="estado-activo oficial">
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
                 <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
@@ -120,12 +345,9 @@
               </div>
             </div>
 
-            <div
-              v-else-if="
-                usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1
-              "
-              class="estado-activo pendiente"
-            >
+            <div v-else-if="
+              usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1
+            " class="estado-activo pendiente">
               <div class="anillo-pulso azul"></div>
               <div class="texto-estado">
                 <span class="estado-principal" style="color: #38bdf8">{{
@@ -175,15 +397,12 @@
                   <h4>{{ evento.titulo }}</h4>
                   <p>🕒 {{ evento.hora_inicio.substring(0, 5) }}</p>
 
-                  <div
-                    class="selector-turno"
-                    v-if="
-                      usuarioEditar.rol === 'admin' ||
-                      usuarioEditar.rol === 'txandalari' ||
-                      usuarioEditar.solicitud_txandalari == 1 ||
-                      usuarioEditar.solicitudTxandalari == 1
-                    "
-                  >
+                  <div class="selector-turno" v-if="
+                    usuarioEditar.rol === 'admin' ||
+                    usuarioEditar.rol === 'txandalari' ||
+                    usuarioEditar.solicitud_txandalari == 1 ||
+                    usuarioEditar.solicitudTxandalari == 1
+                  ">
                     <label>{{ $t('perfil.turno_label') }}</label>
                     <select v-model="evento.puesto" @change="asignarTurno(evento)">
                       <option value="">{{ $t('perfil.turno_ninguno') }}</option>
@@ -203,8 +422,8 @@
               <p>{{ $t('perfil.no_eventos') }}</p>
             </div>
           </section>
-          <!-- 🔴 BAJA DE SOCIO -->
-          <section class="tarjeta">
+
+          <section class="tarjeta" v-if="usuarioEditar.rol !== 'admin'">
             <h3><i class="icono">⚠️</i> Baja de socio</h3>
 
             <div class="zona-baja-socio">
@@ -221,266 +440,6 @@
     </div>
   </div>
 </template>
-
-  <script setup>
-import { API_URL } from '../config'
-import { ref, watch, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import Swal from 'sweetalert2'
-
-const { t } = useI18n()
-
-const props = defineProps({
-  usuario: { type: Object, required: true },
-})
-const emit = defineEmits(['actualizar-usuario'])
-
-const cargando = ref(false)
-const modoEdicion = ref(false)
-const abrirConfirmacion = ref(false)
-const usuarioEditar = ref({})
-const misEventos = ref([])
-
-watch(
-  () => props.usuario,
-  (nuevoUsuario) => {
-    if (nuevoUsuario) usuarioEditar.value = { ...nuevoUsuario }
-  },
-  { immediate: true, deep: true }
-)
-
-const cargarMisEventos = async () => {
-  try {
-    const res = await fetch(`${API_URL}/api_perfil.php`, { credentials: 'include' })
-    const data = await res.json()
-    if (data.success) misEventos.value = data.eventos
-  } catch (error) {
-    console.error('Error eventos:', error)
-  }
-}
-
-onMounted(cargarMisEventos)
-
-const cancelarEdicion = () => {
-  usuarioEditar.value = { ...props.usuario }
-  modoEdicion.value = false
-}
-
-const guardarCambios = async () => {
-  try {
-    const res = await fetch(`${API_URL}/api_perfil.php`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(usuarioEditar.value),
-    })
-    const data = await res.json()
-
-    if (data.success) {
-      emit('actualizar-usuario', usuarioEditar.value)
-      modoEdicion.value = false
-      Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'success',
-        title: t('perfil.msg_datos_ok'),
-        timer: 1500,
-        showConfirmButton: false,
-      })
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const confirmarSolicitud = async () => {
-  abrirConfirmacion.value = false
-  cargando.value = true
-  try {
-    const res = await fetch(`${API_URL}/api_perfil.php`, {
-      method: 'PATCH',
-      credentials: 'include',
-    })
-    const data = await res.json()
-
-    if (data.success) {
-      // SOLUCIÓN: Actualizamos ambas variables para asegurar que la interfaz reaccione al instante y se mantenga
-      usuarioEditar.value.solicitud_txandalari = 1
-      usuarioEditar.value.solicitudTxandalari = 1
-      emit('actualizar-usuario', usuarioEditar.value)
-      Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'success',
-        title: '¡Solicitud enviada!',
-      })
-    } else {
-      Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'error',
-        title: t('perfil.msg_err_enviar'),
-      })
-    }
-  } catch (error) {
-    Swal.fire({
-      background: '#1e293b',
-      color: '#f8fafc',
-      icon: 'error',
-      title: t('perfil.msg_err_conexion'),
-    })
-  } finally {
-    cargando.value = false
-  }
-}
-
-// ASIGNAR TURNO
-const asignarTurno = async (evento) => {
-  try {
-    const res = await fetch(`${API_URL}/api_perfil.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        accion: 'asignar_turno',
-        id_evento: evento.id,
-        puesto: evento.puesto || '',
-      }),
-    })
-    const data = await res.json()
-    if (data.success) {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'bottom-end',
-        showConfirmButton: false,
-        timer: 2000,
-        background: '#1e293b',
-        color: '#facc15',
-      })
-      Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-// Cancelar asistencia y turno
-const cancelarAsistencia = async (id_evento) => {
-  try {
-    const res = await fetch(`${API_URL}/api_asistir.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ id_evento }),
-    })
-    const data = await res.json()
-
-    if (data.success) {
-      cargarMisEventos()
-
-      let mensajeAlerta = 'Cancelado'
-      if (usuarioEditar.value.rol === 'admin' || usuarioEditar.value.rol === 'txandalari') {
-        mensajeAlerta = 'Asistencia y turno cancelados'
-      }
-
-      Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'info',
-        title: mensajeAlerta,
-        timer: 1500,
-        showConfirmButton: false,
-      })
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-// Función para mostrar el QR en grande
-const ampliarQR = () => {
-  if (!usuarioEditar.value.qr_token) return
-
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${usuarioEditar.value.qr_token}`
-
-  Swal.fire({
-    background: '#1e293b',
-    color: '#f8fafc',
-    title: t('perfil.qr_titulo'),
-    imageUrl: qrUrl,
-    imageWidth: 300,
-    imageHeight: 300,
-    imageAlt: 'Código QR de acceso',
-    backdrop: 'rgba(0, 0, 0, 0.9)',
-
-    // --- MAGIA PARA LA 'X' ---
-    showConfirmButton: false, // Quitamos el botón de abajo
-    showCloseButton: true, // Ponemos la 'X' arriba a la derecha
-    customClass: {
-      closeButton: 'x-roja-modal', // Le damos una clase para pintarla de rojo
-    },
-  })
-}
-//////////////////////////
-// 🔴 CANCELAR CUENTA
-//////////////////////////
-
-const confirmarBaja = async () => {
-  const result = await Swal.fire({
-    background: '#1e293b',
-    color: '#f8fafc',
-    icon: 'warning',
-    title: '¿Estás seguro?',
-    text: 'Esta acción eliminará tu cuenta definitivamente',
-    showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#334155',
-    confirmButtonText: 'Sí, eliminar cuenta',
-    cancelButtonText: 'Cancelar',
-  })
-
-  if (result.isConfirmed) {
-    eliminarCuenta()
-  }
-}
-
-const eliminarCuenta = async () => {
-  try {
-    const res = await fetch(`${API_URL}/api_perfil.php`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-
-    const data = await res.json()
-
-    if (data.success) {
-      await Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'success',
-        title: 'Cuenta eliminada',
-      })
-
-      // Redirección (puedes cambiarla si usas router)
-      window.location.href = '/'
-    } else {
-      Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        icon: 'error',
-        title: 'Error al eliminar la cuenta',
-      })
-    }
-  } catch (error) {
-    Swal.fire({
-      background: '#1e293b',
-      color: '#f8fafc',
-      icon: 'error',
-      title: 'Error de conexión',
-    })
-  }
-}
-</script>
 
 <style scoped>
 /* Mantenemos tu estilo y añadimos el CSS para el selector de turnos */
@@ -681,6 +640,7 @@ const eliminarCuenta = async () => {
   font-size: 0.85rem;
   color: #94a3b8;
 }
+
 .btn-cancelar-suscripcion {
   width: 100%;
   padding: 12px;
@@ -1030,6 +990,7 @@ const eliminarCuenta = async () => {
 :deep(.x-roja-modal:focus) {
   box-shadow: none !important;
 }
+
 /* =========================================
    📱 TABLET (mantiene diseño original)
    ========================================= */
