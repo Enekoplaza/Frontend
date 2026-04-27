@@ -1,5 +1,5 @@
 <script setup>
-// 1. Importamos la nueva función
+// 1. Importamos la nueva función-----
 import { apiFetch } from '@/services/apiFetch'
 import { ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -26,10 +26,25 @@ watch(
   { immediate: true, deep: true }
 )
 
+// --- LÓGICA DE FECHAS (NUEVO) ----
+const obtenerFechaHoy = () => {
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, '0');
+  const day = String(hoy.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const cargarMisEventos = async () => {
   try {
     const data = await apiFetch('api_perfil.php')
-    if (data.success) misEventos.value = data.eventos
+    if (data.success) {
+      const fechaHoy = obtenerFechaHoy();
+      
+      // FILTRO: Solo guardamos los eventos cuya fecha sea MAYOR O IGUAL a hoy.
+      // Los eventos de ayer hacia atrás se ignoran (ya no salen en el perfil).
+      misEventos.value = data.eventos.filter(evento => evento.fecha_evento >= fechaHoy);
+    }
   } catch (error) {
     console.error('Error eventos:', error)
   }
