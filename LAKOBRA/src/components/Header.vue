@@ -414,7 +414,7 @@ a:hover {
   }
 }
 /* =========================================
-   🍔 HAMBURGUESA
+   🍔 HAMBURGUESA (SOLO POSICIÓN)
    ========================================= */
 
 .hamburguesa {
@@ -427,27 +427,33 @@ a:hover {
 }
 
 /* =========================================
-   📱 MENÚ MÓVIL REAL
+   📱 MÓVIL (SIN CAMBIAR FORMATO)
    ========================================= */
 
 @media (max-width: 768px) {
+
   .header-container {
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
   }
 
+  /* 🍔 FORZAR A LA DERECHA */
   .hamburguesa {
     display: block;
+    margin-left: auto;
   }
 
+  /* 📦 MENÚ DESDE LA DERECHA */
   .nav {
     position: absolute;
-    top: 70px;
+    top: 100%;
     right: 0;
+
     width: 100%;
     background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
 
-    transform: translateY(-200%);
+    transform: translateX(100%);
     opacity: 0;
     pointer-events: none;
 
@@ -455,11 +461,12 @@ a:hover {
   }
 
   .nav.abierto {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
     pointer-events: auto;
   }
 
+  /* ❗ NO CAMBIO TU LISTA NI ORDEN */
   .lista {
     flex-direction: column;
     padding: 1rem 0;
@@ -467,13 +474,22 @@ a:hover {
 
   .lista li {
     width: 100%;
-    text-align: center;
+    text-align: right;
   }
 
   .lista a {
     display: block;
     width: 100%;
     padding: 10px;
+    text-align: right;
+  }
+
+  .user-welcome {
+    text-align: right;
+  }
+
+  .divider {
+    display: none;
   }
 }
 </style>
