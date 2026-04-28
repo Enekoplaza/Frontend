@@ -1,6 +1,17 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
+import { ref } from 'vue'
+
+const menuAbierto = ref(false)
+
+const toggleMenu = () => {
+  menuAbierto.value = !menuAbierto.value
+}
+
+const cerrarMenu = () => {
+  menuAbierto.value = false
+}
 
 const props = defineProps({
   usuario: Object,
@@ -30,11 +41,13 @@ const esAdmin = computed(() => {
           <h2 class="logo">Lakobra</h2>
         </router-link>
       </div>
-
-      <nav class="nav">
-        <ul class="lista">
+      <button class="hamburguesa" @click="toggleMenu">
+  ☰
+</button>
+<nav class="nav" :class="{ abierto: menuAbierto }">
+  <ul class="lista">
           <li>
-            <RouterLink to="/principal">
+            <RouterLink to="/principal" @click="cerrarMenu">
               {{ $t('header.inicio') }}
             </RouterLink>
           </li>
@@ -398,6 +411,69 @@ a:hover {
   a {
     width: 100%;
     text-align: center;
+  }
+}
+/* =========================================
+   🍔 HAMBURGUESA
+   ========================================= */
+
+.hamburguesa {
+  display: none;
+  font-size: 26px;
+  background: none;
+  border: none;
+  color: var(--header-text);
+  cursor: pointer;
+}
+
+/* =========================================
+   📱 MENÚ MÓVIL REAL
+   ========================================= */
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .hamburguesa {
+    display: block;
+  }
+
+  .nav {
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 100%;
+    background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
+
+    transform: translateY(-200%);
+    opacity: 0;
+    pointer-events: none;
+
+    transition: all 0.3s ease;
+  }
+
+  .nav.abierto {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lista {
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+
+  .lista li {
+    width: 100%;
+    text-align: center;
+  }
+
+  .lista a {
+    display: block;
+    width: 100%;
+    padding: 10px;
   }
 }
 </style>

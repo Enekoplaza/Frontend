@@ -19,83 +19,117 @@
 .container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1.2rem;
 }
 
-/* TÍTULO */
+/* =========================================
+   🔥 TÍTULO (más branding)
+   ========================================= */
+
 .titulo {
   text-align: center;
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 2rem;
+  font-size: 3.2rem;
+  font-weight: 900;
+  margin-bottom: 2.2rem;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
   color: var(--titulo);
-  line-height: 1.1;
+
+  /* efecto más moderno */
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
 }
 
-/* TEXTO */
+/* =========================================
+   📖 DESCRIPCIÓN
+   ========================================= */
+
 .descripcion {
   text-align: justify;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem; /* separación uniforme */
 }
 
 .descripcion p {
-  margin-bottom: 1.5rem;
-  line-height: 1.9;
-  font-size: 1.2rem;
+  margin: 0; /* quitamos márgenes raros */
+  line-height: 1.8;
+  font-size: 1.15rem;
   color: var(--texto);
 }
 
-/* PRIMER PÁRRAFO DESTACADO */
+/* QUITAMOS cualquier diferencia */
 .descripcion p:first-child {
-  font-size: 1.2rem;
+  all: unset;
+  line-height: 1.8;
+  font-size: 1.15rem;
+  color: var(--texto);
+}
+
+/* Mantener coherencia en strong */
+.descripcion strong {
+  font-weight: 700;
+  color: var(--texto);
 }
 
 /* =========================================
    📱 TABLET
    ========================================= */
-@media (max-width: 1024px) {
 
+@media (max-width: 1024px) {
   .titulo {
     font-size: 2.6rem;
   }
 
   .descripcion p {
     font-size: 1.1rem;
-    line-height: 1.8;
   }
 }
 
 /* =========================================
    📱 MÓVIL
    ========================================= */
-@media (max-width: 768px) {
 
+@media (max-width: 768px) {
   .container {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem;
   }
 
   .titulo {
     font-size: 2.2rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .descripcion {
+    gap: 1rem;
   }
 
   .descripcion p {
     font-size: 1.05rem;
     line-height: 1.75;
   }
+
+  .descripcion p:first-child {
+    font-size: 1.1rem;
+  }
 }
 
 /* =========================================
    📱 MÓVIL PEQUEÑO
    ========================================= */
-@media (max-width: 480px) {
 
+@media (max-width: 480px) {
   .titulo {
     font-size: 1.9rem;
   }
 
   .descripcion p {
     font-size: 1rem;
-    line-height: 1.7;
   }
 }
 </style>

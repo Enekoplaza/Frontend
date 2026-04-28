@@ -1,5 +1,5 @@
 <script setup>
-// 1. Importamos el nuevo servicio
+// 1. Importaciones
 import { apiFetch } from '@/services/apiFetch'
 import { ref, onMounted, computed } from 'vue'
 import Swal from 'sweetalert2'
@@ -7,13 +7,23 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-// --- ESTADO Y USUARIO ---
+// --- USUARIO (seguro) ---
 const usuarioLocal = localStorage.getItem('usuarioLakobra')
-const usuarioActivo = ref(usuarioLocal ? JSON.parse(usuarioLocal) : null)
 
+let usuarioParseado = null
+try {
+  usuarioParseado = JSON.parse(usuarioLocal)
+} catch (e) {
+  usuarioParseado = null
+}
+
+const usuarioActivo = ref(usuarioParseado)
+
+// --- ROLES ---
 const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin')
 const esTxandalari = computed(() => usuarioActivo.value?.rol === 'txandalari')
 
+// --- ESTADO ---
 const eventos = ref([])
 const mostrarFormulario = ref(false)
 const modoEdicion = ref(false)
@@ -27,36 +37,58 @@ const formEvento = ref({
   estado: 'pendiente',
 })
 
-// --- LÓGICA DE FECHAS ---
+// --- VISIBILIDAD EVENTOS (CLAVE) ---
+const eventosVisibles = computed(() => {
+  const user = usuarioActivo.value
+
+  // Admin o txandalari → todo
+  if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
+    return eventos.value
+  }
+
+  // resto (logueado o no) → solo confirmados
+  return eventos.value.filter((e) => e.estado === 'confirmado')
+})
+const puedeAyudar = (evento) => {
+  return (
+    esTxandalari.value &&
+    (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
+    !esEventoFinalizado(evento.fecha_evento)
+  )
+}
+
+// --- FECHAS ---
 const obtenerFechaHoy = () => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-const fechaHoy = obtenerFechaHoy();
+  const hoy = new Date()
+  const year = hoy.getFullYear()
+  const month = String(hoy.getMonth() + 1).padStart(2, '0')
+  const day = String(hoy.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const fechaHoy = obtenerFechaHoy()
 
 const esEventoFinalizado = (fechaEvento) => {
-  return fechaEvento < fechaHoy;
-};
+  return fechaEvento < fechaHoy
+}
 
+// --- SWEETALERT ---
 const swalDarkConfig = {
   background: '#1e293b',
   color: '#f8fafc',
   confirmButtonColor: '#38bdf8',
-  cancelButtonColor: '#475569'
+  cancelButtonColor: '#475569',
 }
 
-// --- FUNCIONES ---
+// --- UTIL ---
 const formatearHora = (horaString) => {
   if (!horaString) return ''
   return horaString.substring(0, 5)
 }
 
+// --- CARGAR EVENTOS ---
 const cargarEventos = async () => {
   try {
-    // 2. Uso de apiFetch para GET (súper corto)
     const data = await apiFetch('api_eventos.php')
     if (data.success) {
       eventos.value = data.eventos
@@ -66,18 +98,18 @@ const cargarEventos = async () => {
   }
 }
 
-// POPUP DE AYUDA (TXANDALARIS)
+// --- POPUP AYUDA ---
 const abrirPopupAyuda = async (evento) => {
   const { value: tarea } = await Swal.fire({
     ...swalDarkConfig,
     title: t('eventos.titulo_ayuda'),
     input: 'select',
     inputOptions: {
-      'sin_puesto': t('eventos.opt_sin_puesto'),
-      'puerta': t('eventos.opt_puerta'),
-      'barra': t('eventos.opt_barra'),
-      'limpieza': t('eventos.opt_limpieza'),
-      'otros': t('eventos.opt_otros'),
+      sin_puesto: t('eventos.opt_sin_puesto'),
+      puerta: t('eventos.opt_puerta'),
+      barra: t('eventos.opt_barra'),
+      limpieza: t('eventos.opt_limpieza'),
+      otros: t('eventos.opt_otros'),
     },
     inputPlaceholder: t('eventos.ph_ayuda'),
     showCancelButton: true,
@@ -88,12 +120,11 @@ const abrirPopupAyuda = async (evento) => {
       input.style.backgroundColor = '#0f172a'
       input.style.color = '#ffffff'
       input.style.border = '1px solid #334155'
-    }
+    },
   })
 
   if (tarea) {
     try {
-      // 3. Uso de apiFetch para POST
       const data = await apiFetch('api_asistir.php', {
         method: 'POST',
         body: JSON.stringify({
@@ -103,10 +134,22 @@ const abrirPopupAyuda = async (evento) => {
       })
 
       if (data.success) {
-        Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_guardado'), timer: 1500, showConfirmButton: false })
+        Swal.fire({
+          ...swalDarkConfig,
+          icon: 'success',
+          title: t('eventos.swal_guardado'),
+          timer: 1500,
+          showConfirmButton: false,
+        })
+
         cargarEventos()
       } else {
-        Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: data.message })
+        Swal.fire({
+          ...swalDarkConfig,
+          icon: 'error',
+          title: 'Error',
+          text: data.message,
+        })
       }
     } catch (error) {
       console.error('Error al asignar tarea', error)
@@ -127,27 +170,45 @@ const cancelarFormulario = () => {
   mostrarFormulario.value = false
   modoEdicion.value = false
   idEditando.value = null
-  formEvento.value = { titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, estado: 'pendiente' }
+  formEvento.value = {
+    titulo: '',
+    fecha_evento: '',
+    hora_inicio: '',
+    aforo_max: 120,
+    estado: 'pendiente',
+  }
 }
 
 const guardarEvento = async () => {
   const method = modoEdicion.value ? 'PUT' : 'POST'
-  const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
-  
+  const payload = modoEdicion.value
+    ? { ...formEvento.value, id: idEditando.value }
+    : formEvento.value
+
   try {
-    // 4. Uso de apiFetch para guardar (PUT o POST dinámico)
     const data = await apiFetch('api_eventos.php', {
-      method: method,
+      method,
       body: JSON.stringify(payload),
     })
-    
+
     if (data.success) {
-      Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_guardado'), timer: 1500, showConfirmButton: false })
+      Swal.fire({
+        ...swalDarkConfig,
+        icon: 'success',
+        title: t('eventos.swal_guardado'),
+        timer: 1500,
+        showConfirmButton: false,
+      })
+
       cancelarFormulario()
       cargarEventos()
     }
   } catch (error) {
-    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('eventos.swal_err_con') })
+    Swal.fire({
+      ...swalDarkConfig,
+      icon: 'error',
+      title: t('eventos.swal_err_con'),
+    })
   }
 }
 
@@ -159,123 +220,152 @@ const borrarEvento = async (id) => {
     text: t('eventos.swal_warn_msg'),
     showCancelButton: true,
     confirmButtonText: t('eventos.swal_btn_borrar'),
-    cancelButtonText: t('eventos.btn_cancelar')
+    cancelButtonText: t('eventos.btn_cancelar'),
   })
 
   if (confirmacion.isConfirmed) {
     try {
-      // 5. Uso de apiFetch para DELETE
       await apiFetch('api_eventos.php', {
         method: 'DELETE',
         body: JSON.stringify({ id }),
       })
+
       cargarEventos()
-    } catch (error) { 
-      console.error(error) 
+    } catch (error) {
+      console.error(error)
     }
   }
 }
 
+// --- INIT ---
 onMounted(cargarEventos)
 </script>
-
 <template>
   <div class="eventos-container">
+    <!-- HEADER SIEMPRE VISIBLE -->
+    <div class="header-eventos">
+      <h1>{{ $t('eventos.titulo') }}</h1>
 
-    <template v-if="usuarioActivo">
-      <div class="header-eventos">
-        <h1>{{ $t('eventos.titulo') }}</h1>
-        <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
-          {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
-        </button>
-      </div>
-
-      <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
-        <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
-        <form @submit.prevent="guardarEvento" class="form-grid">
-          <input v-model="formEvento.titulo" type="text" :placeholder="$t('eventos.ph_titulo')" required />
-          <input v-model="formEvento.fecha_evento" type="date" :min="fechaHoy" required />
-          <input v-model="formEvento.hora_inicio" type="time" required />
-          <input v-model="formEvento.aforo_max" type="number" :placeholder="$t('eventos.ph_aforo')" required />
-          <select v-model="formEvento.estado">
-            <option value="pendiente">{{ $t('eventos.estado_pendiente') }}</option>
-            <option value="confirmado">{{ $t('eventos.estado_confirmado') }}</option>
-            <option value="cancelado">{{ $t('eventos.estado_cancelado') }}</option>
-          </select>
-          <button type="submit" class="btn-submit">
-            {{ modoEdicion ? $t('eventos.btn_actualizar') : $t('eventos.btn_guardar') }}
-          </button>
-        </form>
-      </div>
-
-      <div class="grid-eventos">
-        <p v-if="eventos.length === 0" class="no-eventos">{{ $t('eventos.vacio') }}</p>
-
-        <div v-for="evento in eventos" :key="evento.id" class="tarjeta-evento">
-          <div v-if="esAdmin" class="admin-actions">
-            <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
-            <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
-          </div>
-
-          <div class="evento-info">
-            <h3>{{ evento.titulo }}</h3>
-            <p class="fecha">📅 {{ evento.fecha_evento }} 🕒 {{ formatearHora(evento.hora_inicio) }}</p>
-            <p class="aforo">👥 {{ $t('eventos.plazas') }} <strong>{{ evento.plazas_libres }}</strong> / {{
-              evento.aforo_max }}</p>
-            <span v-if="esEventoFinalizado(evento.fecha_evento)" class="badge finalizado">
-              {{ $t('eventos.estado_finalizado') }}
-            </span>
-            <span v-else :class="['badge', evento.estado]">
-              {{ $t('eventos.estado_' + evento.estado) }}
-            </span>
-          </div>
-
-          <div class="footer-tarjeta">
-            <template v-if="esEventoFinalizado(evento.fecha_evento)">
-              <button class="btn-lleno" disabled style="opacity: 0.6; cursor: not-allowed;">
-                {{ $t('eventos.evento_finalizado') }}
-              </button>
-            </template>
-
-            <template v-else>
-              <template v-if="evento.estado === 'pendiente'">
-                <button v-if="esTxandalari" 
-                  class="btn-ayuda" 
-                  :class="{ 'apuntado': evento.estoy_apuntado }"
-                  :disabled="evento.estoy_apuntado"
-                  @click="abrirPopupAyuda(evento)">
-                  <template v-if="evento.estoy_apuntado">
-                    {{ $t('eventos.btn_apuntado') }}
-                  </template>
-                  <template v-else>
-                    <div class="anillo-pulso-verde"></div> {{ $t('eventos.btn_ayuda') }}
-                  </template>
-                </button>
-                
-                <button v-else class="btn-proximamente" disabled>
-                  <div class="anillo-pulso-pequeno"></div> {{ $t('eventos.btn_proximamente') }}
-                </button>
-              </template>
-
-              <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>🚫 {{ $t('eventos.estado_cancelado') }}</button>
-
-              <div v-else class="msg-abierto">{{ $t('eventos.evento_abierto') }}</div>
-            </template>
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <div v-else class="aviso-privado">
-      <div class="icon-lock">🔒</div>
-      <h2>{{ $t('eventos.privado_tit') }}</h2>
-      <p>{{ $t('eventos.privado_msg') }}</p>
-      <router-link to="/login" class="btn-login-link">{{ $t('eventos.privado_btn') }}</router-link>
+      <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
+        {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
+      </button>
     </div>
 
+    <!-- PANEL ADMIN -->
+    <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
+      <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
+
+      <form @submit.prevent="guardarEvento" class="form-grid">
+        <input
+          v-model="formEvento.titulo"
+          type="text"
+          :placeholder="$t('eventos.ph_titulo')"
+          required
+        />
+        <input v-model="formEvento.fecha_evento" type="date" :min="fechaHoy" required />
+        <input v-model="formEvento.hora_inicio" type="time" required />
+        <input
+          v-model="formEvento.aforo_max"
+          type="number"
+          :placeholder="$t('eventos.ph_aforo')"
+          required
+        />
+
+        <select v-model="formEvento.estado">
+          <option value="pendiente">{{ $t('eventos.estado_pendiente') }}</option>
+          <option value="confirmado">{{ $t('eventos.estado_confirmado') }}</option>
+          <option value="cancelado">{{ $t('eventos.estado_cancelado') }}</option>
+        </select>
+
+        <button type="submit" class="btn-submit">
+          {{ modoEdicion ? $t('eventos.btn_actualizar') : $t('eventos.btn_guardar') }}
+        </button>
+      </form>
+    </div>
+
+    <!-- GRID EVENTOS (FILTRADOS AUTOMÁTICAMENTE) -->
+    <div class="grid-eventos">
+      <p v-if="eventosVisibles.length === 0" class="no-eventos">
+        {{ $t('eventos.vacio') }}
+      </p>
+
+      <div v-for="evento in eventosVisibles" :key="evento.id" class="tarjeta-evento">
+        <!-- ACCIONES ADMIN -->
+        <div v-if="esAdmin" class="admin-actions">
+          <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
+          <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
+        </div>
+
+        <!-- INFO -->
+        <div class="evento-info">
+          <h3>{{ evento.titulo }}</h3>
+
+          <p class="fecha">
+            📅 {{ evento.fecha_evento }} 🕒 {{ formatearHora(evento.hora_inicio) }}
+          </p>
+
+          <p class="aforo">
+            👥 {{ $t('eventos.plazas') }} <strong>{{ evento.plazas_libres }}</strong> /
+            {{ evento.aforo_max }}
+          </p>
+
+          <span v-if="esEventoFinalizado(evento.fecha_evento)" class="badge finalizado">
+            {{ $t('eventos.estado_finalizado') }}
+          </span>
+
+          <span v-else :class="['badge', evento.estado]">
+            {{ $t('eventos.estado_' + evento.estado) }}
+          </span>
+        </div>
+
+        <!-- FOOTER BOTONES -->
+        <div class="footer-tarjeta">
+          <template v-if="esEventoFinalizado(evento.fecha_evento)">
+            <button class="btn-lleno" disabled>
+              {{ $t('eventos.evento_finalizado') }}
+            </button>
+          </template>
+
+          <template v-else>
+            <!-- 🟢 TXANDALARI: AYUDA (AHORA TAMBIÉN EN CONFIRMADOS) -->
+            <button
+              v-if="puedeAyudar(evento)"
+              class="btn-ayuda"
+              :class="{ apuntado: evento.estoy_apuntado }"
+              :disabled="evento.estoy_apuntado"
+              @click="abrirPopupAyuda(evento)"
+            >
+              <template v-if="evento.estoy_apuntado">
+                {{ $t('eventos.btn_apuntado') }}
+              </template>
+
+              <template v-else>
+                <div class="anillo-pulso-verde"></div>
+                {{ $t('eventos.btn_ayuda') }}
+              </template>
+            </button>
+
+            <!-- 🔒 NO TXANDALARI -->
+            <button v-else-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
+              <div class="anillo-pulso-pequeno"></div>
+              {{ $t('eventos.btn_proximamente') }}
+            </button>
+
+            <!-- 🚫 CANCELADO -->
+            <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>
+              🚫 {{ $t('eventos.estado_cancelado') }}
+            </button>
+
+            <!-- ℹ️ CONFIRMADO (sin txandalari) -->
+            <div v-else class="msg-abierto">
+              {{ $t('eventos.evento_abierto') }}
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
-
 <style scoped>
 .eventos-container {
   max-width: 1000px;
@@ -399,10 +489,23 @@ onMounted(cargarEventos)
   text-transform: uppercase;
 }
 
-.badge.confirmado { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-.badge.pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-.badge.cancelado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-.badge.finalizado { background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid #475569; }
+.badge.confirmado {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+.badge.pendiente {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+.badge.cancelado {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+.badge.finalizado {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border: 1px solid #475569;
+}
 
 /* BOTONES */
 .btn-ayuda {
@@ -505,15 +608,33 @@ onMounted(cargarEventos)
 
 /* ANIMACIONES */
 @keyframes pulso-naranja {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
 }
 
 @keyframes pulso-verde-anim {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* SWEETALERT FIX */
@@ -526,7 +647,6 @@ onMounted(cargarEventos)
    📱 TABLET
    ========================================= */
 @media (max-width: 1024px) {
-
   .eventos-container {
     padding: 1.5rem;
   }
@@ -545,7 +665,6 @@ onMounted(cargarEventos)
    📱 MÓVIL
    ========================================= */
 @media (max-width: 768px) {
-
   .eventos-container {
     padding: 1rem;
   }
@@ -595,7 +714,6 @@ onMounted(cargarEventos)
    📱 MÓVIL PEQUEÑO
    ========================================= */
 @media (max-width: 480px) {
-
   .eventos-container {
     padding: 0.8rem;
   }
