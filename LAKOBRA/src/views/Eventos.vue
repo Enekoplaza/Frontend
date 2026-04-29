@@ -41,13 +41,18 @@ const formEvento = ref({
 const eventosVisibles = computed(() => {
   const user = usuarioActivo.value
 
-  // Admin o txandalari → todo
+  // ❗ Filtramos SIEMPRE los finalizados
+  const eventosActivos = eventos.value.filter(
+    (e) => !esEventoFinalizado(e.fecha_evento)
+  )
+
+  // Admin o txandalari → ven todo lo NO finalizado
   if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
-    return eventos.value
+    return eventosActivos
   }
 
-  // resto (logueado o no) → solo confirmados
-  return eventos.value.filter((e) => e.estado === 'confirmado')
+  // resto → solo confirmados y NO finalizados
+  return eventosActivos.filter((e) => e.estado === 'confirmado')
 })
 const puedeAyudar = (evento) => {
   return (
