@@ -128,7 +128,9 @@
     "privado_msg": "Debes estar registrado para ver los eventos.",
     "privado_btn": "Ir a Iniciar Sesión",
     "estado_finalizado": "Finalizado",
-    "evento_finalizado": "🏁 Evento Finalizado"
+    "evento_finalizado": "🏁 Evento Finalizado",
+    "btn_ver_calendario": "📅 Ver Calendario"
+    
   },
   "perfil": {
     "bienvenido": "Bienvenido a LAKOBRA",
@@ -165,7 +167,13 @@
     "msg_turno_ok": "Turno asignado",
     "qr_titulo": "Mi Código de Acceso",
     "qr_desc": "Muestra este QR en la puerta para acceder a los eventos confirmados.",
-    "btn_ampliar_qr": "Ampliar QR"
+    "btn_ampliar_qr": "Ampliar QR",
+    "btn_ver_calendario": "📅 Ver Calendario",
+    "cal_confirmado": "Confirmado",
+    "cal_pendiente": "Pendiente",
+    "cal_finalizado": "Finalizado",
+    "cal_mi_turno": "Mi Turno (Trabajo)",
+    "cal_dentro": "Dentro"
     
   },
   "solicitudes": {

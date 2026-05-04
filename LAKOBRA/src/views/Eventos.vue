@@ -4,6 +4,7 @@ import { apiFetch } from '@/services/apiFetch'
 import { ref, onMounted, computed } from 'vue'
 import Swal from 'sweetalert2'
 import { useI18n } from 'vue-i18n'
+import CalendarioModal from '@/components/CalendarioModal.vue'
 
 const { t } = useI18n()
 
@@ -20,12 +21,14 @@ try {
 const usuarioActivo = ref(usuarioParseado)
 
 // --- ROLES ---
+// Si no hay usuario, esto devuelve false automáticamente y no da error
 const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin')
 const esTxandalari = computed(() => usuarioActivo.value?.rol === 'txandalari')
 
 // --- ESTADO ---
 const eventos = ref([])
 const mostrarFormulario = ref(false)
+const mostrarCalendario = ref(false)
 const modoEdicion = ref(false)
 const idEditando = ref(null)
 
@@ -36,31 +39,6 @@ const formEvento = ref({
   aforo_max: 150,
   estado: 'pendiente',
 })
-
-// --- VISIBILIDAD EVENTOS (CLAVE) ---
-const eventosVisibles = computed(() => {
-  const user = usuarioActivo.value
-
-  // ❗ Filtramos SIEMPRE los finalizados
-  const eventosActivos = eventos.value.filter(
-    (e) => !esEventoFinalizado(e.fecha_evento)
-  )
-
-  // Admin o txandalari → ven todo lo NO finalizado
-  if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
-    return eventosActivos
-  }
-
-  // resto → solo confirmados y NO finalizados
-  return eventosActivos.filter((e) => e.estado === 'confirmado')
-})
-const puedeAyudar = (evento) => {
-  return (
-    esTxandalari.value &&
-    (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
-    !esEventoFinalizado(evento.fecha_evento)
-  )
-}
 
 // --- FECHAS ---
 const obtenerFechaHoy = () => {
@@ -75,6 +53,27 @@ const fechaHoy = obtenerFechaHoy()
 
 const esEventoFinalizado = (fechaEvento) => {
   return fechaEvento < fechaHoy
+}
+
+// --- VISIBILIDAD EVENTOS (NUEVA REGLA DEL PROFESOR) ---
+const eventosVisibles = computed(() => {
+  const user = usuarioActivo.value
+
+  // Admin o txandalari → ven TODO (Pendientes, Confirmados y Cancelados)
+  if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
+    return eventos.value
+  }
+
+  // Resto (Socios normales Y Visitantes sin registrar) → SOLO ven los confirmados
+  return eventos.value.filter((e) => e.estado === 'confirmado')
+})
+
+const puedeAyudar = (evento) => {
+  return (
+    (esTxandalari.value || esAdmin.value) && // <-- AHORA SÍ: Txandalaris O Admins
+    (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
+    !esEventoFinalizado(evento.fecha_evento) 
+  )
 }
 
 // --- SWEETALERT ---
@@ -146,15 +145,9 @@ const abrirPopupAyuda = async (evento) => {
           timer: 1500,
           showConfirmButton: false,
         })
-
         cargarEventos()
       } else {
-        Swal.fire({
-          ...swalDarkConfig,
-          icon: 'error',
-          title: 'Error',
-          text: data.message,
-        })
+        Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: data.message })
       }
     } catch (error) {
       console.error('Error al asignar tarea', error)
@@ -186,9 +179,7 @@ const cancelarFormulario = () => {
 
 const guardarEvento = async () => {
   const method = modoEdicion.value ? 'PUT' : 'POST'
-  const payload = modoEdicion.value
-    ? { ...formEvento.value, id: idEditando.value }
-    : formEvento.value
+  const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
 
   try {
     const data = await apiFetch('api_eventos.php', {
@@ -204,16 +195,13 @@ const guardarEvento = async () => {
         timer: 1500,
         showConfirmButton: false,
       })
-
       cancelarFormulario()
       cargarEventos()
+    } else {
+      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: 'Aviso', text: data.message })
     }
   } catch (error) {
-    Swal.fire({
-      ...swalDarkConfig,
-      icon: 'error',
-      title: t('eventos.swal_err_con'),
-    })
+    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('eventos.swal_err_con') })
   }
 }
 
@@ -230,11 +218,7 @@ const borrarEvento = async (id) => {
 
   if (confirmacion.isConfirmed) {
     try {
-      await apiFetch('api_eventos.php', {
-        method: 'DELETE',
-        body: JSON.stringify({ id }),
-      })
-
+      await apiFetch('api_eventos.php', { method: 'DELETE', body: JSON.stringify({ id }) })
       cargarEventos()
     } catch (error) {
       console.error(error)
@@ -242,15 +226,21 @@ const borrarEvento = async (id) => {
   }
 }
 
-// --- INIT ---
 onMounted(cargarEventos)
 </script>
+
 <template>
   <div class="eventos-container">
-    <!-- HEADER SIEMPRE VISIBLE -->
+    <!-- HEADER SIEMPRE VISIBLE PARA TODO EL MUNDO -->
     <div class="header-eventos">
       <h1>{{ $t('eventos.titulo') }}</h1>
+      
+      <!-- BOTÓN CALENDARIO: -->
+      <button v-if="usuarioActivo" class="btn-admin" style="background-color: #8b5cf6; margin-right: auto; margin-left: 15px;" @click="mostrarCalendario = true">
+        {{ $t('eventos.btn_ver_calendario') }}
+      </button>
 
+      <!-- BOTÓN ADMIN (SOLO UNO) -->
       <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
         {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
       </button>
@@ -288,7 +278,7 @@ onMounted(cargarEventos)
       </form>
     </div>
 
-    <!-- GRID EVENTOS (FILTRADOS AUTOMÁTICAMENTE) -->
+    <!-- GRID EVENTOS (FILTRADOS AUTOMÁTICAMENTE PARA PÚBLICO O PRIVADO) -->
     <div class="grid-eventos">
       <p v-if="eventosVisibles.length === 0" class="no-eventos">
         {{ $t('eventos.vacio') }}
@@ -361,7 +351,7 @@ onMounted(cargarEventos)
               🚫 {{ $t('eventos.estado_cancelado') }}
             </button>
 
-            <!-- ℹ️ CONFIRMADO (sin txandalari) -->
+            <!-- ℹ️ CONFIRMADO (Para público general y socios normales) -->
             <div v-else class="msg-abierto">
               {{ $t('eventos.evento_abierto') }}
             </div>
@@ -369,9 +359,19 @@ onMounted(cargarEventos)
         </div>
       </div>
     </div>
+    
+    <!-- MODAL CALENDARIO -->
+    <CalendarioModal 
+      :mostrar="mostrarCalendario" 
+      :eventos="eventosVisibles" 
+      :usuario="usuarioActivo"
+      @cerrar="mostrarCalendario = false"
+    />
   </div>
 </template>
+
 <style scoped>
+
 .eventos-container {
   max-width: 1000px;
   margin: 0 auto;

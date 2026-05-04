@@ -1,9 +1,9 @@
 <script setup>
-// 1. Importamos la nueva función-----
 import { apiFetch } from '@/services/apiFetch'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue' // <-- Añadido computed
 import { useI18n } from 'vue-i18n'
 import Swal from 'sweetalert2'
+import CalendarioModal from '@/components/CalendarioModal.vue'
 
 const { t } = useI18n()
 
@@ -15,8 +15,12 @@ const emit = defineEmits(['actualizar-usuario'])
 const cargando = ref(false)
 const modoEdicion = ref(false)
 const abrirConfirmacion = ref(false)
+const mostrarCalendario = ref(false)
 const usuarioEditar = ref({})
-const misEventos = ref([])
+
+// Tenemos dos listas separadas:
+const misEventos = ref([]) // Para la lista de abajo (solo tus turnos futuros)
+const todosLosEventos = ref([]) // Para el calendario (toda la cartelera)
 
 watch(
   () => props.usuario,
@@ -26,7 +30,7 @@ watch(
   { immediate: true, deep: true }
 )
 
-// --- LÓGICA DE FECHAS (NUEVO) ----
+// --- LÓGICA DE FECHAS ----
 const obtenerFechaHoy = () => {
   const hoy = new Date();
   const year = hoy.getFullYear();
@@ -35,22 +39,48 @@ const obtenerFechaHoy = () => {
   return `${year}-${month}-${day}`;
 };
 
+// 1. Cargar SOLO mis eventos futuros (para la tarjeta de abajo)
 const cargarMisEventos = async () => {
   try {
     const data = await apiFetch('api_perfil.php')
     if (data.success) {
       const fechaHoy = obtenerFechaHoy();
-      
-      // FILTRO: Solo guardamos los eventos cuya fecha sea MAYOR O IGUAL a hoy.
-      // Los eventos de ayer hacia atrás se ignoran (ya no salen en el perfil).
       misEventos.value = data.eventos.filter(evento => evento.fecha_evento >= fechaHoy);
     }
   } catch (error) {
-    console.error('Error eventos:', error)
+    console.error('Error eventos perfil:', error)
   }
 }
 
-onMounted(cargarMisEventos)
+// 2. Cargar TODOS los eventos (para el Calendario)
+const cargarTodosLosEventos = async () => {
+  try {
+    const data = await apiFetch('api_eventos.php')
+    if (data.success) {
+      todosLosEventos.value = data.eventos
+    }
+  } catch (error) {
+    console.error('Error cargando todos los eventos:', error)
+  }
+}
+
+// 3. Reglas de visibilidad para el calendario del perfil
+const eventosParaCalendario = computed(() => {
+  const user = usuarioEditar.value
+
+  // Admin o txandalari ven todos los eventos en el calendario
+  if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
+    return todosLosEventos.value
+  }
+
+  // Socios normales solo ven los confirmados en el calendario
+  return todosLosEventos.value.filter((e) => e.estado === 'confirmado')
+})
+
+onMounted(() => {
+  cargarMisEventos()
+  cargarTodosLosEventos() // Cargamos la cartelera global al entrar al perfil
+})
 
 const cancelarEdicion = () => {
   usuarioEditar.value = { ...props.usuario }
@@ -139,6 +169,7 @@ const asignarTurno = async (evento) => {
         color: '#facc15',
       })
       Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
+      cargarTodosLosEventos() // Refrescar calendario global para mostrar tu turno
     }
   } catch (error) {
     console.error(error)
@@ -155,6 +186,7 @@ const cancelarAsistencia = async (id_evento) => {
 
     if (data.success) {
       cargarMisEventos()
+      cargarTodosLosEventos() // Refrescar calendario global al borrarte
 
       let mensajeAlerta = 'Cancelado'
       if (usuarioEditar.value.rol === 'admin' || usuarioEditar.value.rol === 'txandalari') {
@@ -399,7 +431,14 @@ const eliminarCuenta = async () => {
 
         <main class="contenido">
           <section class="tarjeta eventos">
-            <h3><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
+              
+              <button style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;" @click="mostrarCalendario = true">
+                {{ $t('eventos.btn_ver_calendario') }}
+              </button>
+            </div>
+            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;"></div>
 
             <div v-if="misEventos.length > 0" class="lista-eventos">
               <div v-for="evento in misEventos" :key="evento.id" class="evento-item">
@@ -453,6 +492,14 @@ const eliminarCuenta = async () => {
         </main>
       </div>
     </div>
+
+    <!-- MODAL CALENDARIO (Ahora con la variable correcta) -->
+    <CalendarioModal 
+      :mostrar="mostrarCalendario" 
+      :eventos="eventosParaCalendario" 
+      :usuario="usuarioEditar"
+      @cerrar="mostrarCalendario = false"
+    />
   </div>
 </template>
 

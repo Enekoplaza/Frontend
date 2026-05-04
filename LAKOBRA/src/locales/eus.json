@@ -128,7 +128,9 @@
     "privado_msg": "Erregistratuta egon behar duzu ekitaldiak ikusteko.",
     "privado_btn": "Saioa Hasi",
     "estado_finalizado": "Amaituta",
-    "evento_finalizado": "🏁 Ekitaldia Amaituta"
+    "evento_finalizado": "🏁 Ekitaldia Amaituta",
+    "btn_ver_calendario": "📅 Egutegia Ikusi"
+    
   },
   "perfil": {
     "bienvenido": "Ongi etorri LAKOBRA-ra",
@@ -165,7 +167,13 @@
     "msg_turno_ok": "Txanda esleituta",
     "qr_titulo": "Nire Sarbide Kodea",
     "qr_desc": "Erakutsi QR hau atean baieztatutako ekitaldietara sartzeko.",
-    "btn_ampliar_qr": "QR-a Handitu"
+    "btn_ampliar_qr": "QR-a Handitu",
+    "btn_ver_calendario": "📅 Egutegia Ikusi",
+    "cal_confirmado": "Baieztatuta",
+    "cal_pendiente": "Zain",
+    "cal_finalizado": "Amaituta",
+    "cal_mi_turno": "Nire Txanda (Lana)",
+    "cal_dentro": "Barruan"
   },
   "solicitudes": {
       "titulo": "Eskaeren Panela",
