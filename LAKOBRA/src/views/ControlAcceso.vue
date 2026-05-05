@@ -1,30 +1,27 @@
 <script setup>
-// 1. Importamos el nuevo servicio
 import { apiFetch } from '@/services/apiFetch'
 import { ref } from 'vue'
 
-const tokenInput = ref('')
+const dniInput = ref('')
 const cargando = ref(false)
 const resultado = ref(null)
 
-const validarToken = async () => {
-  if (tokenInput.value.trim() === '') return
+const validarDni = async () => {
+  if (dniInput.value.trim() === '') return
   
   cargando.value = true
   resultado.value = null
 
   try {
-    // 2. Usamos apiFetch (mucho más corto y limpio)
     const data = await apiFetch('api_validar_acceso.php', {
       method: 'POST',
-      body: JSON.stringify({ qr_token: tokenInput.value.trim() })
+      body: JSON.stringify({ dni: dniInput.value.trim().toUpperCase() })
     })
     
     resultado.value = data
     
-    // Limpiamos el input si ha ido bien para leer el siguiente rápido
     if (data.estado === 'OK') {
-      tokenInput.value = ''
+      dniInput.value = ''
     }
 
   } catch (error) {
@@ -34,27 +31,30 @@ const validarToken = async () => {
   }
 }
 </script>
-
 <template>
   <div class="control-acceso">
     <div class="contenedor-herramienta">
       
       <header class="cabecera">
         <h1>🛡️ Control de Puerta</h1>
-        <p>Validador de Tokens de Acceso</p>
+        <p>Validador de Acceso por DNI</p>
       </header>
 
       <div class="formulario-validacion">
-        <label>Introduce el Token del usuario:</label>
+        <label>Introduce el DNI del usuario:</label>
         <div class="input-grupo">
           <input 
             type="text" 
-            v-model="tokenInput" 
-            placeholder="Ej: a1b2c3d4e5f6..."
-            @keyup.enter="validarToken"
+            v-model="dniInput" 
+            placeholder="Ej: 12345678A"
+            @keyup.enter="validarDni"
             :disabled="cargando"
           >
-          <button @click="validarToken" :disabled="cargando || tokenInput === ''" class="btn-validar">
+          <button 
+            @click="validarDni" 
+            :disabled="cargando || dniInput === ''" 
+            class="btn-validar"
+          >
             {{ cargando ? '...' : 'Comprobar' }}
           </button>
         </div>
@@ -90,8 +90,8 @@ const validarToken = async () => {
 
           <div v-else class="estado-error">
             <span class="icono">❌</span>
-            <h2>TOKEN INVÁLIDO</h2>
-            <p>Este código no existe o no es válido.</p>
+            <h2>DNI INVÁLIDO</h2>
+            <p>Este DNI no existe o no es válido.</p>
           </div>
 
         </div>
