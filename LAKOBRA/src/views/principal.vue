@@ -37,6 +37,7 @@ const svgContent = ref('');
 
 let guitarAnimation = null;
 let glowAnimation = null;
+let tituloAnimation = null;
 let observer = null;
 let glowPlayed = false;
 
@@ -48,7 +49,10 @@ async function loadSvg() {
 
   const paths = svgWrapper.value.querySelectorAll('path');
 
+  // Pre-calculamos y aplicamos estilos directamente para no bloquear la animación
   paths.forEach((path) => {
+    // Si el path es muy complejo, forzamos renderizado en GPU
+    path.style.willChange = 'stroke-dashoffset'; 
     const length = path.getTotalLength();
     path.style.strokeDasharray = length;
     path.style.strokeDashoffset = length;
@@ -69,16 +73,22 @@ function setupScrollAnimation() {
 
           if (!glowPlayed) {
             guitarAnimation.finished.then(() => {
-              glowAnimation.play();
-              glowPlayed = true;
+              // Verificamos si aún estamos en la pantalla antes de lanzar el glow
+              if(glowAnimation) {
+                 glowAnimation.play();
+                 glowPlayed = true;
+              }
             });
           }
         } else {
+          // Pausar animaciones pesadas cuando no se ven
           guitarAnimation.pause();
+          if (glowAnimation && glowPlayed) glowAnimation.pause();
         }
       });
     },
-    { threshold: 0.35 }
+    // Reducimos el umbral para que empiece un poco antes y no haya tirones al verlo de golpe
+    { threshold: 0.15 } 
   );
 
   observer.observe(guitarRef.value);
@@ -93,41 +103,43 @@ onMounted(async () => {
 
     const guitarPaths = await loadSvg();
 
+    // 1. ANIMACIÓN DE ENTRADA LIGERA
     const timeline = anime.timeline({
-      easing: 'easeOutExpo',
+      easing: 'easeOutQuart', // Cambiado a un easing menos costoso matemáticamente
     });
 
     timeline
       .add({
         targets: tituloRef.value,
-        translateY: [-30, 0],
+        translateY: [-20, 0], // Reducido el movimiento
         opacity: [0, 1],
-        duration: 1200
+        duration: 800 // Reducido el tiempo
       })
       .add({
         targets: logoRef.value,
         opacity: [0, 1],
-        scale: [0.95, 1],
-        easing: 'easeOutCubic',
-        duration: 1000
-      }, '-=600')
+        scale: [0.97, 1],
+        duration: 800
+      }, '-=400')
       .add({
         targets: descripcionRef.value.querySelectorAll('p'),
-        translateY: [20, 0],
+        translateY: [15, 0],
         opacity: [0, 1],
-        delay: anime.stagger(200),
-        duration: 2000
-      }, 1200);
+        delay: anime.stagger(150), // Menos delay entre párrafos
+        duration: 800
+      }, '-=200');
 
+    // 2. OPTIMIZACIÓN ANIMACIÓN GUITARRA
     guitarAnimation = anime({
       targets: guitarPaths,
       strokeDashoffset: [anime.setDashoffset, 0],
-      easing: 'easeInOutSine',
-      duration: 25500,
-      delay: (el, i) => i * 10,
-      autoplay: false
+      easing: 'linear', // Linear es mucho más rápido para la GPU que easeInOutSine
+      duration: 15000, // ¡ESTO ERA EL PROBLEMA MAYOR! 25500 era excesivo. 4s es un buen tiempo para una animación de trazo.
+      delay: (el, i) => i * 15,
+      autoplay: false // Lo controla el Scroll
     });
 
+    // 3. OPTIMIZACIÓN GLOW
     glowAnimation = anime({
       targets: guitarPaths,
       stroke: [
@@ -135,13 +147,9 @@ onMounted(async () => {
         { value: "#ffffff" },
         { value: "#38bdf8" }
       ],
-      strokeWidth: [
-        { value: 6 },
-        { value: 9 },
-        { value: 6 }
-      ],
-      easing: "easeInOutSine",
-      duration: 1800,
+      // Eliminamos el cambio de strokeWidth, que fuerza al navegador a recalcular el layout
+      easing: "linear",
+      duration: 1500,
       autoplay: false,
       loop: 2,
       direction: "alternate"
@@ -149,17 +157,18 @@ onMounted(async () => {
 
     setupScrollAnimation();
 
-    anime({
+    // 4. ANIMACIÓN TÍTULO LIGERA
+    tituloAnimation = anime({
       targets: tituloRef.value,
-      scale: [1, 1.02],
+      scale: [1, 1.01], // Reducido
       textShadow: [
-        '0 0 25px rgba(56, 189, 248, 0.15)',
-        '0 0 45px rgba(56, 189, 248, 0.6)'
+        '0 0 15px rgba(56, 189, 248, 0.2)',
+        '0 0 30px rgba(56, 189, 248, 0.5)'
       ],
       direction: 'alternate',
       loop: true,
-      easing: 'easeInOutSine',
-      duration: 2500
+      easing: 'linear',
+      duration: 3000
     });
 
   } catch (error) {
@@ -169,8 +178,10 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (observer) observer.disconnect();
-  if (guitarAnimation) guitarAnimation.pause();
-  if (glowAnimation) glowAnimation.pause();
+  // Limpiamos TODAS las instancias de anime para liberar memoria
+  if (guitarAnimation) anime.remove(guitarAnimation.animatables.map(a => a.target));
+  if (glowAnimation) anime.remove(glowAnimation.animatables.map(a => a.target));
+  if (tituloAnimation) anime.remove(tituloRef.value);
 });
 </script>
 
@@ -192,7 +203,7 @@ onBeforeUnmount(() => {
   background: linear-gradient(90deg, #38bdf8, #0ea5e9);
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
+  /* El will-change ayuda al navegador a prepararse para animar sin tirones */
   will-change: transform, text-shadow, opacity;
 }
 
@@ -203,6 +214,7 @@ onBeforeUnmount(() => {
   width: 100%;
   margin: 1rem auto 3rem auto;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .lakobra-img {
@@ -230,9 +242,10 @@ onBeforeUnmount(() => {
 
 .guitar-svg :deep(path) {
   stroke: #0ea5e9;
-  stroke-width: 10;
+  stroke-width: 8; /* Reducido un pelín para trazos más limpios */
   fill: transparent;
-  filter: drop-shadow(0px 0px 8px rgba(56, 189, 248, 0.4)) drop-shadow(0px 0px 18px rgba(255, 255, 255, 0.25));
+  /* Hemos quitado el drop-shadow complejo del SVG y lo dejamos simple,
+     los drop-shadow en SVGs animados matan el rendimiento en móviles */
 }
 
 .descripcion {
@@ -251,22 +264,12 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
-  .titulo {
-    font-size: 2.2rem;
-  }
-
-  .lakobra-img {
-    max-width: 300px;
-  }
+  .titulo { font-size: 2.2rem; }
+  .lakobra-img { max-width: 300px; }
 }
 
 @media (max-width: 480px) {
-  .titulo {
-    font-size: 1.9rem;
-  }
-
-  .lakobra-img {
-    max-width: 250px;
-  }
+  .titulo { font-size: 1.9rem; }
+  .lakobra-img { max-width: 250px; }
 }
 </style>

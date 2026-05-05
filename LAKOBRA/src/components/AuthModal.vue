@@ -1,5 +1,4 @@
 <script setup>
-// 1. Quitamos config.js e importamos nuestro nuevo servicio
 import { apiFetch } from '@/services/apiFetch';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
@@ -18,6 +17,25 @@ const form = ref({
 
 const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' };
 
+// --- NUEVA FUNCIÓN: Limpiar el formulario ---
+const resetForm = () => {
+  form.value = {
+    nombre: '', 
+    dni: '', 
+    email: '', 
+    password: '', 
+    direccion: '', 
+    rol: 'socio'
+  };
+  esLogin.value = true; // Por si cerró estando en la pestaña de registro
+};
+
+// --- NUEVA FUNCIÓN: Cerrar Modal limpiando datos ---
+const cerrarModal = () => {
+  resetForm();
+  emit('cerrar');
+};
+
 const handleSubmit = async () => {
   if (!esLogin.value) {
     if (form.value.nombre.trim().length < 3) {
@@ -35,12 +53,9 @@ const handleSubmit = async () => {
     }
   }
 
-  // Solo necesitamos el nombre del archivo PHP
   const endpoint = esLogin.value ? 'login_api.php' : 'registro_api.php';
 
   try {
-    // 2. Usamos apiFetch. ¡Mira qué limpio queda!
-    // Ya no hace falta poner 'credentials' ni 'headers'
     const data = await apiFetch(endpoint, {
       method: 'POST',
       body: JSON.stringify(form.value)
@@ -56,11 +71,14 @@ const handleSubmit = async () => {
           timer: 2000,
           showConfirmButton: false
         });
+        
         emit('logeado');
+        resetForm(); // <-- Limpiamos las credenciales tras un login exitoso
+        
       } else {
         Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('auth.ok_reg_tit'), text: t('auth.ok_reg_msg') });
         esLogin.value = true;
-        form.value.password = '';
+        form.value.password = ''; // Le borramos solo la contraseña para que el login sea más rápido
       }
     } else {
       Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('auth.err_oops'), text: data.message });
@@ -74,7 +92,10 @@ const handleSubmit = async () => {
 <template>
   <div v-if="mostrar" class="modal-overlay">
     <div class="modal-content">
-      <button class="btn-close" @click="$emit('cerrar')">X</button>
+      
+      <!-- Usamos la nueva función cerrarModal al pulsar la X -->
+      <button class="btn-close" @click="cerrarModal">X</button>
+      
       <h2>{{ esLogin ? $t('auth.login_title') : $t('auth.register_title') }}</h2>
       <form @submit.prevent="handleSubmit">
         <template v-if="!esLogin">
@@ -87,8 +108,9 @@ const handleSubmit = async () => {
         </template>
         <input v-model="form.email" type="email" :placeholder="$t('auth.ph_email')" required>
         <input v-model="form.password" type="password" :placeholder="$t('auth.ph_pass')" required>
-        <button type="submit" class="btn-submit">{{ esLogin ? $t('auth.btn_entrar') : $t('auth.btn_registrar')
-          }}</button>
+        <button type="submit" class="btn-submit">
+          {{ esLogin ? $t('auth.btn_entrar') : $t('auth.btn_registrar') }}
+        </button>
       </form>
       <p @click="esLogin = !esLogin" class="toggle-auth">
         {{ esLogin ? $t('auth.toggle_to_reg') : $t('auth.toggle_to_login') }}

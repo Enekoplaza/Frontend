@@ -10,7 +10,9 @@ defineEmits(['abrirModal'])
   <footer class="footer">
     <div class="container">
       <div class="col">
-        <router-link to="/principal">
+        <!-- LOGO Y TEXTO ACTUALIZADOS -->
+        <router-link to="/principal" class="logo-link">
+          <img src="../assets/logolakobra.png" alt="Logo Lakobra" class="logo-img" />
           <h2 class="logo">Lakobra</h2>
         </router-link>
         <p class="description">{{ $t('footer.desc') }}</p>
@@ -35,7 +37,7 @@ defineEmits(['abrirModal'])
       </nav>
 
       <div class="col">
-        <h3>{{ $t('kontaktua' || 'Contacto') }}</h3>
+        <h3>{{ $t('footer.contacto') }}</h3>
 
         <ul class="footer-links">
           <li>
@@ -158,13 +160,39 @@ defineEmits(['abrirModal'])
   gap: var(--gap-large);
 }
 
+/* =========================================
+   🔥 LOGO Y TEXTO (FOOTER)
+   ========================================= */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  margin-bottom: 15px;
+  width: fit-content;
+}
+
+.logo-img {
+  height: 100px; /* Más grande que en el header para que llene el footer */
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(182, 17, 17, 0.925));
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover .logo-img {
+  transform: scale(1.05) rotate(-3deg);
+}
+
 .logo {
   font-size: 28px;
   font-weight: 800;
-  margin-bottom: 15px;
+  margin: 0; /* Sustituye el margin-bottom que ahora tiene .logo-link */
   color: var(--footer-accent);
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.15); /* Le damos brillo sutil igual que arriba */
 }
 
+/* Resto de elementos */
 .description {
   line-height: 1.6;
   color: var(--footer-text-muted);
@@ -279,6 +307,12 @@ h3 {
     text-align: center;
   }
 
+  /* Centrar el contenedor del logo en móvil para que no quede raro */
+  .logo-link {
+    justify-content: center;
+    margin: 0 auto 15px auto;
+  }
+
   .description {
     margin: 0 auto;
     max-width: 100%;
@@ -320,6 +354,10 @@ h3 {
 
   .logo {
     font-size: 22px;
+  }
+
+  .logo-img {
+    height: 40px; /* Reducimos la cobra un pelín en pantallas súper pequeñas */
   }
 
   .description {

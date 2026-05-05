@@ -36,16 +36,21 @@ const esAdmin = computed(() => {
 <template>
   <header class="header">
     <div class="header-container">
+      
+      <!-- LÓGICA DEL LOGO ACTUALIZADA -->
       <div class="logo-container">
-        <router-link to="/principal" style="border: none; padding: 0;">
+        <router-link to="/principal" class="logo-link">
+          <img src="../assets/logolakobra.png" alt="Logo Lakobra" class="logo-img" />
           <h2 class="logo">Lakobra</h2>
         </router-link>
       </div>
+
       <button class="hamburguesa" @click="toggleMenu">
-  ☰
-</button>
-<nav class="nav" :class="{ abierto: menuAbierto }">
-  <ul class="lista">
+        ☰
+      </button>
+
+      <nav class="nav" :class="{ abierto: menuAbierto }">
+        <ul class="lista">
           <li>
             <RouterLink to="/principal" @click="cerrarMenu">
               {{ $t('header.inicio') }}
@@ -173,8 +178,33 @@ const esAdmin = computed(() => {
 }
 
 /* =========================================
-   🔥 LOGO (más branding)
+   🔥 LOGO Y TEXTO (CON IMAGEN)
    ========================================= */
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  border: none;
+  padding: 0;
+}
+
+.logo-link.router-link-active {
+  border-bottom: none;
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(182, 17, 17, 0.925));
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover .logo-img {
+  transform: scale(1.05) rotate(-3deg);
+}
 
 .logo {
   font-size: 24px;
@@ -182,7 +212,7 @@ const esAdmin = computed(() => {
   color: var(--header-accent);
   letter-spacing: 0.5px;
   white-space: nowrap;
-
+  margin: 0;
   text-shadow: 0 0 18px rgba(56, 189, 248, 0.15);
 }
 
@@ -198,15 +228,12 @@ const esAdmin = computed(() => {
   flex-wrap: wrap;
 }
 
-/* LINKS MÁS MODERNOS */
 a {
   color: var(--header-text);
   text-decoration: none;
   font-weight: 600;
-
   padding: 6px 10px;
   border-radius: 8px;
-
   transition: all 0.25s ease;
   position: relative;
 }
@@ -215,15 +242,14 @@ a:hover {
   color: var(--header-accent);
 }
 
-/* LA LÍNEA AZUL RECUPERADA */
-.router-link-active {
+.router-link-active:not(.logo-link) {
   color: var(--header-accent);
   border-bottom: 2px solid var(--header-accent);
   border-radius: 0;
 }
 
 /* =========================================
-   👤 USER
+   👤 USER & DIVIDER
    ========================================= */
 
 .user-welcome {
@@ -237,7 +263,6 @@ a:hover {
   color: var(--header-accent);
 }
 
-/* logout más limpio */
 .btn-logout {
   color: #ff4d4d !important;
   font-size: 0.85rem;
@@ -247,12 +272,8 @@ a:hover {
 
 .btn-logout:hover {
   opacity: 0.8;
-  border-bottom: none; /* Quitamos la línea activa en caso de error */
+  border-bottom: none;
 }
-
-/* =========================================
-   ➖ DIVIDER
-   ========================================= */
 
 .divider {
   width: 1px;
@@ -261,23 +282,19 @@ a:hover {
 }
 
 /* =========================================
-   🎨 BOTONES
+   🎨 BOTONES ACCIÓN
    ========================================= */
 
 .btn-tema {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-
   color: var(--header-text);
   cursor: pointer;
-
   padding: 6px;
   border-radius: 50%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   transition: all 0.25s ease;
 }
 
@@ -290,13 +307,10 @@ a:hover {
 .btn-idioma {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
-
   color: var(--header-text);
   cursor: pointer;
-
   padding: 3px 8px;
   border-radius: 6px;
-
   font-weight: bold;
   transition: all 0.25s ease;
 }
@@ -311,110 +325,16 @@ a:hover {
    🌗 ANIMACIÓN TEMA
    ========================================= */
 
-.theme-toggle .sun-and-moon {
-  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
-  overflow: visible;
-}
-
-.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) {
-  transform-origin: center;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.theme-toggle .sun-and-moon .moon > circle {
-  transition: transform 0.5s ease;
-}
-
-.theme-toggle.is-dark .sun-and-moon {
-  transform: rotate(-100deg);
-}
-
-.theme-toggle.is-dark .sun-and-moon .sun {
-  transform: scale(1.75);
-}
-
-.theme-toggle.is-dark .sun-and-moon .sun-beams {
-  opacity: 0;
-  transform: rotate(-25deg) scale(0.5);
-}
-
-.theme-toggle.is-dark .sun-and-moon .moon > circle {
-  transform: translateX(-7px);
-}
+.theme-toggle .sun-and-moon { transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25); overflow: visible; }
+.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) { transform-origin: center; transition: transform 0.5s ease, opacity 0.5s ease; }
+.theme-toggle .sun-and-moon .moon > circle { transition: transform 0.5s ease; }
+.theme-toggle.is-dark .sun-and-moon { transform: rotate(-100deg); }
+.theme-toggle.is-dark .sun-and-moon .sun { transform: scale(1.75); }
+.theme-toggle.is-dark .sun-and-moon .sun-beams { opacity: 0; transform: rotate(-25deg) scale(0.5); }
+.theme-toggle.is-dark .sun-and-moon .moon > circle { transform: translateX(-7px); }
 
 /* =========================================
-   📱 TABLET
-   ========================================= */
-
-@media (max-width: 1024px) {
-  .header-container {
-    padding: 1rem 20px;
-  }
-
-  .lista {
-    gap: 0.9rem;
-  }
-
-  .logo {
-    font-size: 22px;
-  }
-}
-
-/* =========================================
-   📱 MÓVIL (MODERNO DE VERDAD)
-   ========================================= */
-
-@media (max-width: 768px) {
-  .header-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 0.9rem 15px;
-  }
-
-  .logo {
-    font-size: 20px;
-  }
-
-  .lista {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-
-  a {
-    font-size: 0.85rem;
-    padding: 5px 8px;
-  }
-
-  .user-welcome {
-    font-size: 0.8rem;
-    text-align: center;
-  }
-
-  .divider {
-    display: none;
-  }
-}
-
-/* =========================================
-   📱 MÓVIL PEQUEÑO
-   ========================================= */
-
-@media (max-width: 480px) {
-  .lista {
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  a {
-    width: 100%;
-    text-align: center;
-  }
-}
-/* =========================================
-   🍔 HAMBURGUESA (SOLO POSICIÓN)
+   🍔 HAMBURGUESA
    ========================================= */
 
 .hamburguesa {
@@ -427,36 +347,46 @@ a:hover {
 }
 
 /* =========================================
-   📱 MÓVIL (SIN CAMBIAR FORMATO)
+   📱 TABLET
    ========================================= */
+@media (max-width: 1024px) {
+  .header-container { padding: 1rem 20px; }
+  .lista { gap: 0.9rem; }
+  .logo { font-size: 22px; }
+}
 
+/* =========================================
+   📱 MÓVIL (EL MENÚ DEL COMPAÑERO ARREGLADO)
+   ========================================= */
 @media (max-width: 768px) {
-
   .header-container {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 0.8rem 15px;
   }
 
-  /* 🍔 FORZAR A LA DERECHA */
+  .logo { font-size: 20px; }
+  .logo-img { height: 30px; }
+
+  /* 🍔 Forzar hamburguesa a la derecha */
   .hamburguesa {
     display: block;
     margin-left: auto;
   }
 
-  /* 📦 MENÚ DESDE LA DERECHA */
+  /* 📦 El menú deslizante de tu compañero */
   .nav {
     position: absolute;
     top: 100%;
     right: 0;
-
     width: 100%;
     background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
-
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* Sombra añadida para que no quede plano sobre el body */
+    
     transform: translateX(100%);
     opacity: 0;
     pointer-events: none;
-
     transition: all 0.3s ease;
   }
 
@@ -466,10 +396,11 @@ a:hover {
     pointer-events: auto;
   }
 
-  /* ❗ NO CAMBIO TU LISTA NI ORDEN */
+  /* ❗ Formato de lista original (derecha) */
   .lista {
     flex-direction: column;
-    padding: 1rem 0;
+    padding: 1.5rem 0;
+    gap: 0; /* Quitamos gap para usar padding en el enlace y que el click sea más fácil */
   }
 
   .lista li {
@@ -477,19 +408,25 @@ a:hover {
     text-align: right;
   }
 
-  .lista a {
+  .lista a, .btn-logout {
     display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px 25px;
     text-align: right;
   }
 
   .user-welcome {
     text-align: right;
+    padding: 10px 25px;
   }
 
   .divider {
     display: none;
+  }
+
+  /* Ajustes para los botones de idioma y tema en móvil */
+  .btn-idioma, .btn-tema {
+    margin: 5px 25px 5px auto;
   }
 }
 </style>

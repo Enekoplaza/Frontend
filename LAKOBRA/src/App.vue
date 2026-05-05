@@ -1,7 +1,7 @@
 <script setup>
 import { apiFetch } from '@/services/apiFetch'
-import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router' // 1. Añadimos useRoute
+import { ref, onMounted, computed } from 'vue' // 2. Añadimos computed
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import AuthModal from './components/AuthModal.vue'
@@ -10,6 +10,13 @@ import AuthModal from './components/AuthModal.vue'
 const mostrarModal = ref(false)
 const usuarioActivo = ref(null)
 const router = useRouter()
+const route = useRoute() // 3. Inicializamos la ruta actual
+
+// --- LÓGICA DE VISIBILIDAD (SEGURIDAD) ---
+// Ocultamos la navegación SOLO si estamos en '/puerta' Y NO hay ningún usuario logueado
+const ocultarNavegacion = computed(() => {
+  return route.path === '/puerta' && !usuarioActivo.value
+})
 
 // Cargar usuario desde localStorage al arrancar
 const cargarSesionLocal = () => {
@@ -24,12 +31,10 @@ const cargarSesionLocal = () => {
   }
 }
 
-// Verificar sesión en backend y RELLENAR DATOS
+// Verificar sesión en backend
 const verificarSesion = async () => {
   try {
-    // 2. USAMOS APIFETCH DIRECTAMENTE (Mucho más limpio, ya hace el res.json y manda credenciales)
     const data = await apiFetch('check_sesion.php')
-
     if (data.logged_in) {
       const datosUsuario = { 
         id: data.id,
@@ -53,19 +58,15 @@ const verificarSesion = async () => {
   }
 }
 
-// Login exitoso
 const loginExitoso = async () => {
   await verificarSesion() 
   mostrarModal.value = false
   router.push('/principal')
 }
 
-// Cerrar sesión
 const cerrarSesion = async () => {
   try {
-    // 3. OTRA VEZ APIFETCH (Solo le pasamos el nombre del archivo PHP)
     await apiFetch('logout.php')
-    
     usuarioActivo.value = null
     localStorage.removeItem('usuarioLakobra')
     router.push('/principal')
@@ -74,7 +75,6 @@ const cerrarSesion = async () => {
   }
 }
 
-// --- MONTADO ---
 onMounted(() => {
   cargarSesionLocal()
   verificarSesion()
@@ -96,7 +96,6 @@ function toggleModo() {
     localStorage.setItem('modoOscuro', modoOscuro.value);
     return;
   }
-
   document.startViewTransition(() => {
     modoOscuro.value = !modoOscuro.value;
     localStorage.setItem('modoOscuro', modoOscuro.value);
@@ -105,8 +104,12 @@ function toggleModo() {
 </script>
 
 <template>
-  <div class="app-container" :class="modoOscuro ? 'dark' : 'light'">
+  <!-- Cambiamos 'esModoPuerta' por 'ocultarNavegacion' -->
+  <div class="app-container" :class="[modoOscuro ? 'dark' : 'light', { 'is-puerta': ocultarNavegacion }]">
+    
+    <!-- Ocultamos el Header solo al invitado -->
     <Header
+      v-if="!ocultarNavegacion"
       :usuario="usuarioActivo"
       :modoOscuro="modoOscuro"
       @abrirModal="mostrarModal = true"
@@ -118,7 +121,9 @@ function toggleModo() {
       <router-view :usuario="usuarioActivo" @actualizar-usuario="verificarSesion" />
     </main>
 
+    <!-- Ocultamos el Footer solo al invitado -->
     <Footer
+      v-if="!ocultarNavegacion"
       :usuario="usuarioActivo"
       @abrirModal="mostrarModal = true"
     />
@@ -163,6 +168,20 @@ function toggleModo() {
   flex: 1;
   padding: 40px 20px;
 }
+
+/* 7. Ajuste para que en modo puerta el contenido ocupe todo y esté centrado */
+.app-container.is-puerta .content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  flex: 1;
+  padding: 40px 20px;
+}
+
 </style>
 
 <style>

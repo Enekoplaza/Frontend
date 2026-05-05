@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-// Importamos la vista principal de forma directa (es la primera que se ve)
 import Principal from '@/views/principal.vue'
 
 const routes = [
@@ -16,7 +14,6 @@ const routes = [
   { 
     path: '/artistas', 
     name: 'artistas', 
-    // Lazy loading: solo carga el código de artistas cuando entras
     component: () => import('@/views/artistas.vue') 
   },
   { 
@@ -29,23 +26,58 @@ const routes = [
     name: 'perfil', 
     component: () => import('@/views/Perfil.vue') 
   },
-  // 🚀 AÑADIMOS LA RUTA QUE FALTABA
   { 
     path: '/solicitudes', 
     name: 'solicitudes', 
     component: () => import('@/views/solicitudes.vue') 
   },
   {
-  path: '/puerta',
-  name: 'puerta',
-  component: () => import('../views/ControlAcceso.vue')
+    path: '/puerta',
+    name: 'puerta',
+    component: () => import('../views/ControlAcceso.vue')
   },
 ]
 
 const router = createRouter({
-  // 🔴 AQUÍ ESTÁ EL CAMBIO: Le pasamos nuestra variable de entorno VITE_BASE_URL
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes
+})
+
+// --- 🛡️ GUARDIA DE SEGURIDAD (Paso 2) ---
+router.beforeEach((to, from, next) => {
+  // 1. Obtenemos el usuario del localStorage
+  const usuarioLocal = JSON.parse(localStorage.getItem('usuarioLakobra') || 'null')
+  
+  // 2. Definimos qué rutas son públicas para todo el mundo
+  // La ruta '/puerta' es pública para que el invitado pueda cargar el componente
+  const rutasPublicas = ['/principal', '/artistas', '/puerta', '/eventos']
+  const esRutaPublica = rutasPublicas.includes(to.path)
+
+  // 3. Caso: Usuario NO logueado intenta entrar a una ruta privada (ej: /perfil)
+  if (!esRutaPublica && !usuarioLocal) {
+    // Si trae el parámetro 'guest' en la URL, le dejamos pasar a la puerta
+    if (to.path === '/puerta' && to.query.guest) {
+      return next()
+    }
+    // Si no, lo mandamos a la principal
+    return next('/principal')
+  }
+
+  // 4. Caso: Usuario logueado (Socio) intenta entrar a /solicitudes o /puerta
+  // Solo Admin y Txandalari pueden entrar en esas
+  const rutasPrivadasAdmin = ['/solicitudes', '/puerta']
+  if (rutasPrivadasAdmin.includes(to.path)) {
+    const esAutorizado = usuarioLocal?.rol === 'admin' || usuarioLocal?.rol === 'txandalari'
+    
+    // Si es un socio normal intentando entrar a la puerta... a casa.
+    // EXCEPCIÓN: Si el socio normal tiene un token 'guest' (poco probable, pero posible), le dejamos.
+    if (!esAutorizado && !to.query.guest) {
+      return next('/principal')
+    }
+  }
+
+  // Si todo está ok, adelante
+  next()
 })
 
 export default router

@@ -11,7 +11,7 @@
   "footer": {
     "desc": "Ekitaldiak eta gehiago ezagutzeko zure ataria. Egin bat komunitatearekin.",
     "enlaces": "Estekak",
-    "Contacto": "Kontaktua",
+    "contacto": "Kontaktua",
     "jarraitu": "Jarraitu",
     "derechos": "Eskubide guztiak erreserbatuta."
   },
@@ -199,5 +199,33 @@
       "swal_ok_rechazo": "Eskaera ezetsia",
       "swal_ok_artista_ac": "Artista onartua",
       "swal_ok_artista_re": "Artista ezabatua"
-    }
+    },
+
+  "puerta": {
+    "titulo": "Ateko Kontrola",
+    "subtitulo": "NAN Bidezko Sarbide Egiaztatzailea",
+    "btn_generar_enlace": "Sortu Behin-behineko Esteka (2h)",
+    "label_dni": "Sartu erabiltzailearen NANa:",
+    "ph_dni": "Adib: 12345678A",
+    "btn_comprobar": "Egiaztatu",
+    "acceso_ok": "SARBIDEA BAIMENDUTA",
+    "puede_pasar": "sar daiteke.",
+    "entrada_dup": "SARRERA BIKOIZTUA",
+    "ya_entro": "dagoeneko erregistratu du sarrera gaur.",
+    "aforo_full": "EDUKIERA BETETA",
+    "no_mas": "Ezin da pertsona gehiago sartu.",
+    "sin_evento": "EKITALDIRIK EZ",
+    "no_hay_evento": "Gaurko ez dago ekitaldi baieztaturik.",
+    "dni_invalido": "NAN BALIOGABEA",
+    "no_existe": "NAN hau ez da existitzen.",
+    "err_conexion": "Konexio errorea",
+    "swal_activo_tit": "Ateko Modua Aktibatuta",
+    "swal_activo_msg": "Behin-behineko sarbidea duzu NANak egiaztatzeko 2 orduz.",
+    "swal_caducado_tit": "Esteka Iraungita",
+    "swal_caducado_msg": "Behin-behineko sarbide hau ez da baliozkoa edo iraungi da.",
+    "swal_copiado_tit": "Esteka Kopiatuta!",
+    "swal_copiado_msg": "Arbelera kopiatu da 2 orduz balio duen URLa.",
+    "swal_err_tit": "Errorea",
+    "swal_err_msg": "Ezin izan da esteka sortu"
+  }
 }

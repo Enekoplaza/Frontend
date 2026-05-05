@@ -11,7 +11,7 @@
   "footer": {
     "desc": "Tu portal para descubrir eventos y mucho más. Únete a la comunidad.",
     "enlaces": "Enlaces",
-    "kontaktua": "Contacto",
+    "contacto": "Contacto",
     "jarraitu": "Síguenos",
     "derechos": "Todos los derechos reservados."
   },
@@ -200,5 +200,33 @@
       "swal_ok_rechazo": "Solicitud rechazada",
       "swal_ok_artista_ac": "Artista aceptado",
       "swal_ok_artista_re": "Artista eliminado"
-    }
+    },
+
+  "puerta": {
+    "titulo": "Control de Puerta",
+    "subtitulo": "Validador de Acceso por DNI",
+    "btn_generar_enlace": "Generar Enlace Temporal (2h)",
+    "label_dni": "Introduce el DNI del usuario:",
+    "ph_dni": "Ej: 12345678A",
+    "btn_comprobar": "Comprobar",
+    "acceso_ok": "ACCESO PERMITIDO",
+    "puede_pasar": "puede pasar.",
+    "entrada_dup": "ENTRADA DUPLICADA",
+    "ya_entro": "ya ha registrado su entrada hoy.",
+    "aforo_full": "AFORO COMPLETO",
+    "no_mas": "No se admiten más personas.",
+    "sin_evento": "SIN EVENTO",
+    "no_hay_evento": "No hay ningún evento confirmado para la fecha de hoy.",
+    "dni_invalido": "DNI INVÁLIDO",
+    "no_existe": "Este DNI no existe.",
+    "err_conexion": "Error de conexión",
+    "swal_activo_tit": "Modo Puerta Activo",
+    "swal_activo_msg": "Tienes acceso temporal para validar DNIs durante 2 horas.",
+    "swal_caducado_tit": "Enlace Caducado",
+    "swal_caducado_msg": "Este acceso temporal ya no es válido o ha caducado.",
+    "swal_copiado_tit": "¡Enlace Copiado!",
+    "swal_copiado_msg": "Se ha copiado al portapapeles la URL válida por 2 horas.",
+    "swal_err_tit": "Error",
+    "swal_err_msg": "No se pudo generar el enlace"
+  }
 }
