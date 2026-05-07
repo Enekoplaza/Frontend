@@ -227,6 +227,10 @@
     "swal_copiado_tit": "¡Enlace Copiado!",
     "swal_copiado_msg": "Se ha copiado al portapapeles la URL válida por 2 horas.",
     "swal_err_tit": "Error",
-    "swal_err_msg": "No se pudo generar el enlace"
+    "swal_err_msg": "No se pudo generar el enlace",
+    "btn_teclado": "Teclado (DNI)",
+    "btn_camara": "Cámara (QR)",
+    "instruccion_qr": "Apunta la cámara al código QR del socio.",
+    "validando": "Validando acceso..."
   }
 }

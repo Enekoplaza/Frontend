@@ -226,6 +226,10 @@
     "swal_copiado_tit": "Esteka Kopiatuta!",
     "swal_copiado_msg": "Arbelera kopiatu da 2 orduz balio duen URLa.",
     "swal_err_tit": "Errorea",
-    "swal_err_msg": "Ezin izan da esteka sortu"
+    "swal_err_msg": "Ezin izan da esteka sortu",
+    "btn_teclado": "Teklatua (NAN)",
+    "btn_camara": "Kamera (QR)",
+    "instruccion_qr": "Zuzendu kamera bazkidearen QR kodera.",
+    "validando": "Sarbidea egiaztatzen..."
   }
 }

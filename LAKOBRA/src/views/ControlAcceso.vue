@@ -1,19 +1,25 @@
 <script setup>
 import { apiFetch } from '@/services/apiFetch'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
-import { useI18n } from 'vue-i18n' // <-- Importamos i18n
+import { useI18n } from 'vue-i18n'
+// Importamos la librería del QR
+import { Html5Qrcode } from 'html5-qrcode'
 
-const { t } = useI18n() // <-- Instanciamos t() para usarlo en el script
+const { t } = useI18n()
 const route = useRoute()
-const router = useRouter() 
+const router = useRouter()
 const dniInput = ref('')
 const cargando = ref(false)
 const resultado = ref(null)
 
 const esAutorizado = ref(false)
 const usuarioLocal = JSON.parse(localStorage.getItem('usuarioLakobra') || '{}')
+
+// --- NUEVO: ESTADO PARA EL ESCÁNER ---
+const modoActivo = ref('dni') // 'dni' o 'qr'
+let html5QrCode = null
 
 onMounted(async () => {
   if (usuarioLocal.rol === 'admin' || usuarioLocal.rol === 'txandalari') {
@@ -26,22 +32,15 @@ onMounted(async () => {
     if (data.success) {
       esAutorizado.value = true
       Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        title: t('puerta.swal_activo_tit'),
-        text: t('puerta.swal_activo_msg'),
-        icon: 'success',
-        timer: 2500,
-        showConfirmButton: false
+        background: '#1e293b', color: '#f8fafc',
+        title: t('puerta.swal_activo_tit'), text: t('puerta.swal_activo_msg'),
+        icon: 'success', timer: 2500, showConfirmButton: false
       })
     } else {
       await Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        title: t('puerta.swal_caducado_tit'),
-        text: t('puerta.swal_caducado_msg'),
-        icon: 'error',
-        confirmButtonColor: '#38bdf8'
+        background: '#1e293b', color: '#f8fafc',
+        title: t('puerta.swal_caducado_tit'), text: t('puerta.swal_caducado_msg'),
+        icon: 'error', confirmButtonColor: '#38bdf8'
       })
       router.push('/principal')
     }
@@ -50,6 +49,73 @@ onMounted(async () => {
   }
 })
 
+// --- LÓGICA DE LA CÁMARA ---
+const cambiarModo = async (nuevoModo) => {
+  modoActivo.value = nuevoModo
+  resultado.value = null
+
+  if (nuevoModo === 'qr') {
+    await nextTick() // Esperar a que el div #reader exista en el DOM
+    iniciarCamara()
+  } else {
+    detenerCamara()
+  }
+}
+
+const iniciarCamara = async () => {
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader")
+  }
+
+  const config = { fps: 10, qrbox: { width: 250, height: 250 } }
+  const onScanSuccess = (textoDecodificado) => {
+    detenerCamara()
+    validarQR(textoDecodificado)
+  }
+
+  try {
+    // 1. Pedimos al navegador que liste las cámaras (ESTO FUERZA EL AVISO DE PERMISOS)
+    const devices = await Html5Qrcode.getCameras()
+
+    if (devices && devices.length > 0) {
+      // 2. Si encuentra cámaras, coge la principal (la webcam en tu PC)
+      const cameraId = devices[0].id
+
+      // 3. Inicia la lectura con esa cámara
+      await html5QrCode.start(cameraId, config, onScanSuccess, () => { })
+    } else {
+      throw new Error("No se detectó ninguna cámara física")
+    }
+  } catch (err) {
+    console.error("Error DETALLADO al acceder a la cámara:", err)
+
+    let mensajeError = 'Revisa los permisos del navegador.'
+    if (err.name === 'NotAllowedError') mensajeError = 'Has denegado el permiso o el SO lo bloquea.'
+    if (err.name === 'NotFoundError') mensajeError = 'No se ha detectado ninguna cámara conectada al PC.'
+    if (err.name === 'NotReadableError') mensajeError = 'Otra aplicación (Zoom, Skype) está usando la cámara.'
+
+    Swal.fire({
+      background: '#1e293b', color: '#f8fafc',
+      title: 'Fallo de Cámara: ' + err.name,
+      text: mensajeError,
+      icon: 'error', confirmButtonColor: '#38bdf8'
+    })
+    cambiarModo('dni')
+  }
+}
+
+const detenerCamara = () => {
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().catch(err => console.error("Error deteniendo cámara", err))
+  }
+}
+
+// Limpiar la cámara si cerramos la página
+onBeforeUnmount(() => {
+  detenerCamara()
+})
+
+// --- VALIDACIONES AL BACKEND ---
 const validarDni = async () => {
   if (dniInput.value.trim() === '') return
   cargando.value = true
@@ -69,6 +135,28 @@ const validarDni = async () => {
   }
 }
 
+const validarQR = async (tokenQr) => {
+  cargando.value = true
+  resultado.value = null
+
+  try {
+    // Enviar solo el token, el PHP ya sabe quiénes somos por la cookie de sesión
+    const data = await apiFetch('validar_qr.php', {
+      method: 'POST',
+      body: JSON.stringify({ token: tokenQr })
+    })
+    resultado.value = data
+  } catch (error) {
+    resultado.value = { estado: 'error', mensaje: t('puerta.err_conexion') }
+  } finally {
+    cargando.value = false
+    // Esperamos 3 segundos y volvemos a encender la cámara para el siguiente
+    setTimeout(() => {
+      if (modoActivo.value === 'qr') iniciarCamara()
+    }, 3000)
+  }
+}
+
 const generarEnlace = async () => {
   try {
     const data = await apiFetch('api_generar_enlace.php')
@@ -76,22 +164,15 @@ const generarEnlace = async () => {
       const url = `${window.location.origin}/puerta?guest=${data.token}`
       await navigator.clipboard.writeText(url)
       Swal.fire({
-        background: '#1e293b',
-        color: '#f8fafc',
-        title: t('puerta.swal_copiado_tit'),
-        text: t('puerta.swal_copiado_msg'),
-        icon: 'success',
-        confirmButtonColor: '#38bdf8'
+        background: '#1e293b', color: '#f8fafc',
+        title: t('puerta.swal_copiado_tit'), text: t('puerta.swal_copiado_msg'),
+        icon: 'success', confirmButtonColor: '#38bdf8'
       })
     }
   } catch (e) {
     Swal.fire({
-      background: '#1e293b',
-      color: '#f8fafc',
-      title: t('puerta.swal_err_tit'),
-      text: t('puerta.swal_err_msg'),
-      icon: 'error',
-      confirmButtonColor: '#38bdf8'
+      background: '#1e293b', color: '#f8fafc', title: t('puerta.swal_err_tit'),
+      text: t('puerta.swal_err_msg'), icon: 'error', confirmButtonColor: '#38bdf8'
     })
   }
 }
@@ -112,7 +193,16 @@ const generarEnlace = async () => {
         </button>
       </div>
 
-      <div class="formulario-validacion">
+      <div class="selector-modo">
+        <button :class="['btn-tab', { activo: modoActivo === 'dni' }]" @click="cambiarModo('dni')">
+          ⌨️ {{ $t('puerta.btn_teclado') }}
+        </button>
+        <button :class="['btn-tab', { activo: modoActivo === 'qr' }]" @click="cambiarModo('qr')">
+          📷 {{ $t('puerta.btn_camara') }}
+        </button>
+      </div>
+
+      <div v-if="modoActivo === 'dni'" class="formulario-validacion">
         <label>{{ $t('puerta.label_dni') }}</label>
         <div class="input-grupo">
           <input type="text" v-model="dniInput" :placeholder="$t('puerta.ph_dni')" @keyup.enter="validarDni"
@@ -123,9 +213,16 @@ const generarEnlace = async () => {
         </div>
       </div>
 
+      <div v-if="modoActivo === 'qr'" class="zona-camara">
+        <p class="instruccion-qr">{{ $t('puerta.instruccion_qr') }}</p>
+        <div id="reader" class="lector-qr"></div>
+        <p v-if="cargando" class="cargando-texto">{{ $t('puerta.validando') }}</p>
+      </div>
+
       <transition name="fade">
-        <div v-if="resultado" class="panel-resultado" :class="resultado.estado.toLowerCase().replace(' ', '-')">
-          
+        <div v-if="resultado" class="panel-resultado"
+          :class="resultado.estado?.toLowerCase().replace(' ', '-') || 'error'">
+
           <div v-if="resultado.estado === 'OK'" class="estado-ok">
             <span class="icono">✅</span>
             <h2>{{ $t('puerta.acceso_ok') }}</h2>
@@ -153,10 +250,10 @@ const generarEnlace = async () => {
 
           <div v-else class="estado-error">
             <span class="icono">❌</span>
-            <h2>{{ $t('puerta.dni_invalido') }}</h2>
-            <p>{{ $t('puerta.no_existe') }}</p>
+            <h2>ERROR</h2>
+            <p>{{ resultado.mensaje || $t('puerta.no_existe') }}</p>
           </div>
-          
+
         </div>
       </transition>
     </div>
@@ -334,8 +431,15 @@ const generarEnlace = async () => {
    ANIMACIONES
    ========================================= */
 @keyframes popIn {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .fade-enter-active,
@@ -355,7 +459,9 @@ const generarEnlace = async () => {
   background-color: #1e293b !important;
   color: #f8fafc !important;
 }
-:deep(.swal2-title), :deep(.swal2-html-container) {
+
+:deep(.swal2-title),
+:deep(.swal2-html-container) {
   color: #f8fafc !important;
 }
 
@@ -367,8 +473,14 @@ const generarEnlace = async () => {
     max-width: 450px;
     padding: 1.8rem;
   }
-  .cabecera h1 { font-size: 1.7rem; }
-  .input-grupo input { font-size: 1rem; }
+
+  .cabecera h1 {
+    font-size: 1.7rem;
+  }
+
+  .input-grupo input {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -376,37 +488,138 @@ const generarEnlace = async () => {
     align-items: center;
     padding: 1.5rem 1rem;
   }
+
   .contenedor-herramienta {
     max-width: 100%;
     padding: 1.5rem;
     border-radius: 10px;
   }
-  .cabecera h1 { font-size: 1.5rem; }
-  .cabecera p { font-size: 0.95rem; }
-  
+
+  .cabecera h1 {
+    font-size: 1.5rem;
+  }
+
+  .cabecera p {
+    font-size: 0.95rem;
+  }
+
   .input-grupo {
     flex-direction: column;
     gap: 12px;
   }
+
   .input-grupo input {
     font-size: 1rem;
     padding: 13px;
   }
+
   .btn-validar {
     width: 100%;
     padding: 12px;
   }
-  .panel-resultado { padding: 1.2rem; }
-  .icono { font-size: 2.5rem; }
+
+  .panel-resultado {
+    padding: 1.2rem;
+  }
+
+  .icono {
+    font-size: 2.5rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .contenedor-herramienta { padding: 1.2rem; }
-  .cabecera h1 { font-size: 1.3rem; }
-  .cabecera p { font-size: 0.9rem; }
-  .input-grupo input { font-size: 0.95rem; }
-  .panel-resultado h2 { font-size: 1.2rem; }
-  .panel-resultado p { font-size: 1rem; }
-  .aforo { font-size: 0.85rem !important; }
+  .contenedor-herramienta {
+    padding: 1.2rem;
+  }
+
+  .cabecera h1 {
+    font-size: 1.3rem;
+  }
+
+  .cabecera p {
+    font-size: 0.9rem;
+  }
+
+  .input-grupo input {
+    font-size: 0.95rem;
+  }
+
+  .panel-resultado h2 {
+    font-size: 1.2rem;
+  }
+
+  .panel-resultado p {
+    font-size: 1rem;
+  }
+
+  .aforo {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* --- ESTILOS NUEVOS PARA LAS PESTAÑAS Y CÁMARA --- */
+.selector-modo {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #0f172a;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.btn-tab {
+  flex: 1;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-tab.activo {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.zona-camara {
+  margin-bottom: 20px;
+}
+
+.instruccion-qr {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.lector-qr {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #334155;
+  background-color: #000;
+}
+
+.cargando-texto {
+  color: #facc15;
+  font-weight: bold;
+  margin-top: 10px;
+  animation: parpadeo 1s infinite;
+}
+
+@keyframes parpadeo {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 </style>
