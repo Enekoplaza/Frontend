@@ -8,16 +8,22 @@ import CalendarioModal from '@/components/CalendarioModal.vue'
 
 const { t } = useI18n()
 
-// --- USUARIO (seguro) ---
-const usuarioLocal = localStorage.getItem('usuarioLakobra')
+// --- CONFIGURACIÓN DE PLAZAS POR TAREA (Reparto de los 6 puestos) ---
+const LIMITES_TAREAS = {
+  barra: 2,
+  puerta: 2,
+  limpieza: 1,
+  otros: 1
+}
 
+// --- USUARIO ---
+const usuarioLocal = localStorage.getItem('usuarioLakobra')
 let usuarioParseado = null
 try {
   usuarioParseado = JSON.parse(usuarioLocal)
 } catch (e) {
   usuarioParseado = null
 }
-
 const usuarioActivo = ref(usuarioParseado)
 
 // --- ROLES ---
@@ -35,24 +41,32 @@ const formEvento = ref({
   titulo: '',
   fecha_evento: '',
   hora_inicio: '',
-  aforo_max: 150,
-  max_txandalaris: 6, // 👈 NUEVO
+  aforo_max: 120,
+  txandalaris_max: 6, // Por defecto 6
   estado: 'pendiente',
 })
 
-// --- FECHAS ---
+// --- GESTIÓN DE FECHAS (Euskera y Validaciones) ---
 const obtenerFechaHoy = () => {
   const hoy = new Date()
-  const year = hoy.getFullYear()
-  const month = String(hoy.getMonth() + 1).padStart(2, '0')
-  const day = String(hoy.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return hoy.toISOString().split('T')[0]
 }
-
 const fechaHoy = obtenerFechaHoy()
 
-const esEventoFinalizado = (fechaEvento) => {
-  return fechaEvento < fechaHoy
+const esEventoFinalizado = (fechaEvento) => fechaEvento < fechaHoy
+
+// Formateador nativo para mostrar fechas en Euskera (ej: osteguna, 2026(e)ko maiatzak 14)
+const formatearFechaEU = (fechaStr) => {
+  if (!fechaStr) return ''
+  const fecha = new Date(fechaStr)
+  return new Intl.DateTimeFormat('eu-ES', { 
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+  }).format(fecha)
+}
+
+const formatearHora = (horaString) => {
+  if (!horaString) return ''
+  return horaString.substring(0, 5)
 }
 
 // --- VISIBILIDAD ---
@@ -64,28 +78,21 @@ const eventosVisibles = computed(() => {
   return eventos.value.filter((e) => e.estado === 'confirmado')
 })
 
-// 🔥 NUEVO: límite txandalaris
 const puedeAyudar = (evento) => {
   return (
     (esTxandalari.value || esAdmin.value) &&
     (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
     !esEventoFinalizado(evento.fecha_evento) &&
-    (evento.txandalaris_apuntados || 0) < (evento.max_txandalaris || 6)
+    (evento.txandalaris_apuntados || 0) < (evento.txandalaris_max || 6)
   )
 }
 
-// --- SWEETALERT ---
+// --- SWEETALERT CONFIG ---
 const swalDarkConfig = {
   background: '#1e293b',
   color: '#f8fafc',
   confirmButtonColor: '#38bdf8',
   cancelButtonColor: '#475569',
-}
-
-// --- UTIL ---
-const formatearHora = (horaString) => {
-  if (!horaString) return ''
-  return horaString.substring(0, 5)
 }
 
 // --- CARGAR EVENTOS ---
@@ -100,37 +107,43 @@ const cargarEventos = async () => {
   }
 }
 
-// --- POPUP AYUDA ---
+// --- POPUP AYUDA (Lógica de Tareas y Bloqueo de Puestos) ---
 const abrirPopupAyuda = async (evento) => {
+  // Construimos las opciones mostrando cuántos huecos quedan
+  const opcionesTareas = {
+    barra: `Taberna (${evento.ocupacion_barra || 0}/${LIMITES_TAREAS.barra})`,
+    puerta: `Sarrera (${evento.ocupacion_puerta || 0}/${LIMITES_TAREAS.puerta})`,
+    limpieza: `Garbiketa (${evento.ocupacion_limpieza || 0}/${LIMITES_TAREAS.limpieza})`,
+    otros: `Bestelakoak (${evento.ocupacion_otros || 0}/${LIMITES_TAREAS.otros})`,
+  }
+
   const { value: tarea } = await Swal.fire({
     ...swalDarkConfig,
-    title: t('eventos.titulo_ayuda'),
+    title: 'Aukeratu zure txanda',
     input: 'select',
-    inputOptions: {
-      sin_puesto: t('eventos.opt_sin_puesto'),
-      puerta: t('eventos.opt_puerta'),
-      barra: t('eventos.opt_barra'),
-      limpieza: t('eventos.opt_limpieza'),
-      otros: t('eventos.opt_otros'),
-    },
-    inputPlaceholder: t('eventos.ph_ayuda'),
+    inputOptions: opcionesTareas,
+    inputPlaceholder: 'Hautatu lan bat...',
     showCancelButton: true,
-    confirmButtonText: t('eventos.btn_confirmar'),
-    cancelButtonText: t('eventos.btn_cancelar'),
+    confirmButtonText: 'Apuntatu',
+    cancelButtonText: 'Utzi',
+    inputValidator: (value) => {
+      // Validación: Comprobar si el puesto específico está lleno
+      const ocupacionActual = parseInt(evento[`ocupacion_${value}`] || 0)
+      if (ocupacionActual >= LIMITES_TAREAS[value]) {
+        return `Barkatu, lan hau beteta dago (${ocupacionActual}/${LIMITES_TAREAS[value]})`
+      }
+    }
   })
 
   if (tarea) {
     try {
       const data = await apiFetch('api_asistir.php', {
         method: 'POST',
-        body: JSON.stringify({
-          id_evento: evento.id,
-          tarea: tarea,
-        }),
+        body: JSON.stringify({ id_evento: evento.id, tarea: tarea }),
       })
 
       if (data.success) {
-        Swal.fire({ ...swalDarkConfig, icon: 'success', timer: 1500, showConfirmButton: false })
+        Swal.fire({ ...swalDarkConfig, icon: 'success', title: 'Egina!', timer: 1500, showConfirmButton: false })
         cargarEventos()
       } else {
         Swal.fire({ ...swalDarkConfig, icon: 'error', text: data.message })
@@ -154,12 +167,7 @@ const cancelarFormulario = () => {
   modoEdicion.value = false
   idEditando.value = null
   formEvento.value = {
-    titulo: '',
-    fecha_evento: '',
-    hora_inicio: '',
-    aforo_max: 120,
-    max_txandalaris: 6, // 👈 NUEVO
-    estado: 'pendiente',
+    titulo: '', fecha_evento: '', hora_inicio: '', aforo_max: 120, txandalaris_max: 6, estado: 'pendiente'
   }
 }
 
@@ -179,7 +187,7 @@ const guardarEvento = async () => {
 }
 
 const borrarEvento = async (id) => {
-  const confirmacion = await Swal.fire({ ...swalDarkConfig, icon: 'warning', showCancelButton: true })
+  const confirmacion = await Swal.fire({ ...swalDarkConfig, icon: 'warning', showCancelButton: true, title: 'Ziur zaude?' })
   if (confirmacion.isConfirmed) {
     await apiFetch('api_eventos.php', { method: 'DELETE', body: JSON.stringify({ id }) })
     cargarEventos()
@@ -188,13 +196,12 @@ const borrarEvento = async (id) => {
 
 onMounted(cargarEventos)
 </script>
+
 <template>
   <div class="eventos-container">
-    <!-- HEADER -->
     <div class="header-eventos">
       <h1>{{ $t('eventos.titulo') }}</h1>
 
-      <!-- CALENDARIO -->
       <button
         v-if="usuarioActivo"
         class="btn-admin"
@@ -204,13 +211,11 @@ onMounted(cargarEventos)
         {{ $t('eventos.btn_ver_calendario') }}
       </button>
 
-      <!-- ADMIN -->
       <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
         {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
       </button>
     </div>
 
-    <!-- PANEL ADMIN -->
     <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
       <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
 
@@ -220,12 +225,11 @@ onMounted(cargarEventos)
         <input v-model="formEvento.hora_inicio" type="time" required />
         <input v-model="formEvento.aforo_max" type="number" :placeholder="$t('eventos.ph_aforo')" required />
 
-        <!-- 🦺 MAX TXANDALARIS -->
         <input
-          v-model="formEvento.max_txandalaris"
+          v-model="formEvento.txandalaris_max"
           type="number"
           min="1"
-          placeholder="Max txandalaris"
+          placeholder="Txandalaris Max"
           required
         />
 
@@ -241,26 +245,23 @@ onMounted(cargarEventos)
       </form>
     </div>
 
-    <!-- GRID EVENTOS -->
     <div class="grid-eventos">
       <p v-if="eventosVisibles.length === 0" class="no-eventos">
         {{ $t('eventos.vacio') }}
       </p>
 
       <div v-for="evento in eventosVisibles" :key="evento.id" class="tarjeta-evento">
-
-        <!-- ADMIN ACTIONS -->
         <div v-if="esAdmin" class="admin-actions">
           <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
           <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
         </div>
 
-        <!-- INFO -->
         <div class="evento-info">
           <h3>{{ evento.titulo }}</h3>
 
           <p class="fecha">
-            📅 {{ evento.fecha_evento }} 🕒 {{ formatearHora(evento.hora_inicio) }}
+            📅 <span style="text-transform: capitalize;">{{ formatearFechaEU(evento.fecha_evento) }}</span><br>
+            🕒 {{ formatearHora(evento.hora_inicio) }}
           </p>
 
           <p class="aforo">
@@ -268,84 +269,62 @@ onMounted(cargarEventos)
             <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}
           </p>
 
-          <!-- 🦺 TXANDALARIS -->
           <p class="txandalaris">
-            🦺 {{ evento.txandalaris_apuntados || 0 }} /
-            {{ evento.max_txandalaris || 6 }}
+            🦺 <strong>{{ evento.txandalaris_apuntados || 0 }} / {{ evento.txandalaris_max || 6 }}</strong> txandalari
           </p>
+          
+          <div style="display: flex; gap: 8px; font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">
+            <span>Barra: {{evento.ocupacion_barra || 0}}/2</span>
+            <span>Atea: {{evento.ocupacion_puerta || 0}}/2</span>
+            <span>Garb: {{evento.ocupacion_limpieza || 0}}/1</span>
+          </div>
 
           <span v-if="esEventoFinalizado(evento.fecha_evento)" class="badge finalizado">
             {{ $t('eventos.estado_finalizado') }}
           </span>
-
           <span v-else :class="['badge', evento.estado]">
             {{ $t('eventos.estado_' + evento.estado) }}
           </span>
         </div>
 
-        <!-- FOOTER -->
         <div class="footer-tarjeta">
-
           <template v-if="esEventoFinalizado(evento.fecha_evento)">
-            <button class="btn-lleno" disabled>
-              {{ $t('eventos.evento_finalizado') }}
-            </button>
+            <button class="btn-lleno" disabled>{{ $t('eventos.evento_finalizado') }}</button>
           </template>
 
           <template v-else>
-
-            <!-- 🟢 BOTÓN AYUDA -->
             <button
               v-if="puedeAyudar(evento)"
               class="btn-ayuda"
               :class="{ apuntado: evento.estoy_apuntado }"
-              :disabled="
-                evento.estoy_apuntado ||
-                (evento.txandalaris_apuntados || 0) >= (evento.max_txandalaris || 6)
-              "
+              :disabled="evento.estoy_apuntado || (evento.txandalaris_apuntados >= (evento.txandalaris_max || 6))"
               @click="abrirPopupAyuda(evento)"
             >
               <template v-if="evento.estoy_apuntado">
                 {{ $t('eventos.btn_apuntado') }}
               </template>
-
               <template v-else>
                 <div class="anillo-pulso-verde"></div>
                 {{ $t('eventos.btn_ayuda') }}
               </template>
             </button>
 
-            <!-- 🚫 COMPLETO -->
-            <button
-              v-else-if="(evento.txandalaris_apuntados || 0) >= (evento.max_txandalaris || 6)"
-              class="btn-lleno"
-              disabled
-            >
-              🦺 Completo
+            <button v-else-if="(evento.txandalaris_apuntados || 0) >= (evento.txandalaris_max || 6)" class="btn-lleno" disabled>
+              🦺 Txandak beteta
             </button>
 
-            <!-- 🔒 PENDIENTE -->
             <button v-else-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
-              <div class="anillo-pulso-pequeno"></div>
               {{ $t('eventos.btn_proximamente') }}
             </button>
-
-            <!-- 🚫 CANCELADO -->
             <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno" disabled>
               🚫 {{ $t('eventos.estado_cancelado') }}
             </button>
-
-            <!-- ℹ️ ABIERTO -->
-            <div v-else class="msg-abierto">
-              {{ $t('eventos.evento_abierto') }}
-            </div>
-
+            <div v-else class="msg-abierto">{{ $t('eventos.evento_abierto') }}</div>
           </template>
         </div>
       </div>
     </div>
 
-    <!-- CALENDARIO -->
     <CalendarioModal
       :mostrar="mostrarCalendario"
       :eventos="eventosVisibles"
