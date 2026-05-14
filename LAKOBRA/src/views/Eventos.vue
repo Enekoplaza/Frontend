@@ -21,7 +21,6 @@ try {
 const usuarioActivo = ref(usuarioParseado)
 
 // --- ROLES ---
-// Si no hay usuario, esto devuelve false automáticamente y no da error
 const esAdmin = computed(() => usuarioActivo.value?.rol === 'admin')
 const esTxandalari = computed(() => usuarioActivo.value?.rol === 'txandalari')
 
@@ -37,6 +36,7 @@ const formEvento = ref({
   fecha_evento: '',
   hora_inicio: '',
   aforo_max: 150,
+  max_txandalaris: 6, // 👈 NUEVO
   estado: 'pendiente',
 })
 
@@ -55,24 +55,22 @@ const esEventoFinalizado = (fechaEvento) => {
   return fechaEvento < fechaHoy
 }
 
-// --- VISIBILIDAD EVENTOS (NUEVA REGLA DEL PROFESOR) ---
+// --- VISIBILIDAD ---
 const eventosVisibles = computed(() => {
   const user = usuarioActivo.value
-
-  // Admin o txandalari → ven TODO (Pendientes, Confirmados y Cancelados)
   if (user && (user.rol === 'admin' || user.rol === 'txandalari')) {
     return eventos.value
   }
-
-  // Resto (Socios normales Y Visitantes sin registrar) → SOLO ven los confirmados
   return eventos.value.filter((e) => e.estado === 'confirmado')
 })
 
+// 🔥 NUEVO: límite txandalaris
 const puedeAyudar = (evento) => {
   return (
-    (esTxandalari.value || esAdmin.value) && // <-- AHORA SÍ: Txandalaris O Admins
+    (esTxandalari.value || esAdmin.value) &&
     (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
-    !esEventoFinalizado(evento.fecha_evento) 
+    !esEventoFinalizado(evento.fecha_evento) &&
+    (evento.txandalaris_apuntados || 0) < (evento.max_txandalaris || 6)
   )
 }
 
@@ -119,12 +117,6 @@ const abrirPopupAyuda = async (evento) => {
     showCancelButton: true,
     confirmButtonText: t('eventos.btn_confirmar'),
     cancelButtonText: t('eventos.btn_cancelar'),
-    didOpen: () => {
-      const input = Swal.getInput()
-      input.style.backgroundColor = '#0f172a'
-      input.style.color = '#ffffff'
-      input.style.border = '1px solid #334155'
-    },
   })
 
   if (tarea) {
@@ -138,16 +130,10 @@ const abrirPopupAyuda = async (evento) => {
       })
 
       if (data.success) {
-        Swal.fire({
-          ...swalDarkConfig,
-          icon: 'success',
-          title: t('eventos.swal_guardado'),
-          timer: 1500,
-          showConfirmButton: false,
-        })
+        Swal.fire({ ...swalDarkConfig, icon: 'success', timer: 1500, showConfirmButton: false })
         cargarEventos()
       } else {
-        Swal.fire({ ...swalDarkConfig, icon: 'error', title: 'Error', text: data.message })
+        Swal.fire({ ...swalDarkConfig, icon: 'error', text: data.message })
       }
     } catch (error) {
       console.error('Error al asignar tarea', error)
@@ -161,7 +147,6 @@ const prepararEdicion = (evento) => {
   mostrarFormulario.value = true
   idEditando.value = evento.id
   formEvento.value = { ...evento }
-  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const cancelarFormulario = () => {
@@ -173,6 +158,7 @@ const cancelarFormulario = () => {
     fecha_evento: '',
     hora_inicio: '',
     aforo_max: 120,
+    max_txandalaris: 6, // 👈 NUEVO
     estado: 'pendiente',
   }
 }
@@ -181,66 +167,44 @@ const guardarEvento = async () => {
   const method = modoEdicion.value ? 'PUT' : 'POST'
   const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
 
-  try {
-    const data = await apiFetch('api_eventos.php', {
-      method,
-      body: JSON.stringify(payload),
-    })
+  const data = await apiFetch('api_eventos.php', {
+    method,
+    body: JSON.stringify(payload),
+  })
 
-    if (data.success) {
-      Swal.fire({
-        ...swalDarkConfig,
-        icon: 'success',
-        title: t('eventos.swal_guardado'),
-        timer: 1500,
-        showConfirmButton: false,
-      })
-      cancelarFormulario()
-      cargarEventos()
-    } else {
-      Swal.fire({ ...swalDarkConfig, icon: 'warning', title: 'Aviso', text: data.message })
-    }
-  } catch (error) {
-    Swal.fire({ ...swalDarkConfig, icon: 'error', title: t('eventos.swal_err_con') })
+  if (data.success) {
+    cancelarFormulario()
+    cargarEventos()
   }
 }
 
 const borrarEvento = async (id) => {
-  const confirmacion = await Swal.fire({
-    ...swalDarkConfig,
-    icon: 'warning',
-    title: t('eventos.swal_warn_tit'),
-    text: t('eventos.swal_warn_msg'),
-    showCancelButton: true,
-    confirmButtonText: t('eventos.swal_btn_borrar'),
-    cancelButtonText: t('eventos.btn_cancelar'),
-  })
-
+  const confirmacion = await Swal.fire({ ...swalDarkConfig, icon: 'warning', showCancelButton: true })
   if (confirmacion.isConfirmed) {
-    try {
-      await apiFetch('api_eventos.php', { method: 'DELETE', body: JSON.stringify({ id }) })
-      cargarEventos()
-    } catch (error) {
-      console.error(error)
-    }
+    await apiFetch('api_eventos.php', { method: 'DELETE', body: JSON.stringify({ id }) })
+    cargarEventos()
   }
 }
 
 onMounted(cargarEventos)
 </script>
-
 <template>
   <div class="eventos-container">
-    <!-- HEADER SIEMPRE VISIBLE PARA TODO EL MUNDO -->
+    <!-- HEADER -->
     <div class="header-eventos">
       <h1>{{ $t('eventos.titulo') }}</h1>
-      
-      <!-- BOTÓN CALENDARIO: -->
-      <button v-if="usuarioActivo" class="btn-admin" style="background-color: #8b5cf6; margin-right: auto; margin-left: 15px;" @click="mostrarCalendario = true">
+
+      <!-- CALENDARIO -->
+      <button
+        v-if="usuarioActivo"
+        class="btn-admin"
+        style="background-color: #8b5cf6; margin-right: auto; margin-left: 15px;"
+        @click="mostrarCalendario = true"
+      >
         {{ $t('eventos.btn_ver_calendario') }}
       </button>
 
-      <!-- BOTÓN ADMIN (SOLO UNO) -->
+      <!-- ADMIN -->
       <button v-if="esAdmin" class="btn-admin" @click="mostrarFormulario = !mostrarFormulario">
         {{ mostrarFormulario ? $t('eventos.btn_cancelar') : $t('eventos.btn_crear') }}
       </button>
@@ -251,18 +215,17 @@ onMounted(cargarEventos)
       <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
 
       <form @submit.prevent="guardarEvento" class="form-grid">
-        <input
-          v-model="formEvento.titulo"
-          type="text"
-          :placeholder="$t('eventos.ph_titulo')"
-          required
-        />
+        <input v-model="formEvento.titulo" type="text" :placeholder="$t('eventos.ph_titulo')" required />
         <input v-model="formEvento.fecha_evento" type="date" :min="fechaHoy" required />
         <input v-model="formEvento.hora_inicio" type="time" required />
+        <input v-model="formEvento.aforo_max" type="number" :placeholder="$t('eventos.ph_aforo')" required />
+
+        <!-- 🦺 MAX TXANDALARIS -->
         <input
-          v-model="formEvento.aforo_max"
+          v-model="formEvento.max_txandalaris"
           type="number"
-          :placeholder="$t('eventos.ph_aforo')"
+          min="1"
+          placeholder="Max txandalaris"
           required
         />
 
@@ -278,14 +241,15 @@ onMounted(cargarEventos)
       </form>
     </div>
 
-    <!-- GRID EVENTOS (FILTRADOS AUTOMÁTICAMENTE PARA PÚBLICO O PRIVADO) -->
+    <!-- GRID EVENTOS -->
     <div class="grid-eventos">
       <p v-if="eventosVisibles.length === 0" class="no-eventos">
         {{ $t('eventos.vacio') }}
       </p>
 
       <div v-for="evento in eventosVisibles" :key="evento.id" class="tarjeta-evento">
-        <!-- ACCIONES ADMIN -->
+
+        <!-- ADMIN ACTIONS -->
         <div v-if="esAdmin" class="admin-actions">
           <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
           <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
@@ -300,8 +264,14 @@ onMounted(cargarEventos)
           </p>
 
           <p class="aforo">
-            👥 {{ $t('eventos.plazas') }} <strong>{{ evento.plazas_libres }}</strong> /
-            {{ evento.aforo_max }}
+            👥 {{ $t('eventos.plazas') }}
+            <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}
+          </p>
+
+          <!-- 🦺 TXANDALARIS -->
+          <p class="txandalaris">
+            🦺 {{ evento.txandalaris_apuntados || 0 }} /
+            {{ evento.max_txandalaris || 6 }}
           </p>
 
           <span v-if="esEventoFinalizado(evento.fecha_evento)" class="badge finalizado">
@@ -313,8 +283,9 @@ onMounted(cargarEventos)
           </span>
         </div>
 
-        <!-- FOOTER BOTONES -->
+        <!-- FOOTER -->
         <div class="footer-tarjeta">
+
           <template v-if="esEventoFinalizado(evento.fecha_evento)">
             <button class="btn-lleno" disabled>
               {{ $t('eventos.evento_finalizado') }}
@@ -322,12 +293,16 @@ onMounted(cargarEventos)
           </template>
 
           <template v-else>
-            <!-- 🟢 TXANDALARI: AYUDA (AHORA TAMBIÉN EN CONFIRMADOS) -->
+
+            <!-- 🟢 BOTÓN AYUDA -->
             <button
               v-if="puedeAyudar(evento)"
               class="btn-ayuda"
               :class="{ apuntado: evento.estoy_apuntado }"
-              :disabled="evento.estoy_apuntado"
+              :disabled="
+                evento.estoy_apuntado ||
+                (evento.txandalaris_apuntados || 0) >= (evento.max_txandalaris || 6)
+              "
               @click="abrirPopupAyuda(evento)"
             >
               <template v-if="evento.estoy_apuntado">
@@ -340,7 +315,16 @@ onMounted(cargarEventos)
               </template>
             </button>
 
-            <!-- 🔒 NO TXANDALARI -->
+            <!-- 🚫 COMPLETO -->
+            <button
+              v-else-if="(evento.txandalaris_apuntados || 0) >= (evento.max_txandalaris || 6)"
+              class="btn-lleno"
+              disabled
+            >
+              🦺 Completo
+            </button>
+
+            <!-- 🔒 PENDIENTE -->
             <button v-else-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
               <div class="anillo-pulso-pequeno"></div>
               {{ $t('eventos.btn_proximamente') }}
@@ -351,25 +335,25 @@ onMounted(cargarEventos)
               🚫 {{ $t('eventos.estado_cancelado') }}
             </button>
 
-            <!-- ℹ️ CONFIRMADO (Para público general y socios normales) -->
+            <!-- ℹ️ ABIERTO -->
             <div v-else class="msg-abierto">
               {{ $t('eventos.evento_abierto') }}
             </div>
+
           </template>
         </div>
       </div>
     </div>
-    
-    <!-- MODAL CALENDARIO -->
-    <CalendarioModal 
-      :mostrar="mostrarCalendario" 
-      :eventos="eventosVisibles" 
+
+    <!-- CALENDARIO -->
+    <CalendarioModal
+      :mostrar="mostrarCalendario"
+      :eventos="eventosVisibles"
       :usuario="usuarioActivo"
       @cerrar="mostrarCalendario = false"
     />
   </div>
 </template>
-
 <style scoped>
 
 .eventos-container {
