@@ -147,34 +147,6 @@ const confirmarSolicitud = async () => {
   }
 }
 
-// ASIGNAR TURNO
-const asignarTurno = async (evento) => {
-  try {
-    const data = await apiFetch('api_perfil.php', {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'asignar_turno',
-        id_evento: evento.id,
-        puesto: evento.puesto || '',
-      }),
-    })
-    
-    if (data.success) {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'bottom-end',
-        showConfirmButton: false,
-        timer: 2000,
-        background: '#1e293b',
-        color: '#facc15',
-      })
-      Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
-      cargarTodosLosEventos() // Refrescar calendario global para mostrar tu turno
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
 
 // Cancelar asistencia y turno
 const cancelarAsistencia = async (id_evento) => {
@@ -222,10 +194,10 @@ const ampliarQR = () => {
     imageHeight: 300,
     imageAlt: 'Código QR de acceso',
     backdrop: 'rgba(0, 0, 0, 0.9)',
-    showConfirmButton: false, 
-    showCloseButton: true, 
+    showConfirmButton: false,
+    showCloseButton: true,
     customClass: {
-      closeButton: 'x-roja-modal', 
+      closeButton: 'x-roja-modal',
     },
   })
 }
@@ -432,13 +404,17 @@ const eliminarCuenta = async () => {
         <main class="contenido">
           <section class="tarjeta eventos">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
-              
-              <button style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;" @click="mostrarCalendario = true">
+              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{
+                $t('perfil.mis_eventos') }}</h3>
+
+              <button
+                style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;"
+                @click="mostrarCalendario = true">
                 {{ $t('eventos.btn_ver_calendario') }}
               </button>
             </div>
-            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;"></div>
+            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;">
+            </div>
 
             <div v-if="misEventos.length > 0" class="lista-eventos">
               <div v-for="evento in misEventos" :key="evento.id" class="evento-item">
@@ -447,25 +423,10 @@ const eliminarCuenta = async () => {
                   <span class="mes">{{ evento.fecha_evento.split('-')[1] }}</span>
                 </div>
 
-                <div class="detalle-evento">
-                  <h4>{{ evento.titulo }}</h4>
-                  <p>🕒 {{ evento.hora_inicio.substring(0, 5) }}</p>
-
-                  <div class="selector-turno" v-if="
-                    usuarioEditar.rol === 'admin' ||
-                    usuarioEditar.rol === 'txandalari' ||
-                    usuarioEditar.solicitud_txandalari == 1 ||
-                    usuarioEditar.solicitudTxandalari == 1
-                  ">
-                    <label>{{ $t('perfil.turno_label') }}</label>
-                    <select v-model="evento.puesto" @change="asignarTurno(evento)">
-                      <option value="">{{ $t('perfil.turno_ninguno') }}</option>
-                      <option value="barra">{{ $t('perfil.turno_barra') }}</option>
-                      <option value="puerta">{{ $t('perfil.turno_puerta') }}</option>
-                      <option value="limpieza">{{ $t('perfil.turno_limpieza') }}</option>
-                      <option value="otros">{{ $t('perfil.turno_otros') }}</option>
-                    </select>
-                  </div>
+                <div class="info-turno-fijo" v-if="evento.puesto" style="margin-top: 0.5rem;">
+                  <span style="color: #facc15; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                    🦺 <strong>{{ $t('perfil.turno_label') }}</strong> {{ $t('perfil.turno_' + evento.puesto) }}
+                  </span>
                 </div>
 
                 <button @click="cancelarAsistencia(evento.id)" class="btn-anular">×</button>
@@ -494,12 +455,8 @@ const eliminarCuenta = async () => {
     </div>
 
     <!-- MODAL CALENDARIO (Ahora con la variable correcta) -->
-    <CalendarioModal 
-      :mostrar="mostrarCalendario" 
-      :eventos="eventosParaCalendario" 
-      :usuario="usuarioEditar"
-      @cerrar="mostrarCalendario = false"
-    />
+    <CalendarioModal :mostrar="mostrarCalendario" :eventos="eventosParaCalendario" :usuario="usuarioEditar"
+      @cerrar="mostrarCalendario = false" />
   </div>
 </template>
 
