@@ -36,8 +36,7 @@ const esAdmin = computed(() => {
 <template>
   <header class="header">
     <div class="header-container">
-      
-      <!-- LÓGICA DEL LOGO ACTUALIZADA -->
+
       <div class="logo-container">
         <router-link to="/principal" class="logo-link">
           <img src="../assets/logolakobra.png" alt="Logo Lakobra" class="logo-img" />
@@ -52,50 +51,59 @@ const esAdmin = computed(() => {
       <nav class="nav" :class="{ abierto: menuAbierto }">
         <ul class="lista">
           <li>
-            <RouterLink to="/principal" @click="cerrarMenu">
-              {{ $t('header.inicio') }}
+            <RouterLink to="/principal" @click="cerrarMenu" class="nav-item">
+              <span class="icono-nav">🏠</span> {{ $t('header.inicio') }}
             </RouterLink>
           </li>
 
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth">
-              {{ $t('header.login') }}
+            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth nav-item">
+              <span class="icono-nav">🔑</span> {{ $t('header.login') }}
             </a>
           </li>
 
           <li class="user-welcome" v-else>
-            <RouterLink to="/perfil">
+            <RouterLink to="/perfil" class="nav-item perfil-link">
+              <span class="icono-nav">👤</span>
               <strong>{{ usuario.nombre }}</strong>
-              <span v-if="usuario.rol && usuario.rol.toLowerCase() !== 'admin'">
+              <span v-if="usuario.rol && usuario.rol.toLowerCase() !== 'admin'" class="rol-badge">
                 ({{ usuario.rol }})
               </span>
             </RouterLink>
           </li>
 
           <li v-if="!esAdmin">
-            <RouterLink to="/artistas">
-              {{ $t('header.artistas') }}
+            <RouterLink to="/artistas" class="nav-item">
+              <span class="icono-nav">🎸</span> {{ $t('header.artistas') }}
             </RouterLink>
           </li>
 
           <li v-if="esAdmin">
-            <RouterLink to="/solicitudes">
-              {{ $t('header.solicitudes') }}
+            <RouterLink to="/solicitudes" class="nav-item">
+              <span class="icono-nav">✉️</span> {{ $t('header.solicitudes') }}
             </RouterLink>
           </li>
 
           <li>
-            <RouterLink to="/eventos">
-              {{ $t('header.eventos') }}
+            <RouterLink to="/eventos" class="nav-item">
+              <span class="icono-nav">📅</span> {{ $t('header.eventos') }}
             </RouterLink>
           </li>
 
           <li v-if="usuario && (usuario.rol === 'admin' || usuario.rol === 'txandalari')">
-            <RouterLink to="/puerta">{{ $t('header.puerta') }}</RouterLink>
+            <RouterLink to="/puerta" class="nav-item">
+              <span class="icono-nav">🚪</span> {{ $t('header.puerta') }}
+            </RouterLink>
           </li>
 
           <li v-if="usuario">
-            <a href="#" @click.prevent="$emit('logout')" class="btn-logout">
+            <a href="#" @click.prevent="$emit('logout')" class="btn-logout nav-item">
+              <svg class="icono-salir" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
               {{ $t('header.logout') }}
             </a>
           </li>
@@ -103,18 +111,14 @@ const esAdmin = computed(() => {
           <li class="divider"></li>
 
           <li>
-            <button class="btn-idioma" @click="toggleIdioma" :title="$t('header.cambiar_idioma')">
-              {{ locale === 'es' ? 'EUS' : 'ES' }}
+            <button class="btn-idioma nav-item" @click="toggleIdioma" :title="$t('header.cambiar_idioma')">
+              <span class="icono-nav">🌍</span> {{ locale === 'es' ? 'EUS' : 'ES' }}
             </button>
           </li>
 
           <li>
-            <button
-              class="btn-tema theme-toggle"
-              :class="{ 'is-dark': modoOscuro }"
-              @click="$emit('toggleTema')"
-              :title="$t('header.cambiar_tema')"
-            >
+            <button class="btn-tema theme-toggle nav-item" :class="{ 'is-dark': modoOscuro }"
+              @click="$emit('toggleTema')" :title="$t('header.cambiar_tema')">
               <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
                 <mask class="moon" id="moon-mask">
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -144,7 +148,6 @@ const esAdmin = computed(() => {
 /* =========================================
    🌌 HEADER BASE (MODERNO)
    ========================================= */
-
 .header {
   --header-bg-start: #1e293b;
   --header-bg-end: #0f172a;
@@ -165,9 +168,8 @@ const esAdmin = computed(() => {
 /* =========================================
    🧱 CONTAINER
    ========================================= */
-
 .header-container {
-  max-width: 1200px;
+  max-width: 1450px;
   margin: 0 auto;
   padding: 1rem 25px;
 
@@ -180,7 +182,6 @@ const esAdmin = computed(() => {
 /* =========================================
    🔥 LOGO Y TEXTO (CON IMAGEN)
    ========================================= */
-
 .logo-link {
   display: flex;
   align-items: center;
@@ -217,29 +218,35 @@ const esAdmin = computed(() => {
 }
 
 /* =========================================
-   📍 NAV
+   📍 NAV & ENLACES (CON ICONOS)
    ========================================= */
-
 .lista {
   display: flex;
   gap: 1.2rem;
   list-style: none;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: 0;
 }
 
-a {
+/* Base para los enlaces con iconos */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   color: var(--header-text);
   text-decoration: none;
   font-weight: 600;
   padding: 6px 10px;
   border-radius: 8px;
   transition: all 0.25s ease;
-  position: relative;
+  white-space: nowrap;
 }
 
-a:hover {
+.nav-item:hover {
   color: var(--header-accent);
+  transform: translateY(-2px);
 }
 
 .router-link-active:not(.logo-link) {
@@ -248,43 +255,51 @@ a:hover {
   border-radius: 0;
 }
 
-/* =========================================
-   👤 USER & DIVIDER
-   ========================================= */
+.icono-nav {
+  font-size: 1.15rem;
+}
 
+/* =========================================
+   👤 USER, LOGOUT & DIVIDER
+   ========================================= */
 .user-welcome {
-  color: var(--header-text);
-  font-size: 0.9rem;
   white-space: nowrap;
   opacity: 0.9;
 }
 
-.user-welcome strong {
-  color: var(--header-accent);
+.perfil-link {
+  color: #38bdf8 !important;
+}
+
+.rol-badge {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-left: 2px;
 }
 
 .btn-logout {
-  color: #ff4d4d !important;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: 0.2s;
+  color: #ef4444 !important;
 }
 
-.btn-logout:hover {
-  opacity: 0.8;
-  border-bottom: none;
+.icono-salir {
+  color: #ef4444;
+  transition: transform 0.3s ease;
+}
+
+.btn-logout:hover .icono-salir {
+  transform: translateX(4px);
 }
 
 .divider {
   width: 1px;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.12);
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 0.5rem;
 }
 
 /* =========================================
-   🎨 BOTONES ACCIÓN
+   🎨 BOTONES ACCIÓN (TEMA E IDIOMA)
    ========================================= */
-
 .btn-tema {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -309,7 +324,7 @@ a:hover {
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--header-text);
   cursor: pointer;
-  padding: 3px 8px;
+  padding: 5px 10px;
   border-radius: 6px;
   font-weight: bold;
   transition: all 0.25s ease;
@@ -319,24 +334,40 @@ a:hover {
   color: var(--header-accent);
   border-color: var(--header-accent);
   background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
 }
 
 /* =========================================
    🌗 ANIMACIÓN TEMA
    ========================================= */
-
-.theme-toggle .sun-and-moon { transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25); overflow: visible; }
-.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) { transform-origin: center; transition: transform 0.5s ease, opacity 0.5s ease; }
-.theme-toggle .sun-and-moon .moon > circle { transition: transform 0.5s ease; }
-.theme-toggle.is-dark .sun-and-moon { transform: rotate(-100deg); }
-.theme-toggle.is-dark .sun-and-moon .sun { transform: scale(1.75); }
-.theme-toggle.is-dark .sun-and-moon .sun-beams { opacity: 0; transform: rotate(-25deg) scale(0.5); }
-.theme-toggle.is-dark .sun-and-moon .moon > circle { transform: translateX(-7px); }
+.theme-toggle .sun-and-moon {
+  transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25);
+  overflow: visible;
+}
+.theme-toggle .sun-and-moon > :is(.moon, .sun, .sun-beams) {
+  transform-origin: center;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+.theme-toggle .sun-and-moon .moon > circle {
+  transition: transform 0.5s ease;
+}
+.theme-toggle.is-dark .sun-and-moon {
+  transform: rotate(-100deg);
+}
+.theme-toggle.is-dark .sun-and-moon .sun {
+  transform: scale(1.75);
+}
+.theme-toggle.is-dark .sun-and-moon .sun-beams {
+  opacity: 0;
+  transform: rotate(-25deg) scale(0.5);
+}
+.theme-toggle.is-dark .sun-and-moon .moon > circle {
+  transform: translateX(-7px);
+}
 
 /* =========================================
    🍔 HAMBURGUESA
    ========================================= */
-
 .hamburguesa {
   display: none;
   font-size: 26px;
@@ -347,43 +378,43 @@ a:hover {
 }
 
 /* =========================================
-   📱 TABLET
+   📱 RESPONSIVE (TABLET & MÓVIL)
    ========================================= */
 @media (max-width: 1024px) {
-  .header-container { padding: 1rem 20px; }
-  .lista { gap: 0.9rem; }
-  .logo { font-size: 22px; }
+.header-container { 
+    padding: 1rem 15px; 
+    gap: 0.5rem; 
+  }
+  .lista { gap: 0.4rem; } /* Juntamos los botones un poco más */
+  .nav-item { 
+    padding: 6px 6px; 
+    font-size: 0.9rem; /* Letra un pelín más pequeña para que quepa todo */
+  }
+  .icono-nav { font-size: 1rem; }
+  .logo { font-size: 20px; }
+  .logo-img { height: 40px; }
 }
 
-/* =========================================
-   📱 MÓVIL (EL MENÚ DEL COMPAÑERO ARREGLADO)
-   ========================================= */
+
 @media (max-width: 768px) {
   .header-container {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
     padding: 0.8rem 15px;
   }
-
   .logo { font-size: 20px; }
   .logo-img { height: 30px; }
 
-  /* 🍔 Forzar hamburguesa a la derecha */
   .hamburguesa {
     display: block;
     margin-left: auto;
   }
 
-  /* 📦 El menú deslizante de tu compañero */
   .nav {
     position: absolute;
     top: 100%;
     right: 0;
     width: 100%;
     background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* Sombra añadida para que no quede plano sobre el body */
-    
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     transform: translateX(100%);
     opacity: 0;
     pointer-events: none;
@@ -396,37 +427,39 @@ a:hover {
     pointer-events: auto;
   }
 
-  /* ❗ Formato de lista original (derecha) */
   .lista {
     flex-direction: column;
     padding: 1.5rem 0;
-    gap: 0; /* Quitamos gap para usar padding en el enlace y que el click sea más fácil */
+    gap: 0;
   }
 
-  .lista li {
-    width: 100%;
-    text-align: right;
-  }
+  .lista li { width: 100%; }
 
-  .lista a, .btn-logout {
-    display: block;
+  /* En móvil, los flex items necesitan justify-content para ir a la derecha */
+  .nav-item {
+    justify-content: flex-end;
     width: 100%;
     padding: 12px 25px;
-    text-align: right;
   }
 
-  .user-welcome {
-    text-align: right;
-    padding: 10px 25px;
+  .nav-item:hover {
+    transform: translateX(-5px); /* Efecto de desplazamiento a la izquierda al hacer click en móvil */
   }
 
-  .divider {
-    display: none;
+  .divider { display: none; }
+
+  .btn-idioma {
+    margin: 5px 25px 5px auto; /* Mantenemos el idioma como estaba */
   }
 
-  /* Ajustes para los botones de idioma y tema en móvil */
-  .btn-idioma, .btn-tema {
-    margin: 5px 25px 5px auto;
+  .btn-tema {
+    width: 40px;
+    height: 40px;
+    margin: 5px auto; /* 👈 Este cambio centra el botón horizontalmente en el menú móvil */
+    padding: 0;
+    display: flex; /* Asegura que el SVG siga centrado dentro del botón */
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

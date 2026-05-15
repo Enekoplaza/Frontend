@@ -458,7 +458,8 @@ const eliminarCuenta = async () => {
                 {{ $t('eventos.btn_ver_calendario') }}
               </button>
             </div>
-            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;"></div>
+            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;">
+            </div>
 
             <div v-if="misEventos.length > 0" class="lista-eventos">
               <div v-for="evento in misEventos" :key="evento.id" class="evento-item">

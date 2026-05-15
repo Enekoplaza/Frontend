@@ -189,6 +189,7 @@ const guardarEvento = async () => {
   if (data.success) { cancelarFormulario(); cargarEventos(); }
 }
 
+// --- RESTAURAR DELETE ---
 const borrarEvento = async (id) => {
   const confirm = await Swal.fire({ background: '#1e293b', color: '#fff', icon: 'warning', showCancelButton: true, title: 'Ziur zaude?' })
   if (confirm.isConfirmed) {
@@ -199,6 +200,7 @@ const borrarEvento = async (id) => {
 
 onMounted(cargarEventos)
 </script>
+
 <template>
   <div class="eventos-container" style="padding: 20px;">
     
@@ -290,8 +292,8 @@ onMounted(cargarEventos)
   </div>
 </template>
 
-<style scoped>
 
+<style scoped>
 .eventos-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -418,14 +420,17 @@ onMounted(cargarEventos)
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;
 }
+
 .badge.pendiente {
   background: rgba(245, 158, 11, 0.2);
   color: #f59e0b;
 }
+
 .badge.cancelado {
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
 }
+
 .badge.finalizado {
   background: rgba(148, 163, 184, 0.2);
   color: #94a3b8;
@@ -537,10 +542,12 @@ onMounted(cargarEventos)
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
   }
+
   70% {
     transform: scale(1);
     box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
   }
+
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
@@ -552,10 +559,12 @@ onMounted(cargarEventos)
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
+
   70% {
     transform: scale(1);
     box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
   }
+
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
