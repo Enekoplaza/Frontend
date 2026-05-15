@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 
-// 1. IMPORTANTE: Los idiomas se importan así desde el paquete 'core'
+// Importación de idiomas desde el paquete 'core'
 import esLocale from '@fullcalendar/core/locales/es'
 import euLocale from '@fullcalendar/core/locales/eu' 
 
@@ -17,9 +17,11 @@ const props = defineProps({
   usuario: { type: Object, default: null }
 })
 
-const emit = defineEmits(['cerrar'])
+// Añadimos 'seleccionar-evento' al listado de eventos que este componente puede emitir
+const emit = defineEmits(['cerrar', 'seleccionar-evento'])
 
 // --- TRADUCTOR DE EVENTOS ---
+// Cambia esto en el <script setup> de CalendarioModal.vue
 const eventosFormateados = computed(() => {
   const hoy = new Date().toISOString().split('T')[0]
   const rolUsuario = props.usuario?.rol || 'socio'
@@ -36,7 +38,6 @@ const eventosFormateados = computed(() => {
 
     if (e.estoy_apuntado || (e.puesto && e.puesto !== '')) {
       if (rolUsuario === 'admin' || rolUsuario === 'txandalari') {
-        // Usamos $t para traducir el prefijo del título también
         titulo = `🛠️ [${locale.value === 'eus' ? 'Txanda' : 'Turno'}] ${e.titulo}`
         bgColor = '#8b5cf6'
       } else {
@@ -45,23 +46,41 @@ const eventosFormateados = computed(() => {
       }
     }
 
+    // Clonamos el objeto "e" entero de forma segura para que no se pierda nada
+    const copiaSeguraEvento = JSON.parse(JSON.stringify(e))
+
     return {
       title: titulo,
       date: e.fecha_evento,
       backgroundColor: bgColor,
       borderColor: bgColor,
-      allDay: true 
+      allDay: true,
+      // Guardamos la copia limpia aquí dentro
+      extendedProps: {
+        datosOriginales: copiaSeguraEvento
+      }
     }
   })
 })
+
+// --- MANEJADOR DE CLIC EN UN EVENTO ---
+const manejarEventoClick = (info) => {
+  // Extraemos el objeto original que guardamos en extendedProps
+  const eventoOriginal = info.event.extendedProps.datosOriginales
+  if (eventoOriginal) {
+    // Enviamos el evento hacia arriba (a eventos.vue o perfil.vue)
+    emit('seleccionar-evento', eventoOriginal)
+  }
+}
 
 // --- CONFIGURACIÓN DEL CALENDARIO ---
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin],
   initialView: 'dayGridMonth',
-  // 2. Aquí hacemos el cambio dinámico de idioma
   locale: locale.value === 'eus' ? euLocale : esLocale, 
   events: eventosFormateados.value,
+  // 🌟 Capturamos el clic del usuario usando la función que creamos arriba
+  eventClick: manejarEventoClick,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -98,7 +117,6 @@ const calendarOptions = computed(() => ({
     </div>
   </transition>
 </template>
-
 <style scoped>
 /* ESTILOS DEL MODAL (Fondo oscuro) */
 .modal-overlay {
