@@ -95,7 +95,7 @@ const verDetalleEvento = async (evento) => {
       const colorTexto = t.estoy_en_esta_tarea ? '#10b981' : '#e2e8f0'
       const checkApuntado = t.estoy_en_esta_tarea ? '<b>(Apuntatuta!) ✓</b>' : ''
       const colorCupo = t.ocupacion_actual >= t.limite_usuarios ? '#ef4444' : '#a1a1aa'
-      
+
       tareasHtml += `
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: ${colorTexto}">
           <span>${t.nombre_tarea} ${checkApuntado}</span>
@@ -116,7 +116,7 @@ const verDetalleEvento = async (evento) => {
     html: `
       <div style="font-size: 0.95rem; line-height: 1.6;">
         <p style="margin: 5px 0;">📅 <b>Data:</b> ${formatearFechaEU(evento.fecha_evento)}</p>
-        <p style="margin: 5px 0;">🕒 <b>Ordutegia:</b> ${evento.hora_inicio.substring(0,5)}</p>
+        <p style="margin: 5px 0;">🕒 <b>Ordutegia:</b> ${evento.hora_inicio.substring(0, 5)}</p>
         <p style="margin: 5px 0;">👥 <b>Plaza libreak (Bazkideak):</b> <span style="color: #10b981; font-weight:bold;">${evento.plazas_libres}</span> / ${evento.aforo_max}</p>
         ${tareasHtml}
       </div>
@@ -242,35 +242,6 @@ const confirmarSolicitud = async () => {
   }
 }
 
-// ASIGNAR TURNO MANUAL (Lista inferior)
-const asignarTurno = async (evento) => {
-  try {
-    const data = await apiFetch('api_perfil.php', {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'asignar_turno',
-        id_evento: evento.id,
-        puesto: evento.puesto || '',
-      }),
-    })
-    
-    if (data.success) {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'bottom-end',
-        showConfirmButton: false,
-        timer: 2000,
-        background: '#1e293b',
-        color: '#facc15',
-      })
-      Toast.fire({ icon: 'success', title: t('perfil.msg_turno_ok') })
-      cargarTodosLosEventos()
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 // Cancelar asistencia y turno
 const cancelarAsistencia = async (id_evento) => {
   try {
@@ -315,8 +286,8 @@ const ampliarQR = () => {
     imageHeight: 300,
     imageAlt: 'Código QR de acceso',
     backdrop: 'rgba(0, 0, 0, 0.9)',
-    showConfirmButton: false, 
-    showCloseButton: true, 
+    showConfirmButton: false,
+    showCloseButton: true,
     customClass: { closeButton: 'x-roja-modal' },
   })
 }
@@ -370,7 +341,8 @@ const eliminarCuenta = async () => {
             <h3><i class="icono">📱</i> {{ $t('perfil.qr_titulo') }}</h3>
 
             <div v-if="usuarioEditar.qr_token" class="qr-contenedor">
-              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`" alt="Mi Código QR" class="imagen-qr" />
+              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
+                alt="Mi Código QR" class="imagen-qr" />
               <p class="descripcion-qr">{{ $t('perfil.qr_desc') }}</p>
               <button @click="ampliarQR" class="btn-qr">{{ $t('perfil.btn_ampliar_qr') }}</button>
             </div>
@@ -383,21 +355,34 @@ const eliminarCuenta = async () => {
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
               <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono" title="Editar">✏️</button>
+              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono"
+                title="Editar">✏️</button>
             </div>
 
             <div v-if="!modoEdicion" class="vista-datos">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><p class="dato-texto">{{ usuarioEditar.nombre }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><p class="dato-texto">{{ usuarioEditar.dni }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><p class="dato-texto">{{ usuarioEditar.email }}</p></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><p class="dato-texto">{{ usuarioEditar.direccion }}</p></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.nombre }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.dni }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.email }}</p>
+              </div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label>
+                <p class="dato-texto">{{ usuarioEditar.direccion }}</p>
+              </div>
             </div>
 
             <div v-else class="formulario-edicion">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text" v-model="usuarioEditar.nombre" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text" v-model="usuarioEditar.dni" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email" v-model="usuarioEditar.email" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text" v-model="usuarioEditar.direccion" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text"
+                  v-model="usuarioEditar.nombre" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text"
+                  v-model="usuarioEditar.dni" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email"
+                  v-model="usuarioEditar.email" /></div>
+              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text"
+                  v-model="usuarioEditar.direccion" /></div>
 
               <div class="botones-edicion">
                 <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
@@ -410,10 +395,12 @@ const eliminarCuenta = async () => {
             </div>
           </section>
 
-          <section class="tarjeta estado-txandalari" :class="{ activo: usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1 }">
+          <section class="tarjeta estado-txandalari"
+            :class="{ activo: usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1 }">
             <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
-            
-            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'" class="estado-activo oficial">
+
+            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
+              class="estado-activo oficial">
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
                 <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
@@ -421,7 +408,8 @@ const eliminarCuenta = async () => {
               </div>
             </div>
 
-            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1" class="estado-activo pendiente">
+            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1"
+              class="estado-activo pendiente">
               <div class="anillo-pulso azul"></div>
               <div class="texto-estado">
                 <span class="estado-principal" style="color: #38bdf8">{{ $t('perfil.txan_pendiente') }}</span>
@@ -443,7 +431,8 @@ const eliminarCuenta = async () => {
                 <p>{{ $t('perfil.conf_seguro') }}</p>
                 <div class="botones-modal">
                   <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
-                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar')
+                  }}</button>
                 </div>
               </div>
             </div>
@@ -453,8 +442,11 @@ const eliminarCuenta = async () => {
         <main class="contenido">
           <section class="tarjeta eventos">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}</h3>
-              <button style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;" @click="mostrarCalendario = true">
+              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{
+                $t('perfil.mis_eventos') }}</h3>
+              <button
+                style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;"
+                @click="mostrarCalendario = true">
                 {{ $t('eventos.btn_ver_calendario') }}
               </button>
             </div>
@@ -472,15 +464,10 @@ const eliminarCuenta = async () => {
                   <h4>{{ evento.titulo }}</h4>
                   <p>🕒 {{ evento.hora_inicio.substring(0, 5) }}</p>
 
-                  <div class="selector-turno" v-if="usuarioEditar.rol === 'admin' || usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1">
-                    <label>{{ $t('perfil.turno_label') }}</label>
-                    <select v-model="evento.puesto" @change="asignarTurno(evento)">
-                      <option value="">{{ $t('perfil.turno_ninguno') }}</option>
-                      <option value="barra">{{ $t('perfil.turno_barra') }}</option>
-                      <option value="puerta">{{ $t('perfil.turno_puerta') }}</option>
-                      <option value="limpieza">{{ $t('perfil.turno_limpieza') }}</option>
-                      <option value="otros">{{ $t('perfil.turno_otros') }}</option>
-                    </select>
+                  <div class="info-turno-fijo" v-if="evento.puesto" style="margin-top: 0.5rem;">
+                    <span style="color: #facc15; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                      🦺 <strong>{{ $t('perfil.turno_label') }}:</strong> {{ $t('perfil.turno_' + evento.puesto) }}
+                    </span>
                   </div>
                 </div>
                 <button @click="cancelarAsistencia(evento.id)" class="btn-anular">×</button>
@@ -496,7 +483,8 @@ const eliminarCuenta = async () => {
             <h3><i class="icono">⚠️</i> Baja de socio</h3>
             <div class="zona-baja-socio">
               <p style="color: #94a3b8; margin-bottom: 1rem">
-                Si deseas darte de baja como socio, puedes hacerlo en cualquier momento. Esta acción eliminará tu cuenta de forma permanente.
+                Si deseas darte de baja como socio, puedes hacerlo en cualquier momento. Esta acción eliminará tu cuenta
+                de forma permanente.
               </p>
               <button class="btn-cancelar-suscripcion" @click="confirmarBaja">Darse de baja</button>
             </div>
@@ -505,13 +493,8 @@ const eliminarCuenta = async () => {
       </div>
     </div>
 
-    <CalendarioModal 
-      :mostrar="mostrarCalendario" 
-      :eventos="eventosParaCalendario" 
-      :usuario="usuarioEditar"
-      @cerrar="mostrarCalendario = false"
-      @seleccionar-evento="verDetalleEvento"
-    />
+    <CalendarioModal :mostrar="mostrarCalendario" :eventos="eventosParaCalendario" :usuario="usuarioEditar"
+      @cerrar="mostrarCalendario = false" @seleccionar-evento="verDetalleEvento" />
   </div>
 </template>
 <style scoped>

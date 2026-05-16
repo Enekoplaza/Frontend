@@ -6,6 +6,9 @@ import Swal from 'sweetalert2'
 import { useI18n } from 'vue-i18n'
 // Importamos la librería del QR
 import { Html5Qrcode } from 'html5-qrcode'
+// Importamos librerías para el PDF
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -176,6 +179,83 @@ const generarEnlace = async () => {
     })
   }
 }
+
+// --- GENERAR PDF DE AFORO (NUEVO) ---
+const generarPDF = async () => {
+  try {
+    // 1. Pedir eventos
+    const resEventos = await apiFetch('api_eventos.php')
+    if (!resEventos.success || resEventos.eventos.length === 0) {
+      return Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: 'No hay eventos disponibles' })
+    }
+
+    // 2. Montar opciones para el Select
+    const opcionesEventos = {}
+    resEventos.eventos.forEach(e => {
+      opcionesEventos[e.id] = `${e.titulo} (${e.fecha_evento})`
+    })
+
+    // 3. Preguntar al administrador de qué evento quiere el PDF
+    const { value: idEventoElegido } = await Swal.fire({
+      background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8', cancelButtonColor: '#475569',
+      title: 'Selecciona el Evento',
+      input: 'select',
+      inputOptions: opcionesEventos,
+      inputPlaceholder: 'Elige un evento de la lista...',
+      showCancelButton: true,
+      confirmButtonText: 'Generar PDF',
+      cancelButtonText: 'Cancelar'
+    })
+
+    if (!idEventoElegido) return
+
+    // 4. Mostrar cargando
+    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Generando PDF...', allowOutsideClick: false, didOpen: () => Swal.showLoading() })
+
+    const eventoSeleccionado = resEventos.eventos.find(e => e.id == idEventoElegido)
+
+    // 5. Pedir la lista de asistentes reales al backend
+    const resAsistentes = await apiFetch(`api_asistentes.php?id_evento=${idEventoElegido}`)
+    if (!resAsistentes.success) throw new Error('Error al obtener la lista de asistentes')
+
+    // 6. Generar PDF
+    const doc = new jsPDF()
+
+    doc.setFontSize(18)
+    doc.setTextColor(56, 189, 248)
+    doc.text('Registro Oficial de Accesos - La Kobra', 14, 20)
+
+    doc.setFontSize(11)
+    doc.setTextColor(80, 80, 80)
+    doc.text(`Evento: ${eventoSeleccionado.titulo}`, 14, 30)
+    doc.text(`Fecha: ${eventoSeleccionado.fecha_evento}`, 14, 36)
+    doc.text(`Total Asistentes: ${resAsistentes.asistentes.length} / ${eventoSeleccionado.aforo_max}`, 14, 42)
+
+    const filasTabla = resAsistentes.asistentes.map((asistente, index) => [
+      index + 1,
+      asistente.nombre,
+      asistente.dni,
+      asistente.fecha_hora_entrada
+    ])
+
+    autoTable(doc, {
+      startY: 50,
+      head: [['Nº', 'Nombre del Socio', 'DNI', 'Hora de Acceso']],
+      body: filasTabla,
+      headStyles: { fillColor: [30, 41, 59] },
+      alternateRowStyles: { fillColor: [241, 245, 249] }
+    })
+
+    const nombreArchivo = `Aforo_${eventoSeleccionado.titulo.replace(/\s+/g, '_')}.pdf`
+    doc.save(nombreArchivo)
+    
+    Swal.close()
+
+  } catch (error) {
+    console.error(error)
+    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Error', text: 'No se pudo generar el PDF', icon: 'error', confirmButtonColor: '#38bdf8' })
+  }
+}
 </script>
 
 <template>
@@ -187,9 +267,12 @@ const generarEnlace = async () => {
         <p>{{ $t('puerta.subtitulo') }}</p>
       </header>
 
-      <div v-if="usuarioLocal && usuarioLocal.rol === 'admin'" class="zona-admin">
+      <div v-if="usuarioLocal && usuarioLocal.rol === 'admin'" class="zona-admin" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <button @click="generarEnlace" class="btn-enlace">
           🔗 {{ $t('puerta.btn_generar_enlace') }}
+        </button>
+        <button @click="generarPDF" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; margin-top: 5px;">
+          📄 Descargar Aforo PDF
         </button>
       </div>
 

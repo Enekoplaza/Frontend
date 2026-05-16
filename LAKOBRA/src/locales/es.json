@@ -116,11 +116,11 @@
     "btn_proximamente": "Próximamente",
     "titulo_ayuda": "Selecciona tu tarea",
     "ph_ayuda": "¿En qué vas a ayudar?",
-    "opt_sin_puesto": "Posturik ez (Asistir solo)",
-    "opt_puerta": "Atea (Puerta)",
+    "opt_sin_puesto": "Asistir solo",
+    "opt_puerta": "Puerta",
     "opt_barra": "Barra",
-    "opt_limpieza": "Garbiketa (Limpieza)",
-    "opt_otros": "Beste batzuk (Otros)",
+    "opt_limpieza": "Limpieza",
+    "opt_otros": "Otros",
     "btn_confirmar": "Confirmar",
     "btn_ayuda": "Ayuda",
     "btn_apuntado": "✅ Contamos contigo",
@@ -129,7 +129,13 @@
     "privado_btn": "Ir a Iniciar Sesión",
     "estado_finalizado": "Finalizado",
     "evento_finalizado": "🏁 Evento Finalizado",
-    "btn_ver_calendario": "📅 Ver Calendario"
+    "btn_ver_calendario": "📅 Ver Calendario",
+    "distribucion_turnos": "Distribución de Puestos",
+    "turnos": "Turnos",
+    "fecha_etiq": "Fecha:",
+    "hora_etiq": "Hora:",
+    "plazas_libres": "Plazas libres:",
+    "btn_cerrar": "Cerrar"
     
   },
   "perfil": {
