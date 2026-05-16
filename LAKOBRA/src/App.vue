@@ -138,7 +138,7 @@ function toggleModo() {
 
 <style scoped>
 .app-container.light {
-  --fondo: #f8fafc;
+  --fondo: #dadde0;
   --texto: #334155;
   --titulo: #0f172a;
   --boton-bg: #38bdf8;
