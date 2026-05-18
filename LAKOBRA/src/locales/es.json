@@ -237,6 +237,23 @@
     "btn_teclado": "Teclado (DNI)",
     "btn_camara": "Cámara (QR)",
     "instruccion_qr": "Apunta la cámara al código QR del socio.",
-    "validando": "Validando acceso..."
+    "validando": "Validando acceso...",
+    "btn_descargar_pdf": "📄 Descargar Aforo PDF",
+    "pdf_no_eventos": "No hay eventos disponibles",
+    "pdf_selecciona_evento": "Selecciona el Evento",
+    "pdf_elige_evento": "Elige un evento de la lista...",
+    "btn_generar_pdf": "Generar PDF",
+    "btn_cancelar": "Cancelar",
+    "pdf_generando": "Generando PDF...",
+    "pdf_err_lista": "Error al obtener la lista de asistentes",
+    "pdf_titulo_doc": "Registro Oficial de Accesos - La Kobra",
+    "pdf_evento": "Evento",
+    "pdf_fecha": "Fecha",
+    "pdf_total": "Total Asistentes",
+    "pdf_col_n": "Nº",
+    "pdf_col_nombre": "Nombre del Socio",
+    "pdf_col_dni": "DNI",
+    "pdf_col_hora": "Hora de Acceso",
+    "pdf_err_generar": "No se pudo generar el PDF"
   }
 }
