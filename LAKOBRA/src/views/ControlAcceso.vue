@@ -180,13 +180,13 @@ const generarEnlace = async () => {
   }
 }
 
-// --- GENERAR PDF DE AFORO (NUEVO) ---
+// --- GENERAR PDF DE AFORO ---
 const generarPDF = async () => {
   try {
     // 1. Pedir eventos
     const resEventos = await apiFetch('api_eventos.php')
     if (!resEventos.success || resEventos.eventos.length === 0) {
-      return Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: 'No hay eventos disponibles' })
+      return Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: t('puerta.pdf_no_eventos') })
     }
 
     // 2. Montar opciones para el Select
@@ -198,38 +198,38 @@ const generarPDF = async () => {
     // 3. Preguntar al administrador de qué evento quiere el PDF
     const { value: idEventoElegido } = await Swal.fire({
       background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8', cancelButtonColor: '#475569',
-      title: 'Selecciona el Evento',
+      title: t('puerta.pdf_selecciona_evento'),
       input: 'select',
       inputOptions: opcionesEventos,
-      inputPlaceholder: 'Elige un evento de la lista...',
+      inputPlaceholder: t('puerta.pdf_elige_evento'),
       showCancelButton: true,
-      confirmButtonText: 'Generar PDF',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: t('puerta.btn_generar_pdf'),
+      cancelButtonText: t('puerta.btn_cancelar')
     })
 
     if (!idEventoElegido) return
 
     // 4. Mostrar cargando
-    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Generando PDF...', allowOutsideClick: false, didOpen: () => Swal.showLoading() })
+    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: t('puerta.pdf_generando'), allowOutsideClick: false, didOpen: () => Swal.showLoading() })
 
     const eventoSeleccionado = resEventos.eventos.find(e => e.id == idEventoElegido)
 
     // 5. Pedir la lista de asistentes reales al backend
     const resAsistentes = await apiFetch(`api_asistentes.php?id_evento=${idEventoElegido}`)
-    if (!resAsistentes.success) throw new Error('Error al obtener la lista de asistentes')
+    if (!resAsistentes.success) throw new Error(t('puerta.pdf_err_lista'))
 
     // 6. Generar PDF
     const doc = new jsPDF()
 
     doc.setFontSize(18)
     doc.setTextColor(56, 189, 248)
-    doc.text('Registro Oficial de Accesos - La Kobra', 14, 20)
+    doc.text(t('puerta.pdf_titulo_doc'), 14, 20)
 
     doc.setFontSize(11)
     doc.setTextColor(80, 80, 80)
-    doc.text(`Evento: ${eventoSeleccionado.titulo}`, 14, 30)
-    doc.text(`Fecha: ${eventoSeleccionado.fecha_evento}`, 14, 36)
-    doc.text(`Total Asistentes: ${resAsistentes.asistentes.length} / ${eventoSeleccionado.aforo_max}`, 14, 42)
+    doc.text(`${t('puerta.pdf_evento')}: ${eventoSeleccionado.titulo}`, 14, 30)
+    doc.text(`${t('puerta.pdf_fecha')}: ${eventoSeleccionado.fecha_evento}`, 14, 36)
+    doc.text(`${t('puerta.pdf_total')}: ${resAsistentes.asistentes.length} / ${eventoSeleccionado.aforo_max}`, 14, 42)
 
     const filasTabla = resAsistentes.asistentes.map((asistente, index) => [
       index + 1,
@@ -240,7 +240,7 @@ const generarPDF = async () => {
 
     autoTable(doc, {
       startY: 50,
-      head: [['Nº', 'Nombre del Socio', 'DNI', 'Hora de Acceso']],
+      head: [[t('puerta.pdf_col_n'), t('puerta.pdf_col_nombre'), t('puerta.pdf_col_dni'), t('puerta.pdf_col_hora')]],
       body: filasTabla,
       headStyles: { fillColor: [30, 41, 59] },
       alternateRowStyles: { fillColor: [241, 245, 249] }
@@ -253,7 +253,7 @@ const generarPDF = async () => {
 
   } catch (error) {
     console.error(error)
-    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Error', text: 'No se pudo generar el PDF', icon: 'error', confirmButtonColor: '#38bdf8' })
+    Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Error', text: t('puerta.pdf_err_generar'), icon: 'error', confirmButtonColor: '#38bdf8' })
   }
 }
 </script>
@@ -272,7 +272,7 @@ const generarPDF = async () => {
           🔗 {{ $t('puerta.btn_generar_enlace') }}
         </button>
         <button @click="generarPDF" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; margin-top: 5px;">
-          📄 Descargar Aforo PDF
+          {{ $t('puerta.btn_descargar_pdf') }}
         </button>
       </div>
 

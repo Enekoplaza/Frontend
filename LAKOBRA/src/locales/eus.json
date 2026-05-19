@@ -236,6 +236,23 @@
     "btn_teclado": "Teklatua (NAN)",
     "btn_camara": "Kamera (QR)",
     "instruccion_qr": "Zuzendu kamera bazkidearen QR kodera.",
-    "validando": "Sarbidea egiaztatzen..."
+    "validando": "Sarbidea egiaztatzen...",
+    "btn_descargar_pdf": "📄 Aforoaren PDF-a Deskargatu",
+    "pdf_no_eventos": "Ez dago ekitaldirik erabilgarri",
+    "pdf_selecciona_evento": "Aukeratu Ekitaldia",
+    "pdf_elige_evento": "Hautatu zerrendako ekitaldi bat...",
+    "btn_generar_pdf": "PDF-a Sortu",
+    "btn_cancelar": "Utzi",
+    "pdf_generando": "PDF-a sortzen...",
+    "pdf_err_lista": "Errorea partaideen zerrenda lortzean",
+    "pdf_titulo_doc": "Sarbideen Erregistro Ofiziala - La Kobra",
+    "pdf_evento": "Ekitaldia",
+    "pdf_fecha": "Data",
+    "pdf_total": "Guztira (Partaideak)",
+    "pdf_col_n": "Zk.",
+    "pdf_col_nombre": "Bazkidearen Izena",
+    "pdf_col_dni": "NAN",
+    "pdf_col_hora": "Sartzeko Ordua",
+    "pdf_err_generar": "Ezin izan da PDF-a sortu"
   }
 }
