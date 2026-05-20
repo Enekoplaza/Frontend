@@ -164,8 +164,23 @@ const generarEnlace = async () => {
   try {
     const data = await apiFetch('api_generar_enlace.php')
     if (data.success) {
-      const url = `${window.location.origin}/puerta?guest=${data.token}`
-      await navigator.clipboard.writeText(url)
+      const rutaCalculada = router.resolve({ path: '/puerta', query: { guest: data.token } }).href;
+      const url = `${window.location.origin}${rutaCalculada}`;
+
+      // 🔄 PLAN B CONTRA BLOQUEOS HTTP/CSP 🔄
+      // Intentamos el método moderno, si falla, usamos el método clásico compatible con todo
+      try {
+        await navigator.clipboard.writeText(url)
+      } catch (clipError) {
+        console.warn("Llamando al plan B de copiado por restricciones HTTP/CSP");
+        const inputTemporal = document.createElement('input');
+        inputTemporal.value = url;
+        document.body.appendChild(inputTemporal);
+        inputTemporal.select();
+        document.execCommand('copy'); // Comando clásico compatible con HTTP directo
+        document.body.removeChild(inputTemporal);
+      }
+
       Swal.fire({
         background: '#1e293b', color: '#f8fafc',
         title: t('puerta.swal_copiado_tit'), text: t('puerta.swal_copiado_msg'),
@@ -173,6 +188,7 @@ const generarEnlace = async () => {
       })
     }
   } catch (e) {
+    console.error("Error real en generarEnlace:", e);
     Swal.fire({
       background: '#1e293b', color: '#f8fafc', title: t('puerta.swal_err_tit'),
       text: t('puerta.swal_err_msg'), icon: 'error', confirmButtonColor: '#38bdf8'

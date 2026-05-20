@@ -216,4 +216,14 @@ function toggleModo() {
     clip-path: inset(0 0 0 0);
   }
 }
+
+@media (max-width: 480px) {
+
+  .app-container {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+}
 </style>

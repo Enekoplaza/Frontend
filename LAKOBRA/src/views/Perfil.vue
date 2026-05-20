@@ -1070,7 +1070,7 @@ const eliminarCuenta = async () => {
    📱 MÓVIL
    ========================================= */
 @media (max-width: 768px) {
-
+  
   .perfil {
     padding: 1.5rem 1rem;
   }
