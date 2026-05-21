@@ -275,20 +275,26 @@ const cancelarAsistencia = async (id_evento) => {
 
 const ampliarQR = () => {
   if (!usuarioEditar.value.qr_token) return
+
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${usuarioEditar.value.qr_token}`
 
   Swal.fire({
     background: '#1e293b',
     color: '#f8fafc',
     title: t('perfil.qr_titulo'),
-    imageUrl: qrUrl,
-    imageWidth: 300,
-    imageHeight: 300,
-    imageAlt: 'Código QR de acceso',
+    html: `
+      <div class="qr-modal-wrapper">
+        <img src="${qrUrl}" alt="QR" class="qr-modal-img"/>
+      </div>
+    `,
     backdrop: 'rgba(0, 0, 0, 0.9)',
     showConfirmButton: false,
     showCloseButton: true,
-    customClass: { closeButton: 'x-roja-modal' },
+    customClass: {
+      popup: 'qr-modal-popup',
+      htmlContainer: 'qr-modal-container',
+      closeButton: 'x-roja-modal'
+    }
   })
 }
 
@@ -1160,5 +1166,38 @@ const eliminarCuenta = async () => {
   .dia {
     font-size: 1.2rem;
   }
+}
+/* =========================
+   📱 QR MODAL CENTRADO
+   ========================= */
+
+:deep(.qr-modal-popup) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+:deep(.qr-modal-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-modal-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-modal-img {
+  max-width: 90vw;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const menuAbierto = ref(false)
 
@@ -22,12 +21,10 @@ defineEmits(['abrirModal', 'logout', 'toggleTema'])
 
 const { locale } = useI18n()
 
-// 🔄 Cambiar idioma
 const toggleIdioma = () => {
   locale.value = locale.value === 'es' ? 'eus' : 'es'
 }
 
-// 🔐 Detectar admin (robusto)
 const esAdmin = computed(() => {
   return props.usuario?.rol?.toLowerCase() === 'admin'
 })
@@ -57,13 +54,13 @@ const esAdmin = computed(() => {
           </li>
 
           <li v-if="!usuario">
-            <a href="#" @click.prevent="$emit('abrirModal')" class="link-auth nav-item">
+            <a href="#" @click.prevent="$emit('abrirModal'); cerrarMenu()" class="link-auth nav-item">
               <span class="icono-nav">🔑</span> {{ $t('header.login') }}
             </a>
           </li>
 
           <li class="user-welcome" v-else>
-            <RouterLink to="/perfil" class="nav-item perfil-link">
+            <RouterLink to="/perfil" class="nav-item perfil-link" @click="cerrarMenu">
               <span class="icono-nav">👤</span>
               <strong>{{ usuario.nombre }}</strong>
               <span v-if="usuario.rol && usuario.rol.toLowerCase() !== 'admin'" class="rol-badge">
@@ -73,31 +70,31 @@ const esAdmin = computed(() => {
           </li>
 
           <li v-if="!esAdmin">
-            <RouterLink to="/artistas" class="nav-item">
+            <RouterLink to="/artistas" class="nav-item" @click="cerrarMenu">
               <span class="icono-nav">🎸</span> {{ $t('header.artistas') }}
             </RouterLink>
           </li>
 
           <li v-if="esAdmin">
-            <RouterLink to="/solicitudes" class="nav-item">
+            <RouterLink to="/solicitudes" class="nav-item" @click="cerrarMenu">
               <span class="icono-nav">✉️</span> {{ $t('header.solicitudes') }}
             </RouterLink>
           </li>
 
           <li>
-            <RouterLink to="/eventos" class="nav-item">
+            <RouterLink to="/eventos" class="nav-item" @click="cerrarMenu">
               <span class="icono-nav">📅</span> {{ $t('header.eventos') }}
             </RouterLink>
           </li>
 
           <li v-if="usuario && (usuario.rol === 'admin' || usuario.rol === 'txandalari')">
-            <RouterLink to="/puerta" class="nav-item">
+            <RouterLink to="/puerta" class="nav-item" @click="cerrarMenu">
               <span class="icono-nav">🚪</span> {{ $t('header.puerta') }}
             </RouterLink>
           </li>
 
           <li v-if="usuario">
-            <a href="#" @click.prevent="$emit('logout')" class="btn-logout nav-item">
+            <a href="#" @click.prevent="$emit('logout'); cerrarMenu()" class="btn-logout nav-item">
               <svg class="icono-salir" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -111,14 +108,14 @@ const esAdmin = computed(() => {
           <li class="divider"></li>
 
           <li>
-            <button class="btn-idioma nav-item" @click="toggleIdioma" :title="$t('header.cambiar_idioma')">
+            <button class="btn-idioma nav-item" @click="toggleIdioma(); cerrarMenu()" :title="$t('header.cambiar_idioma')">
               <span class="icono-nav">🌍</span> {{ locale === 'es' ? 'EUS' : 'ES' }}
             </button>
           </li>
 
           <li>
             <button class="btn-tema theme-toggle nav-item" :class="{ 'is-dark': modoOscuro }"
-              @click="$emit('toggleTema')" :title="$t('header.cambiar_tema')">
+              @click="$emit('toggleTema'); cerrarMenu()" :title="$t('header.cambiar_tema')">
               <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
                 <mask class="moon" id="moon-mask">
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
