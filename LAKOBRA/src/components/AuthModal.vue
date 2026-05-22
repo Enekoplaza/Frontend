@@ -54,12 +54,7 @@ const resetForm = () => {
     dni: '',
     email: '',
     password: '',
-    calle: '',
-    numero: '',
-    piso: '',
-    cp: '',
     ciudad: '',
-    direccion: '',
     rol: 'socio',
   }
   esLogin.value = true
@@ -253,17 +248,7 @@ const handleSubmit = async () => {
           </p>
 
           <div class="direccion-grid">
-            <input v-model="form.calle" type="text" placeholder="Calle / Avenida" required />
-            <input v-model="form.numero" type="text" placeholder="Nº" required />
-            <input v-model="form.piso" type="text" placeholder="Piso (ej: 3ºB)" />
-            <input
-              v-model="form.cp"
-              type="text"
-              placeholder="Código Postal"
-              maxlength="5"
-              required
-            />
-            <input v-model="form.ciudad" type="text" placeholder="Ciudad" required />
+            <input v-model="form.ciudad" type="text" placeholder="Helbidea" required />
           </div>
         </template>
 
