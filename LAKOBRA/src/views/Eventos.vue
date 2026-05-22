@@ -29,6 +29,35 @@ const eventosVisibles = computed(() => {
   return eventos.value.filter((e) => e.estado === 'confirmado')
 })
 
+const cancelarAsistenciaEvento = async (evento) => {
+  const confirm = await Swal.fire({
+    ...swalDarkConfig,
+    icon: 'warning',
+    showCancelButton: true,
+    title: '¿Cancelar asistencia?',
+    text: 'Se eliminará tu turno en este evento.',
+    confirmButtonText: 'Sí, cancelar',
+    cancelButtonText: 'Volver',
+  })
+
+  if (confirm.isConfirmed) {
+    const data = await apiFetch('api_asistir.php', {
+      method: 'POST',
+      body: JSON.stringify({ id_evento: evento.id, cancelar: true }),
+    })
+    if (data.success) {
+      Swal.fire({
+        ...swalDarkConfig,
+        icon: 'info',
+        title: 'Turno cancelado',
+        timer: 1500,
+        showConfirmButton: false,
+      })
+      cargarEventos()
+    }
+  }
+}
+
 // Valores iniciales por defecto
 const formularioBase = () => ({
   titulo: '',
@@ -39,7 +68,7 @@ const formularioBase = () => ({
   max_puerta: 2,
   max_barra: 2,
   max_limpieza: 2,
-  max_otros: 2
+  max_otros: 2,
 })
 
 const formEvento = ref(formularioBase())
@@ -51,7 +80,12 @@ const esEventoFinalizado = (fecha) => fecha < fechaHoy
 const formatearFechaEU = (fechaStr) => {
   if (!fechaStr) return ''
   // Aquí podemos dejar el formato numérico base o usar locale, pero el date standard funciona bien
-  return new Intl.DateTimeFormat('eu-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(fechaStr))
+  return new Intl.DateTimeFormat('eu-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(fechaStr))
 }
 
 const cargarEventos = async () => {
@@ -65,7 +99,11 @@ const cargarEventos = async () => {
 
 // Límite txandalaris dinámico
 const puedeAyudar = (evento) => {
-  const topeTxandalaris = (evento.max_puerta || 2) + (evento.max_barra || 2) + (evento.max_limpieza || 2) + (evento.max_otros || 2)
+  const topeTxandalaris =
+    (evento.max_puerta || 2) +
+    (evento.max_barra || 2) +
+    (evento.max_limpieza || 2) +
+    (evento.max_otros || 2)
   return (
     (esTxandalari.value || esAdmin.value) &&
     (evento.estado === 'pendiente' || evento.estado === 'confirmado') &&
@@ -76,23 +114,27 @@ const puedeAyudar = (evento) => {
 
 // --- POPUP REVELAR DETALLES DESDE EL CALENDARIO ---
 const verDetalleEvento = async (infoOEvento) => {
-  if (!infoOEvento) return;
+  if (!infoOEvento) return
 
-  let evento = infoOEvento;
-  if (infoOEvento.event && infoOEvento.event.extendedProps && infoOEvento.event.extendedProps.datosOriginales) {
-    evento = infoOEvento.event.extendedProps.datosOriginales;
+  let evento = infoOEvento
+  if (
+    infoOEvento.event &&
+    infoOEvento.event.extendedProps &&
+    infoOEvento.event.extendedProps.datosOriginales
+  ) {
+    evento = infoOEvento.event.extendedProps.datosOriginales
   }
 
   const titulo = evento.titulo || 'Ekitaldia'
   const fecha = evento.fecha_evento || ''
-  const hora = evento.hora_inicio ? evento.hora_inicio.substring(0,5) : '00:00'
+  const hora = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) : '00:00'
   const plazasLibres = evento.plazas_libres !== undefined ? evento.plazas_libres : '?'
   const aforoMax = evento.aforo_max || '?'
-  
-  const maxP = evento.max_puerta || 2;
-  const maxB = evento.max_barra || 2;
-  const maxL = evento.max_limpieza || 2;
-  const maxO = evento.max_otros || 2;
+
+  const maxP = evento.max_puerta || 2
+  const maxB = evento.max_barra || 2
+  const maxL = evento.max_limpieza || 2
+  const maxO = evento.max_otros || 2
 
   const tareasHtml = `
       <div style="margin-top: 15px; padding: 12px; background: #0f172a; border-radius: 6px; text-align: left; border: 1px solid #334155;">
@@ -100,22 +142,30 @@ const verDetalleEvento = async (infoOEvento) => {
         
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0">
           <span>${t('eventos.opt_puerta')}</span>
-          <span style="color: ${(evento.ocupacion_puerta || 0) >= maxP ? '#ef4444' : '#a1a1aa'}"><strong>${evento.ocupacion_puerta || 0} / ${maxP}</strong></span>
+          <span style="color: ${
+            (evento.ocupacion_puerta || 0) >= maxP ? '#ef4444' : '#a1a1aa'
+          }"><strong>${evento.ocupacion_puerta || 0} / ${maxP}</strong></span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0">
           <span>${t('eventos.opt_barra')}</span>
-          <span style="color: ${(evento.ocupacion_barra || 0) >= maxB ? '#ef4444' : '#a1a1aa'}"><strong>${evento.ocupacion_barra || 0} / ${maxB}</strong></span>
+          <span style="color: ${
+            (evento.ocupacion_barra || 0) >= maxB ? '#ef4444' : '#a1a1aa'
+          }"><strong>${evento.ocupacion_barra || 0} / ${maxB}</strong></span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0">
           <span>${t('eventos.opt_limpieza')}</span>
-          <span style="color: ${(evento.ocupacion_limpieza || 0) >= maxL ? '#ef4444' : '#a1a1aa'}"><strong>${evento.ocupacion_limpieza || 0} / ${maxL}</strong></span>
+          <span style="color: ${
+            (evento.ocupacion_limpieza || 0) >= maxL ? '#ef4444' : '#a1a1aa'
+          }"><strong>${evento.ocupacion_limpieza || 0} / ${maxL}</strong></span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0">
           <span>${t('eventos.opt_otros')}</span>
-          <span style="color: ${(evento.ocupacion_otros || 0) >= maxO ? '#ef4444' : '#a1a1aa'}"><strong>${evento.ocupacion_otros || 0} / ${maxO}</strong></span>
+          <span style="color: ${
+            (evento.ocupacion_otros || 0) >= maxO ? '#ef4444' : '#a1a1aa'
+          }"><strong>${evento.ocupacion_otros || 0} / ${maxO}</strong></span>
         </div>
       </div>
-  `;
+  `
 
   const result = await Swal.fire({
     background: '#1e293b',
@@ -125,15 +175,17 @@ const verDetalleEvento = async (infoOEvento) => {
       <div style="font-size: 0.95rem; line-height: 1.6;">
         <p style="margin: 5px 0;">📅 ${fecha}</p>
         <p style="margin: 5px 0;">🕒 ${hora}</p>
-        <p style="margin: 5px 0;">👥 <b>${t('eventos.plazas')}</b> <span style="color: #10b981; font-weight:bold;">${plazasLibres}</span> / ${aforoMax}</p>
-        ${(esAdmin.value || esTxandalari.value) ? tareasHtml : ''}
+        <p style="margin: 5px 0;">👥 <b>${t(
+          'eventos.plazas'
+        )}</b> <span style="color: #10b981; font-weight:bold;">${plazasLibres}</span> / ${aforoMax}</p>
+        ${esAdmin.value || esTxandalari.value ? tareasHtml : ''}
       </div>
     `,
     showCancelButton: !esEventoFinalizado(fecha) && (esAdmin.value || esTxandalari.value),
     confirmButtonColor: '#475569',
     cancelButtonColor: '#10b981',
     confirmButtonText: t('eventos.btn_cancelar'),
-    cancelButtonText: t('eventos.btn_ayuda')
+    cancelButtonText: t('eventos.btn_ayuda'),
   })
 
   if (result.dismiss === Swal.DismissReason.cancel) {
@@ -143,7 +195,12 @@ const verDetalleEvento = async (infoOEvento) => {
 }
 
 // --- POPUP PARA APUNTARSE ---
-const swalDarkConfig = { background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8', cancelButtonColor: '#475569' }
+const swalDarkConfig = {
+  background: '#1e293b',
+  color: '#f8fafc',
+  confirmButtonColor: '#38bdf8',
+  cancelButtonColor: '#475569',
+}
 
 const abrirPopupAyuda = async (evento) => {
   const maxP = evento.max_puerta ?? 2
@@ -167,22 +224,53 @@ const abrirPopupAyuda = async (evento) => {
     cancelButtonText: t('eventos.btn_cancelar'),
     didOpen: () => {
       const select = Swal.getInput()
-      if ((evento.ocupacion_puerta || 0) >= maxP) { let opt = select.querySelector('option[value="puerta"]'); if(opt) { opt.disabled = true; opt.style.color = '#475569'; } }
-      if ((evento.ocupacion_barra || 0) >= maxB) { let opt = select.querySelector('option[value="barra"]'); if(opt) { opt.disabled = true; opt.style.color = '#475569'; } }
-      if ((evento.ocupacion_limpieza || 0) >= maxL) { let opt = select.querySelector('option[value="limpieza"]'); if(opt) { opt.disabled = true; opt.style.color = '#475569'; } }
-      if ((evento.ocupacion_otros || 0) >= maxO) { let opt = select.querySelector('option[value="otros"]'); if(opt) { opt.disabled = true; opt.style.color = '#475569'; } }
-    }
+      if ((evento.ocupacion_puerta || 0) >= maxP) {
+        let opt = select.querySelector('option[value="puerta"]')
+        if (opt) {
+          opt.disabled = true
+          opt.style.color = '#475569'
+        }
+      }
+      if ((evento.ocupacion_barra || 0) >= maxB) {
+        let opt = select.querySelector('option[value="barra"]')
+        if (opt) {
+          opt.disabled = true
+          opt.style.color = '#475569'
+        }
+      }
+      if ((evento.ocupacion_limpieza || 0) >= maxL) {
+        let opt = select.querySelector('option[value="limpieza"]')
+        if (opt) {
+          opt.disabled = true
+          opt.style.color = '#475569'
+        }
+      }
+      if ((evento.ocupacion_otros || 0) >= maxO) {
+        let opt = select.querySelector('option[value="otros"]')
+        if (opt) {
+          opt.disabled = true
+          opt.style.color = '#475569'
+        }
+      }
+    },
   })
 
   if (tarea) {
     try {
       const data = await apiFetch('api_asistir.php', {
         method: 'POST',
-        body: JSON.stringify({ id_evento: evento.id, tarea: tarea }), 
+        body: JSON.stringify({ id_evento: evento.id, tarea: tarea }),
       })
 
       if (data.success) {
-        Swal.fire({ ...swalDarkConfig, icon: 'success', title: t('eventos.swal_ok_conf'), text: t('eventos.btn_apuntado'), timer: 2000, showConfirmButton: false })
+        Swal.fire({
+          ...swalDarkConfig,
+          icon: 'success',
+          title: t('eventos.swal_ok_conf'),
+          text: t('eventos.btn_apuntado'),
+          timer: 2000,
+          showConfirmButton: false,
+        })
         cargarEventos()
       } else {
         Swal.fire({ ...swalDarkConfig, icon: 'error', text: data.message })
@@ -210,26 +298,28 @@ const cancelarFormulario = () => {
 
 const guardarEvento = async () => {
   const method = modoEdicion.value ? 'PUT' : 'POST'
-  const payload = modoEdicion.value ? { ...formEvento.value, id: idEditando.value } : formEvento.value
-  
+  const payload = modoEdicion.value
+    ? { ...formEvento.value, id: idEditando.value }
+    : formEvento.value
+
   const data = await apiFetch('api_eventos.php', { method, body: JSON.stringify(payload) })
-  if (data.success) { 
+  if (data.success) {
     cancelarFormulario()
     cargarEventos()
   }
 }
 
 const borrarEvento = async (id) => {
-  const confirm = await Swal.fire({ 
-    ...swalDarkConfig, 
-    icon: 'warning', 
-    showCancelButton: true, 
+  const confirm = await Swal.fire({
+    ...swalDarkConfig,
+    icon: 'warning',
+    showCancelButton: true,
     title: t('eventos.swal_warn_tit'),
     text: t('eventos.swal_warn_msg'),
     confirmButtonText: t('eventos.swal_btn_borrar'),
-    cancelButtonText: t('eventos.btn_cancelar')
+    cancelButtonText: t('eventos.btn_cancelar'),
   })
-  
+
   if (confirm.isConfirmed) {
     await apiFetch(`api_eventos.php?id=${id}`, { method: 'DELETE' })
     cargarEventos()
@@ -241,15 +331,10 @@ onMounted(cargarEventos)
 
 <template>
   <div class="eventos-container">
-    
     <div class="header-eventos">
       <h1>{{ $t('eventos.titulo') }}</h1>
-      
-      <button
-        v-if="usuarioActivo"
-        class="btn-calendario"
-        @click="mostrarCalendario = true"
-      >
+
+      <button v-if="usuarioActivo" class="btn-calendario" @click="mostrarCalendario = true">
         {{ $t('eventos.btn_ver_calendario') }}
       </button>
 
@@ -260,30 +345,85 @@ onMounted(cargarEventos)
 
     <div v-if="esAdmin && mostrarFormulario" class="admin-panel">
       <h2>{{ modoEdicion ? $t('eventos.edit_titulo') : $t('eventos.new_titulo') }}</h2>
-      
+
       <form @submit.prevent="guardarEvento" class="form-evento">
-        <input v-model="formEvento.titulo" type="text" :placeholder="$t('eventos.ph_titulo')" required class="input-form" />
-        
+        <input
+          v-model="formEvento.titulo"
+          type="text"
+          :placeholder="$t('eventos.ph_titulo')"
+          required
+          class="input-form"
+        />
+
         <div class="form-grid">
-          <label>{{ $t('eventos.fecha_etiq') }}<input v-model="formEvento.fecha_evento" type="date" :min="fechaHoy" required class="input-form" /></label>
-          <label>{{ $t('eventos.hora_etiq') }}<input v-model="formEvento.hora_inicio" type="time" required class="input-form" /></label>
-          <label>{{ $t('eventos.ph_aforo') }}:<input v-model="formEvento.aforo_max" type="number" required class="input-form" /></label>
+          <label
+            >{{ $t('eventos.fecha_etiq')
+            }}<input
+              v-model="formEvento.fecha_evento"
+              type="date"
+              :min="fechaHoy"
+              required
+              class="input-form"
+          /></label>
+          <label
+            >{{ $t('eventos.hora_etiq')
+            }}<input v-model="formEvento.hora_inicio" type="time" required class="input-form"
+          /></label>
+          <label
+            >{{ $t('eventos.ph_aforo') }}:<input
+              v-model="formEvento.aforo_max"
+              type="number"
+              required
+              class="input-form"
+          /></label>
         </div>
 
         <div class="panel-puestos-form">
           <h4>{{ $t('eventos.distribucion_turnos') }}</h4>
           <div class="grid-puestos-form">
-            <label>{{ $t('eventos.opt_puerta') }}
-              <input v-model.number="formEvento.max_puerta" type="number" min="2" max="10" required class="input-form-sm" />
+            <label
+              >{{ $t('eventos.opt_puerta') }}
+              <input
+                v-model.number="formEvento.max_puerta"
+                type="number"
+                min="2"
+                max="10"
+                required
+                class="input-form-sm"
+              />
             </label>
-            <label>{{ $t('eventos.opt_barra') }}
-              <input v-model.number="formEvento.max_barra" type="number" min="2" max="10" required class="input-form-sm" />
+            <label
+              >{{ $t('eventos.opt_barra') }}
+              <input
+                v-model.number="formEvento.max_barra"
+                type="number"
+                min="2"
+                max="10"
+                required
+                class="input-form-sm"
+              />
             </label>
-            <label>{{ $t('eventos.opt_limpieza') }}
-              <input v-model.number="formEvento.max_limpieza" type="number" min="2" max="10" required class="input-form-sm" />
+            <label
+              >{{ $t('eventos.opt_limpieza') }}
+              <input
+                v-model.number="formEvento.max_limpieza"
+                type="number"
+                min="2"
+                max="10"
+                required
+                class="input-form-sm"
+              />
             </label>
-            <label>{{ $t('eventos.opt_otros') }}
-              <input v-model.number="formEvento.max_otros" type="number" min="2" max="10" required class="input-form-sm" />
+            <label
+              >{{ $t('eventos.opt_otros') }}
+              <input
+                v-model.number="formEvento.max_otros"
+                type="number"
+                min="2"
+                max="10"
+                required
+                class="input-form-sm"
+              />
             </label>
           </div>
         </div>
@@ -302,7 +442,6 @@ onMounted(cargarEventos)
 
     <div class="grid-eventos">
       <div v-for="evento in eventosVisibles" :key="evento.id" class="tarjeta-evento">
-        
         <div v-if="esAdmin" class="admin-actions">
           <button @click="prepararEdicion(evento)" class="btn-icon">✏️</button>
           <button @click="borrarEvento(evento.id)" class="btn-icon delete">🗑️</button>
@@ -310,34 +449,68 @@ onMounted(cargarEventos)
 
         <div class="evento-info">
           <h3>{{ evento.titulo }}</h3>
-          <p class="fecha">📅 <span style="text-transform: capitalize;">{{ evento.fecha_evento }}</span> | 🕒 {{ evento.hora_inicio.substring(0,5) }}</p>
-          <p class="aforo">👥 {{ $t('eventos.plazas') }} <strong>{{ evento.plazas_libres }}</strong> / {{ evento.aforo_max }}</p>
+          <p class="fecha">
+            📅 <span style="text-transform: capitalize">{{ evento.fecha_evento }}</span> | 🕒
+            {{ evento.hora_inicio.substring(0, 5) }}
+          </p>
+          <p class="aforo">
+            👥 {{ $t('eventos.plazas') }} <strong>{{ evento.plazas_libres }}</strong> /
+            {{ evento.aforo_max }}
+          </p>
         </div>
 
         <div v-if="esAdmin || esTxandalari" class="info-puestos">
-          <h4>{{ $t('eventos.turnos') }} ({{ evento.txandalaris_apuntados || 0 }} / {{ (evento.max_puerta || 2) + (evento.max_barra || 2) + (evento.max_limpieza || 2) + (evento.max_otros || 2) }})</h4>
-          
+          <h4>
+            {{ $t('eventos.turnos') }} ({{ evento.txandalaris_apuntados || 0 }} /
+            {{
+              (evento.max_puerta || 2) +
+              (evento.max_barra || 2) +
+              (evento.max_limpieza || 2) +
+              (evento.max_otros || 2)
+            }})
+          </h4>
+
           <div class="puesto-item">
             <span>{{ $t('eventos.opt_puerta') }}</span>
-            <span :class="{'puesto-lleno': (evento.ocupacion_puerta || 0) >= (evento.max_puerta || 2), 'puesto-libre': (evento.ocupacion_puerta || 0) < (evento.max_puerta || 2)}">
+            <span
+              :class="{
+                'puesto-lleno': (evento.ocupacion_puerta || 0) >= (evento.max_puerta || 2),
+                'puesto-libre': (evento.ocupacion_puerta || 0) < (evento.max_puerta || 2),
+              }"
+            >
               <strong>{{ evento.ocupacion_puerta || 0 }} / {{ evento.max_puerta || 2 }}</strong>
             </span>
           </div>
           <div class="puesto-item">
             <span>{{ $t('eventos.opt_barra') }}</span>
-            <span :class="{'puesto-lleno': (evento.ocupacion_barra || 0) >= (evento.max_barra || 2), 'puesto-libre': (evento.ocupacion_barra || 0) < (evento.max_barra || 2)}">
+            <span
+              :class="{
+                'puesto-lleno': (evento.ocupacion_barra || 0) >= (evento.max_barra || 2),
+                'puesto-libre': (evento.ocupacion_barra || 0) < (evento.max_barra || 2),
+              }"
+            >
               <strong>{{ evento.ocupacion_barra || 0 }} / {{ evento.max_barra || 2 }}</strong>
             </span>
           </div>
           <div class="puesto-item">
             <span>{{ $t('eventos.opt_limpieza') }}</span>
-            <span :class="{'puesto-lleno': (evento.ocupacion_limpieza || 0) >= (evento.max_limpieza || 2), 'puesto-libre': (evento.ocupacion_limpieza || 0) < (evento.max_limpieza || 2)}">
+            <span
+              :class="{
+                'puesto-lleno': (evento.ocupacion_limpieza || 0) >= (evento.max_limpieza || 2),
+                'puesto-libre': (evento.ocupacion_limpieza || 0) < (evento.max_limpieza || 2),
+              }"
+            >
               <strong>{{ evento.ocupacion_limpieza || 0 }} / {{ evento.max_limpieza || 2 }}</strong>
             </span>
           </div>
           <div class="puesto-item">
             <span>{{ $t('eventos.opt_otros') }}</span>
-            <span :class="{'puesto-lleno': (evento.ocupacion_otros || 0) >= (evento.max_otros || 2), 'puesto-libre': (evento.ocupacion_otros || 0) < (evento.max_otros || 2)}">
+            <span
+              :class="{
+                'puesto-lleno': (evento.ocupacion_otros || 0) >= (evento.max_otros || 2),
+                'puesto-libre': (evento.ocupacion_otros || 0) < (evento.max_otros || 2),
+              }"
+            >
               <strong>{{ evento.ocupacion_otros || 0 }} / {{ evento.max_otros || 2 }}</strong>
             </span>
           </div>
@@ -350,34 +523,53 @@ onMounted(cargarEventos)
 
           <template v-else>
             <button
-              v-if="puedeAyudar(evento)"
+              v-if="puedeAyudar(evento) && !evento.estoy_apuntado"
               class="btn-ayuda"
-              :class="{ apuntado: evento.estoy_apuntado }"
               @click="abrirPopupAyuda(evento)"
             >
-              <template v-if="evento.estoy_apuntado">{{ $t('eventos.btn_apuntado') }}</template>
-              <template v-else>
-                <div class="anillo-pulso-verde"></div>
-                {{ $t('eventos.btn_ayuda') }}
-              </template>
+              <div class="anillo-pulso-verde"></div>
+              {{ $t('eventos.btn_ayuda') }}
             </button>
 
-            <button v-else-if="(evento.txandalaris_apuntados || 0) >= ((evento.max_puerta || 2) + (evento.max_barra || 2) + (evento.max_limpieza || 2) + (evento.max_otros || 2)) && (esAdmin || esTxandalari)" class="btn-lleno" disabled>
+            <button
+              v-else-if="evento.estoy_apuntado && !esEventoFinalizado(evento.fecha_evento)"
+              class="btn-ayuda apuntado"
+              @click="cancelarAsistenciaEvento(evento)"
+            >
+              ✓ {{ $t('eventos.btn_apuntado') }} — click para cancelar
+            </button>
+
+            <button
+              v-else-if="
+                (evento.txandalaris_apuntados || 0) >=
+                  (evento.max_puerta || 2) +
+                    (evento.max_barra || 2) +
+                    (evento.max_limpieza || 2) +
+                    (evento.max_otros || 2) &&
+                (esAdmin || esTxandalari)
+              "
+              class="btn-lleno"
+              disabled
+            >
               {{ $t('eventos.aforo_completo') }}
             </button>
-            
+
             <button v-else-if="evento.estado === 'pendiente'" class="btn-proximamente" disabled>
-              <div class="anillo-pulso-pequeno"></div>{{ $t('eventos.btn_proximamente') }}
+              <div class="anillo-pulso-pequeno"></div>
+              {{ $t('eventos.btn_proximamente') }}
             </button>
 
-            <button v-else-if="evento.estado === 'cancelado'" class="btn-lleno btn-cancelado-aviso" disabled>
+            <button
+              v-else-if="evento.estado === 'cancelado'"
+              class="btn-lleno btn-cancelado-aviso"
+              disabled
+            >
               🚫 {{ $t('eventos.estado_cancelado') }}
             </button>
 
             <div v-else class="msg-abierto">{{ $t('eventos.evento_abierto') }}</div>
           </template>
         </div>
-
       </div>
     </div>
 
@@ -388,7 +580,6 @@ onMounted(cargarEventos)
       @cerrar="mostrarCalendario = false"
       @seleccionar-evento="verDetalleEvento"
     />
-
   </div>
 </template>
 
@@ -459,7 +650,8 @@ onMounted(cargarEventos)
   gap: 10px;
 }
 
-.input-form, .select-form {
+.input-form,
+.select-form {
   flex: 1;
   min-width: 150px;
   width: 100%;
@@ -696,15 +888,33 @@ onMounted(cargarEventos)
 
 /* ANIMACIONES */
 @keyframes pulso-naranja {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
 }
 
 @keyframes pulso-verde-anim {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 /* SWEETALERT FIX */
@@ -717,24 +927,31 @@ onMounted(cargarEventos)
    📱 TABLET
    ========================================= */
 @media (max-width: 1024px) {
-  .eventos-container { padding: 1.5rem; }
+  .eventos-container {
+    padding: 1.5rem;
+  }
   .grid-eventos {
     grid-template-columns: repeat(2, 1fr); /* 👈 Mantenemos 2 columnas en tablet */
     gap: 15px;
   }
-  .evento-info h3 { font-size: 1.2rem; }
+  .evento-info h3 {
+    font-size: 1.2rem;
+  }
 }
 
 /* =========================================
    📱 MÓVIL
    ========================================= */
 @media (max-width: 768px) {
-  .eventos-container { padding: 1rem; }
+  .eventos-container {
+    padding: 1rem;
+  }
   .header-eventos {
     flex-direction: column;
     align-items: flex-start;
   }
-  .btn-admin, .btn-calendario {
+  .btn-admin,
+  .btn-calendario {
     width: 100%;
     margin-left: 0;
     margin-top: 10px;
@@ -743,20 +960,36 @@ onMounted(cargarEventos)
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  .tarjeta-evento { padding: 1.2rem; }
-  .form-evento { flex-direction: column; }
-  .btn-submit { width: 100%; }
-  .evento-info h3 { font-size: 1.1rem; }
-  .evento-info p { font-size: 0.9rem; }
+  .tarjeta-evento {
+    padding: 1.2rem;
+  }
+  .form-evento {
+    flex-direction: column;
+  }
+  .btn-submit {
+    width: 100%;
+  }
+  .evento-info h3 {
+    font-size: 1.1rem;
+  }
+  .evento-info p {
+    font-size: 0.9rem;
+  }
 }
 
 /* =========================================
    📱 MÓVIL PEQUEÑO
    ========================================= */
 @media (max-width: 480px) {
-  .eventos-container { padding: 0.8rem; }
-  .tarjeta-evento { padding: 1rem; }
-  .btn-ayuda, .btn-lleno, .btn-proximamente {
+  .eventos-container {
+    padding: 0.8rem;
+  }
+  .tarjeta-evento {
+    padding: 1rem;
+  }
+  .btn-ayuda,
+  .btn-lleno,
+  .btn-proximamente {
     padding: 10px;
     font-size: 0.95rem;
   }

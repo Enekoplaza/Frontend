@@ -32,16 +32,21 @@ watch(
 
 // --- LÓGICA DE FECHAS ----
 const obtenerFechaHoy = () => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+  const hoy = new Date()
+  const year = hoy.getFullYear()
+  const month = String(hoy.getMonth() + 1).padStart(2, '0')
+  const day = String(hoy.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const formatearFechaEU = (fechaStr) => {
   if (!fechaStr) return ''
-  return new Intl.DateTimeFormat('eu-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(fechaStr))
+  return new Intl.DateTimeFormat('eu-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(fechaStr))
 }
 
 // 1. Cargar SOLO mis eventos futuros (para la tarjeta de abajo)
@@ -49,8 +54,8 @@ const cargarMisEventos = async () => {
   try {
     const data = await apiFetch('api_perfil.php')
     if (data.success) {
-      const fechaHoy = obtenerFechaHoy();
-      misEventos.value = data.eventos.filter(evento => evento.fecha_evento >= fechaHoy);
+      const fechaHoy = obtenerFechaHoy()
+      misEventos.value = data.eventos.filter((evento) => evento.fecha_evento >= fechaHoy)
     }
   } catch (error) {
     console.error('Error eventos perfil:', error)
@@ -91,7 +96,7 @@ const verDetalleEvento = async (evento) => {
       <div style="margin-top: 15px; padding: 12px; background: #0f172a; border-radius: 6px; text-align: left; border: 1px solid #334155;">
         <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 0.95rem;">Txandak / Lanpostuak:</h4>
     `
-    evento.tareas.forEach(t => {
+    evento.tareas.forEach((t) => {
       const colorTexto = t.estoy_en_esta_tarea ? '#10b981' : '#e2e8f0'
       const checkApuntado = t.estoy_en_esta_tarea ? '<b>(Apuntatuta!) ✓</b>' : ''
       const colorCupo = t.ocupacion_actual >= t.limite_usuarios ? '#ef4444' : '#a1a1aa'
@@ -117,7 +122,9 @@ const verDetalleEvento = async (evento) => {
       <div style="font-size: 0.95rem; line-height: 1.6;">
         <p style="margin: 5px 0;">📅 <b>Data:</b> ${formatearFechaEU(evento.fecha_evento)}</p>
         <p style="margin: 5px 0;">🕒 <b>Ordutegia:</b> ${evento.hora_inicio.substring(0, 5)}</p>
-        <p style="margin: 5px 0;">👥 <b>Plaza libreak (Bazkideak):</b> <span style="color: #10b981; font-weight:bold;">${evento.plazas_libres}</span> / ${evento.aforo_max}</p>
+        <p style="margin: 5px 0;">👥 <b>Plaza libreak (Bazkideak):</b> <span style="color: #10b981; font-weight:bold;">${
+          evento.plazas_libres
+        }</span> / ${evento.aforo_max}</p>
         ${tareasHtml}
       </div>
     `,
@@ -125,7 +132,7 @@ const verDetalleEvento = async (evento) => {
     confirmButtonColor: '#475569',
     cancelButtonColor: '#10b981',
     confirmButtonText: 'Itxi / Cerrar',
-    cancelButtonText: 'Lagundu / Txanda hartu'
+    cancelButtonText: 'Lagundu / Txanda hartu',
   })
 
   // Si pincha en "Lagundu", cerramos el calendario y lanzamos la asignación de turno
@@ -138,17 +145,25 @@ const verDetalleEvento = async (evento) => {
 // Flujo secundario para elegir txanda e inscribirse
 const abrirPopupAyuda = async (evento) => {
   if (!evento.tareas || evento.tareas.length === 0) {
-    Swal.fire({ background: '#1e293b', color: '#fff', icon: 'info', text: 'Ez dago txandarik ekitaldi honetan.' })
-    return;
+    Swal.fire({
+      background: '#1e293b',
+      color: '#fff',
+      icon: 'info',
+      text: 'Ez dago txandarik ekitaldi honetan.',
+    })
+    return
   }
 
   const opcionesTareas = {}
-  evento.tareas.forEach(t => {
+  evento.tareas.forEach((t) => {
     opcionesTareas[t.id] = `${t.nombre_tarea} (${t.ocupacion_actual}/${t.limite_usuarios})`
   })
 
   const { value: idTarea } = await Swal.fire({
-    background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8', cancelButtonColor: '#475569',
+    background: '#1e293b',
+    color: '#f8fafc',
+    confirmButtonColor: '#38bdf8',
+    cancelButtonColor: '#475569',
     title: 'Aukeratu zure txanda',
     input: 'select',
     inputOptions: opcionesTareas,
@@ -157,11 +172,11 @@ const abrirPopupAyuda = async (evento) => {
     confirmButtonText: 'Apuntatu',
     cancelButtonText: 'Utzi',
     inputValidator: (value) => {
-      const seleccionada = evento.tareas.find(t => t.id == value)
+      const seleccionada = evento.tareas.find((t) => t.id == value)
       if (seleccionada && seleccionada.ocupacion_actual >= seleccionada.limite_usuarios) {
         return `Txanda hau beteta dago!`
       }
-    }
+    },
   })
 
   if (idTarea) {
@@ -170,7 +185,14 @@ const abrirPopupAyuda = async (evento) => {
       body: JSON.stringify({ id_evento: evento.id, id_tarea: idTarea }),
     })
     if (data.success) {
-      Swal.fire({ background: '#1e293b', color: '#fff', icon: 'success', title: 'Egina!', timer: 1500, showConfirmButton: false })
+      Swal.fire({
+        background: '#1e293b',
+        color: '#fff',
+        icon: 'success',
+        title: 'Egina!',
+        timer: 1500,
+        showConfirmButton: false,
+      })
       cargarMisEventos()
       cargarTodosLosEventos()
     }
@@ -293,8 +315,8 @@ const ampliarQR = () => {
     customClass: {
       popup: 'qr-modal-popup',
       htmlContainer: 'qr-modal-container',
-      closeButton: 'x-roja-modal'
-    }
+      closeButton: 'x-roja-modal',
+    },
   })
 }
 
@@ -311,20 +333,37 @@ const confirmarBaja = async () => {
     confirmButtonText: 'Sí, eliminar cuenta',
     cancelButtonText: 'Cancelar',
   })
-  if (result.isConfirmed) { eliminarCuenta() }
+  if (result.isConfirmed) {
+    eliminarCuenta()
+  }
 }
 
 const eliminarCuenta = async () => {
   try {
     const data = await apiFetch('api_perfil.php', { method: 'DELETE' })
     if (data.success) {
-      await Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'success', title: 'Cuenta eliminada' })
+      await Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'success',
+        title: 'Cuenta eliminada',
+      })
       window.location.href = '/'
     } else {
-      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'error', title: 'Error al eliminar la cuenta' })
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'error',
+        title: 'Error al eliminar la cuenta',
+      })
     }
   } catch (error) {
-    Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'error', title: 'Error de conexión' })
+    Swal.fire({
+      background: '#1e293b',
+      color: '#f8fafc',
+      icon: 'error',
+      title: 'Error de conexión',
+    })
   }
 }
 </script>
@@ -347,8 +386,11 @@ const eliminarCuenta = async () => {
             <h3><i class="icono">📱</i> {{ $t('perfil.qr_titulo') }}</h3>
 
             <div v-if="usuarioEditar.qr_token" class="qr-contenedor">
-              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
-                alt="Mi Código QR" class="imagen-qr" />
+              <img
+                :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${usuarioEditar.qr_token}`"
+                alt="Mi Código QR"
+                class="imagen-qr"
+              />
               <p class="descripcion-qr">{{ $t('perfil.qr_desc') }}</p>
               <button @click="ampliarQR" class="btn-qr">{{ $t('perfil.btn_ampliar_qr') }}</button>
             </div>
@@ -361,52 +403,85 @@ const eliminarCuenta = async () => {
           <section class="tarjeta datos-usuario">
             <div class="cabecera-seccion">
               <h3><i class="icono">👤</i> {{ $t('perfil.mis_datos') }}</h3>
-              <button v-if="!modoEdicion" @click="modoEdicion = true" class="boton-editar-icono"
-                title="Editar">✏️</button>
+              <button
+                v-if="!modoEdicion"
+                @click="modoEdicion = true"
+                class="boton-editar-icono"
+                title="Editar"
+              >
+                ✏️
+              </button>
             </div>
 
             <div v-if="!modoEdicion" class="vista-datos">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.nombre') }}</label>
                 <p class="dato-texto">{{ usuarioEditar.nombre }}</p>
               </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.dni') }}</label>
                 <p class="dato-texto">{{ usuarioEditar.dni }}</p>
               </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.email') }}</label>
                 <p class="dato-texto">{{ usuarioEditar.email }}</p>
               </div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.direccion') }}</label>
                 <p class="dato-texto">{{ usuarioEditar.direccion }}</p>
               </div>
             </div>
 
             <div v-else class="formulario-edicion">
-              <div class="grupo-dato"><label>{{ $t('perfil.nombre') }}</label><input type="text"
-                  v-model="usuarioEditar.nombre" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.dni') }}</label><input type="text"
-                  v-model="usuarioEditar.dni" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.email') }}</label><input type="email"
-                  v-model="usuarioEditar.email" /></div>
-              <div class="grupo-dato"><label>{{ $t('perfil.direccion') }}</label><input type="text"
-                  v-model="usuarioEditar.direccion" /></div>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.nombre') }}</label
+                ><input type="text" v-model="usuarioEditar.nombre" />
+              </div>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.dni') }}</label
+                ><input type="text" v-model="usuarioEditar.dni" />
+              </div>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.email') }}</label
+                ><input type="email" v-model="usuarioEditar.email" />
+              </div>
+              <div class="grupo-dato">
+                <label>{{ $t('perfil.direccion') }}</label
+                ><input type="text" v-model="usuarioEditar.direccion" />
+              </div>
 
               <div class="botones-edicion">
-                <button @click="guardarCambios" class="btn-guardar">{{ $t('perfil.btn_guardar') }}</button>
-                <button @click="cancelarEdicion" class="btn-cancelar">{{ $t('perfil.btn_cancelar') }}</button>
+                <button @click="guardarCambios" class="btn-guardar">
+                  {{ $t('perfil.btn_guardar') }}
+                </button>
+                <button @click="cancelarEdicion" class="btn-cancelar">
+                  {{ $t('perfil.btn_cancelar') }}
+                </button>
               </div>
 
               <div class="zona-baja-cuenta" v-if="usuarioEditar.rol !== 'admin'">
-                <button class="btn-cancelar-suscripcion" @click="confirmarBaja">Eliminar cuenta</button>
+                <button class="btn-cancelar-suscripcion" @click="confirmarBaja">
+                  Eliminar cuenta
+                </button>
               </div>
             </div>
           </section>
 
-          <section class="tarjeta estado-txandalari"
-            :class="{ activo: usuarioEditar.rol === 'txandalari' || usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1 }">
+          <section
+            class="tarjeta estado-txandalari"
+            :class="{
+              activo:
+                usuarioEditar.rol === 'txandalari' ||
+                usuarioEditar.solicitud_txandalari == 1 ||
+                usuarioEditar.solicitudTxandalari == 1,
+            }"
+          >
             <h3>🐍 {{ $t('perfil.estado_lakobra') }}</h3>
 
-            <div v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
-              class="estado-activo oficial">
+            <div
+              v-if="usuarioEditar.rol === 'txandalari' || usuarioEditar.rol === 'admin'"
+              class="estado-activo oficial"
+            >
               <div class="anillo-pulso"></div>
               <div class="texto-estado">
                 <span class="estado-principal">{{ $t('perfil.txan_oficial') }}</span>
@@ -414,11 +489,17 @@ const eliminarCuenta = async () => {
               </div>
             </div>
 
-            <div v-else-if="usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1"
-              class="estado-activo pendiente">
+            <div
+              v-else-if="
+                usuarioEditar.solicitud_txandalari == 1 || usuarioEditar.solicitudTxandalari == 1
+              "
+              class="estado-activo pendiente"
+            >
               <div class="anillo-pulso azul"></div>
               <div class="texto-estado">
-                <span class="estado-principal" style="color: #38bdf8">{{ $t('perfil.txan_pendiente') }}</span>
+                <span class="estado-principal" style="color: #38bdf8">{{
+                  $t('perfil.txan_pendiente')
+                }}</span>
                 <span class="estado-secundario">{{ $t('perfil.txan_espera') }}</span>
               </div>
             </div>
@@ -436,9 +517,12 @@ const eliminarCuenta = async () => {
                 <h4>{{ $t('perfil.conf_titulo') }}</h4>
                 <p>{{ $t('perfil.conf_seguro') }}</p>
                 <div class="botones-modal">
-                  <button @click="confirmarSolicitud" class="btn-guardar">{{ $t('perfil.btn_si_enviar') }}</button>
-                  <button @click="abrirConfirmacion = false" class="btn-cancelar">{{ $t('perfil.btn_cancelar')
-                  }}</button>
+                  <button @click="confirmarSolicitud" class="btn-guardar">
+                    {{ $t('perfil.btn_si_enviar') }}
+                  </button>
+                  <button @click="abrirConfirmacion = false" class="btn-cancelar">
+                    {{ $t('perfil.btn_cancelar') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -447,17 +531,39 @@ const eliminarCuenta = async () => {
 
         <main class="contenido">
           <section class="tarjeta eventos">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-              <h3 style="margin: 0; padding-bottom: 0; border: none;"><i class="icono">📅</i> {{
-                $t('perfil.mis_eventos') }}</h3>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+              "
+            >
+              <h3 style="margin: 0; padding-bottom: 0; border: none">
+                <i class="icono">📅</i> {{ $t('perfil.mis_eventos') }}
+              </h3>
               <button
-                style="background-color: #8b5cf6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer;"
-                @click="mostrarCalendario = true">
+                style="
+                  background-color: #8b5cf6;
+                  color: white;
+                  border: none;
+                  padding: 0.5rem 1rem;
+                  border-radius: 8px;
+                  font-weight: bold;
+                  cursor: pointer;
+                "
+                @click="mostrarCalendario = true"
+              >
                 {{ $t('eventos.btn_ver_calendario') }}
               </button>
             </div>
-            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; margin-top: -0.5rem;">
-            </div>
+            <div
+              style="
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 1.5rem;
+                margin-top: -0.5rem;
+              "
+            ></div>
 
             <div v-if="misEventos.length > 0" class="lista-eventos">
               <div v-for="evento in misEventos" :key="evento.id" class="evento-item">
@@ -470,9 +576,18 @@ const eliminarCuenta = async () => {
                   <h4>{{ evento.titulo }}</h4>
                   <p>🕒 {{ evento.hora_inicio.substring(0, 5) }}</p>
 
-                  <div class="info-turno-fijo" v-if="evento.puesto" style="margin-top: 0.5rem;">
-                    <span style="color: #facc15; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
-                      🦺 <strong>{{ $t('perfil.turno_label') }}:</strong> {{ $t('perfil.turno_' + evento.puesto) }}
+                  <div class="info-turno-fijo" v-if="evento.puesto" style="margin-top: 0.5rem">
+                    <span
+                      style="
+                        color: #facc15;
+                        font-size: 0.95rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                      "
+                    >
+                      🦺 <strong>{{ $t('perfil.turno_label') }}:</strong>
+                      {{ $t('perfil.turno_' + evento.puesto) }}
                     </span>
                   </div>
                 </div>
@@ -489,8 +604,8 @@ const eliminarCuenta = async () => {
             <h3><i class="icono">⚠️</i> Baja de socio</h3>
             <div class="zona-baja-socio">
               <p style="color: #94a3b8; margin-bottom: 1rem">
-                Si deseas darte de baja como socio, puedes hacerlo en cualquier momento. Esta acción eliminará tu cuenta
-                de forma permanente.
+                Si deseas darte de baja como socio, puedes hacerlo en cualquier momento. Esta acción
+                eliminará tu cuenta de forma permanente.
               </p>
               <button class="btn-cancelar-suscripcion" @click="confirmarBaja">Darse de baja</button>
             </div>
@@ -499,12 +614,15 @@ const eliminarCuenta = async () => {
       </div>
     </div>
 
-    <CalendarioModal :mostrar="mostrarCalendario" :eventos="eventosParaCalendario" :usuario="usuarioEditar"
-      @cerrar="mostrarCalendario = false" @seleccionar-evento="verDetalleEvento" />
+    <CalendarioModal
+      :mostrar="mostrarCalendario"
+      :eventos="eventosParaCalendario"
+      :usuario="usuarioEditar"
+      @cerrar="mostrarCalendario = false"
+      @seleccionar-evento="verDetalleEvento"
+    />
   </div>
-</template>
-<style scoped>
-/* Mantenemos tu estilo y añadimos el CSS para el selector de turnos */
+</template><style scoped>
 .perfil {
   min-height: 100vh;
   padding: 2rem 1rem;
@@ -555,12 +673,6 @@ const eliminarCuenta = async () => {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 2rem;
-}
-
-@media (max-width: 768px) {
-  .grid-principal {
-    grid-template-columns: 1fr;
-  }
 }
 
 .tarjeta {
@@ -740,12 +852,10 @@ const eliminarCuenta = async () => {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
   }
-
   70% {
     transform: scale(1);
     box-shadow: 0 0 0 10px rgba(250, 204, 21, 0);
   }
-
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
@@ -757,12 +867,10 @@ const eliminarCuenta = async () => {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
   }
-
   70% {
     transform: scale(1);
     box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
   }
-
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
@@ -862,7 +970,6 @@ const eliminarCuenta = async () => {
   color: #94a3b8;
 }
 
-/* SELECTOR DE TURNOS */
 .selector-turno {
   display: flex;
   align-items: center;
@@ -1001,7 +1108,6 @@ const eliminarCuenta = async () => {
 
 .imagen-qr {
   background: white;
-  /* El QR necesita fondo blanco para que las cámaras lo lean bien */
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -1037,7 +1143,6 @@ const eliminarCuenta = async () => {
   color: #0f172a;
 }
 
-/* Color rojo para la 'X' del SweetAlert y efecto al pasar el ratón */
 :deep(.x-roja-modal) {
   color: #ef4444 !important;
   transition: all 0.2s ease;
@@ -1048,16 +1153,14 @@ const eliminarCuenta = async () => {
   transform: scale(1.2);
 }
 
-/* Quitamos el borde azul feo que a veces sale al hacer click en la X */
 :deep(.x-roja-modal:focus) {
   box-shadow: none !important;
 }
 
 /* =========================================
-   📱 TABLET (mantiene diseño original)
+   📱 TABLET
    ========================================= */
 @media (max-width: 1024px) {
-
   .grid-principal {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -1073,10 +1176,9 @@ const eliminarCuenta = async () => {
 }
 
 /* =========================================
-   📱 MÓVIL
+   📱 MÓVIL — con reordenamiento de secciones
    ========================================= */
 @media (max-width: 768px) {
-  
   .perfil {
     padding: 1.5rem 1rem;
   }
@@ -1096,13 +1198,40 @@ const eliminarCuenta = async () => {
     padding: 5px 12px;
   }
 
+  /* Convertimos el grid en flex para poder usar order entre aside y main */
   .grid-principal {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* display:contents hace que aside y main "desaparezcan" como cajas
+     y sus hijos participen directamente en el flex del grid-principal */
+  .barra-lateral,
+  .contenido {
+    display: contents;
+  }
+
+  /* Orden deseado: QR → Eventos → Datos → Txandalari → Baja */
+  .tarjeta.qr-usuario {
+    order: 1;
+  }
+  .tarjeta.eventos {
+    order: 2;
+  }
+  .tarjeta.datos-usuario {
+    order: 3;
+  }
+  .tarjeta.estado-txandalari {
+    order: 4;
+  }
+  .tarjeta:not(.qr-usuario):not(.eventos):not(.datos-usuario):not(.estado-txandalari) {
+    order: 5;
   }
 
   .tarjeta {
     padding: 1.2rem;
+    margin-bottom: 1rem;
   }
 
   .tarjeta h3 {
@@ -1138,7 +1267,6 @@ const eliminarCuenta = async () => {
    📱 MÓVIL PEQUEÑO
    ========================================= */
 @media (max-width: 480px) {
-
   .cabecera-perfil h1 {
     font-size: 1.4rem;
   }
@@ -1167,21 +1295,26 @@ const eliminarCuenta = async () => {
     font-size: 1.2rem;
   }
 }
+
 /* =========================
    📱 QR MODAL CENTRADO
    ========================= */
-
 :deep(.qr-modal-popup) {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  padding: 1.5rem 1rem !important;
+  box-sizing: border-box !important;
 }
 
 :deep(.qr-modal-container) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .qr-modal-wrapper {
@@ -1192,12 +1325,14 @@ const eliminarCuenta = async () => {
 }
 
 .qr-modal-img {
-  max-width: 90vw;
-  max-height: 70vh;
-  width: auto;
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 300px;
   height: auto;
   background: white;
   padding: 10px;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 </style>

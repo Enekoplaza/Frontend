@@ -160,6 +160,8 @@ function toggleModo() {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
   background-color: var(--fondo);
   color: var(--texto);
 }
@@ -167,63 +169,15 @@ function toggleModo() {
 .content {
   flex: 1;
   padding: 40px 20px;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
-/* 7. Ajuste para que en modo puerta el contenido ocupe todo y esté centrado */
 .app-container.is-puerta .content {
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.content {
-  flex: 1;
-  padding: 40px 20px;
-}
-
-</style>
-
-<style>
-/* =========================================
-   ANIMACIÓN DE BARRIDO (VIEW TRANSITIONS)
-   ========================================= */
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-/* La pantalla "vieja" se queda quieta en el fondo */
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-/* La pantalla "nueva" (con el nuevo tema) barre por encima */
-::view-transition-new(root) {
-  z-index: 2;
-  /* Empieza invisible: recortamos el 100% desde la derecha */
-  clip-path: inset(0 100% 0 0);
-  /* Animación suave de 0.7 segundos */
-  animation: barrido-derecha 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* El fotograma clave que hace que la máscara se abra de Izquierda a Derecha */
-@keyframes barrido-derecha {
-  to {
-    /* Termina totalmente visible */
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@media (max-width: 480px) {
-
-  .app-container {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
 }
 </style>
