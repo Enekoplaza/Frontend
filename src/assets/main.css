@@ -1,0 +1,26 @@
+/* Importa la base si la necesitas (reset de colores, etc) */
+@import './base.css';
+
+/* 1. Reset fundamental */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* 2. El contenedor #app debe permitir que el contenido fluya */
+#app {
+  width: 100%;
+  min-height: 100vh;
+  display: block; /* Quitamos el grid extraño de Vue */
+  margin: 0;
+  padding: 0;
+}
+
+/* 3. Estilos globales para enlaces (opcional, ajusta a tu gusto) */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: 0.3s;
+}

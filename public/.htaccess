@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /~lakobra1/LAKOBRA/
+  
+  # Si es el index.html, no hacer nada
+  RewriteRule ^index\.html$ - [L]
+  
+  # Si el archivo o carpeta solicitado NO existe físicamente...
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # ...redirigir internamente al index.html de la aplicación
+  RewriteRule . /~lakobra1/LAKOBRA/index.html [L]
+</IfModule>
