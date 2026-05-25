@@ -11,7 +11,7 @@ const emit = defineEmits(['cerrar', 'logeado'])
 
 const esLogin = ref(true)
 
-// ✅ FORM ACTUALIZADO
+// ✅ FORM ACTUALIZADO Y CORREGIDO
 const form = ref({
   nombre: '',
   dni: '',
@@ -54,7 +54,12 @@ const resetForm = () => {
     dni: '',
     email: '',
     password: '',
+    calle: '',
+    numero: '',
+    piso: '',
+    cp: '',
     ciudad: '',
+    direccion: '',
     rol: 'socio',
   }
   esLogin.value = true
@@ -139,7 +144,7 @@ const handleSubmit = async () => {
         ...swalDarkConfig,
         icon: 'warning',
         title: 'Código postal incorrecto',
-        text: 'Debe tener 5 números',
+        text: 'Debe tener 5 números (Ej: 48001)',
       })
       return
     }
@@ -210,6 +215,7 @@ const handleSubmit = async () => {
   }
 }
 </script>
+
 <template>
   <div v-if="mostrar" class="modal-overlay">
     <div class="modal-content">
@@ -219,7 +225,6 @@ const handleSubmit = async () => {
 
       <form @submit.prevent="handleSubmit">
         <template v-if="!esLogin">
-          <!-- NOMBRE: mínimo 3 palabras -->
           <input
             v-model="form.nombre"
             type="text"
@@ -234,7 +239,6 @@ const handleSubmit = async () => {
             Escribe tu nombre y los dos apellidos
           </p>
 
-          <!-- DNI: formato y letra válidos -->
           <input
             v-model="form.dni"
             type="text"
@@ -247,8 +251,12 @@ const handleSubmit = async () => {
             DNI incorrecto. Debe tener 8 números y la letra correcta
           </p>
 
-          <div class="direccion-grid">
-            <input v-model="form.ciudad" type="text" placeholder="Helbidea" required />
+          <div class="direccion-bloque">
+            <input v-model="form.calle" type="text" placeholder="Calle / Kalea" class="input-calle" required />
+            <input v-model="form.numero" type="text" placeholder="Nº" class="input-num" required />
+            <input v-model="form.piso" type="text" placeholder="Piso" class="input-piso" />
+            <input v-model="form.cp" type="text" placeholder="C.P. (48001)" maxlength="5" class="input-cp" required />
+            <input v-model="form.ciudad" type="text" placeholder="Ciudad / Hiria" class="input-ciudad" required />
           </div>
         </template>
 
@@ -266,6 +274,7 @@ const handleSubmit = async () => {
     </div>
   </div>
 </template>
+
 <style scoped>
 .modal-overlay {
   position: fixed;
@@ -279,7 +288,6 @@ const handleSubmit = async () => {
   justify-content: center;
   z-index: 1050;
   padding: 15px;
-  /* mejora en móvil */
 }
 
 .modal-content {
@@ -288,10 +296,8 @@ const handleSubmit = async () => {
   padding: 40px;
   border-radius: 16px;
   width: 95%;
-  max-width: 420px;
+  max-width: 440px; /* Incrementado ligeramente para albergar el grid cómodamente */
   position: relative;
-
-  /* mejora UX */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -305,6 +311,8 @@ const handleSubmit = async () => {
   background: none;
   border: none;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* FORM */
@@ -322,6 +330,36 @@ select {
   border: 1px solid #334155;
   border-radius: 8px;
   font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 🏢 DISEÑO DEL GRID DE DIRECCIÓN (NUEVO) 🏢 */
+.direccion-bloque {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Divide el espacio en 3 columnas iguales */
+  gap: 10px;
+  width: 100%;
+}
+
+.input-calle {
+  grid-column: span 3; /* Ocupa todo el ancho superior */
+}
+
+.input-num {
+  grid-column: span 1;
+}
+
+.input-piso {
+  grid-column: span 2;
+}
+
+.input-cp {
+  grid-column: span 1;
+}
+
+.input-ciudad {
+  grid-column: span 2;
 }
 
 .btn-submit {
@@ -333,6 +371,7 @@ select {
   border-radius: 8px;
   cursor: pointer;
   transition: 0.2s;
+  width: 100%;
 }
 
 .btn-submit:hover {
@@ -346,6 +385,7 @@ select {
   margin-top: 20px;
   text-decoration: underline;
 }
+
 .input-error {
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.05);
@@ -368,7 +408,7 @@ select {
    ========================================= */
 @media (max-width: 1024px) {
   .modal-content {
-    max-width: 380px;
+    max-width: 400px;
     padding: 35px;
   }
 }
@@ -382,6 +422,15 @@ select {
     max-width: 100%;
     border-radius: 14px;
     padding: 30px 20px;
+  }
+
+  .direccion-bloque {
+    grid-template-columns: 1fr; /* Pasa a formato cascada de 1 columna para que no se estruje */
+    gap: 12px;
+  }
+
+  .input-calle, .input-num, .input-piso, .input-cp, .input-ciudad {
+    grid-column: span 1; /* Todos los elementos pasan a ocupar el ancho total del móvil */
   }
 
   input,

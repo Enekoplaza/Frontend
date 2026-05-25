@@ -20,7 +20,7 @@ const resultado = ref(null)
 const esAutorizado = ref(false)
 const usuarioLocal = JSON.parse(localStorage.getItem('usuarioLakobra') || '{}')
 
-// --- NUEVO: ESTADO PARA EL ESCÁNER ---
+// --- ESTADO PARA EL ESCÁNER ---
 const modoActivo = ref('dni') // 'dni' o 'qr'
 let html5QrCode = null
 
@@ -66,10 +66,23 @@ const cambiarModo = async (nuevoModo) => {
 }
 
 const iniciarCamara = async () => {
+  // 🛑 CONTROL CRÍTICO DE CONTEXTO SEGURO (PARCHE ENTREGA)
+  if (!window.isSecureContext) {
+    Swal.fire({
+      background: '#1e293b', color: '#f8fafc',
+      title: 'Bloqueo de Seguridad (HTTP)',
+      html: 'El navegador bloquea la cámara porque el servidor actual no usa <b>HTTPS</b>.<br><br>Para probarlo en móvil, usa el método local <code>npm run dev -- --host</code> configurando Chrome Flags para IPs inseguras.',
+      icon: 'warning', confirmButtonColor: '#38bdf8'
+    })
+    cambiarModo('dni')
+    return
+  }
+
   if (!html5QrCode) {
     html5QrCode = new Html5Qrcode("reader")
   }
 
+  // Configuración estándar con caja de escaneo fija
   const config = { fps: 10, qrbox: { width: 250, height: 250 } }
   const onScanSuccess = (textoDecodificado) => {
     detenerCamara()
@@ -77,29 +90,25 @@ const iniciarCamara = async () => {
   }
 
   try {
-    // 1. Pedimos al navegador que liste las cámaras (ESTO FUERZA EL AVISO DE PERMISOS)
-    const devices = await Html5Qrcode.getCameras()
-
-    if (devices && devices.length > 0) {
-      // 2. Si encuentra cámaras, coge la principal (la webcam en tu PC)
-      const cameraId = devices[0].id
-
-      // 3. Inicia la lectura con esa cámara
-      await html5QrCode.start(cameraId, config, onScanSuccess, () => { })
-    } else {
-      throw new Error("No se detectó ninguna cámara física")
-    }
+    // 💡 MEJORA: En móviles usamos directamente la cámara trasera ('environment') sin listar IDs
+    // Esto previene fallos raros de indexación de cámaras y abre la lente correcta a la primera.
+    await html5QrCode.start(
+      { facingMode: "environment" }, 
+      config, 
+      onScanSuccess, 
+      () => { }
+    )
   } catch (err) {
     console.error("Error DETALLADO al acceder a la cámara:", err)
 
-    let mensajeError = 'Revisa los permisos del navegador.'
+    let mensajeError = 'Revisa los permisos del navegador o el protocolo HTTP/HTTPS.'
     if (err.name === 'NotAllowedError') mensajeError = 'Has denegado el permiso o el SO lo bloquea.'
-    if (err.name === 'NotFoundError') mensajeError = 'No se ha detectado ninguna cámara conectada al PC.'
-    if (err.name === 'NotReadableError') mensajeError = 'Otra aplicación (Zoom, Skype) está usando la cámara.'
+    if (err.name === 'NotFoundError') mensajeError = 'No se ha detectado ninguna cámara compatible en el dispositivo.'
+    if (err.name === 'NotReadableError') mensajeError = 'La cámara está siendo usada por otra pestaña o app.'
 
     Swal.fire({
       background: '#1e293b', color: '#f8fafc',
-      title: 'Fallo de Cámara: ' + err.name,
+      title: 'Fallo de Cámara: ' + (err.name || 'Desconocido'),
       text: mensajeError,
       icon: 'error', confirmButtonColor: '#38bdf8'
     })
@@ -143,7 +152,6 @@ const validarQR = async (tokenQr) => {
   resultado.value = null
 
   try {
-    // Enviar solo el token, el PHP ya sabe quiénes somos por la cookie de sesión
     const data = await apiFetch('validar_qr.php', {
       method: 'POST',
       body: JSON.stringify({ token: tokenQr })
@@ -168,7 +176,6 @@ const generarEnlace = async () => {
       const url = `${window.location.origin}${rutaCalculada}`;
 
       // 🔄 PLAN B CONTRA BLOQUEOS HTTP/CSP 🔄
-      // Intentamos el método moderno, si falla, usamos el método clásico compatible con todo
       try {
         await navigator.clipboard.writeText(url)
       } catch (clipError) {
@@ -177,7 +184,7 @@ const generarEnlace = async () => {
         inputTemporal.value = url;
         document.body.appendChild(inputTemporal);
         inputTemporal.select();
-        document.execCommand('copy'); // Comando clásico compatible con HTTP directo
+        document.execCommand('copy');
         document.body.removeChild(inputTemporal);
       }
 
@@ -199,19 +206,16 @@ const generarEnlace = async () => {
 // --- GENERAR PDF DE AFORO ---
 const generarPDF = async () => {
   try {
-    // 1. Pedir eventos
     const resEventos = await apiFetch('api_eventos.php')
     if (!resEventos.success || resEventos.eventos.length === 0) {
       return Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'info', title: t('puerta.pdf_no_eventos') })
     }
 
-    // 2. Montar opciones para el Select
     const opcionesEventos = {}
     resEventos.eventos.forEach(e => {
       opcionesEventos[e.id] = `${e.titulo} (${e.fecha_evento})`
     })
 
-    // 3. Preguntar al administrador de qué evento quiere el PDF
     const { value: idEventoElegido } = await Swal.fire({
       background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8', cancelButtonColor: '#475569',
       title: t('puerta.pdf_selecciona_evento'),
@@ -225,18 +229,13 @@ const generarPDF = async () => {
 
     if (!idEventoElegido) return
 
-    // 4. Mostrar cargando
     Swal.fire({ background: '#1e293b', color: '#f8fafc', title: t('puerta.pdf_generando'), allowOutsideClick: false, didOpen: () => Swal.showLoading() })
 
     const eventoSeleccionado = resEventos.eventos.find(e => e.id == idEventoElegido)
-
-    // 5. Pedir la lista de asistentes reales al backend
     const resAsistentes = await apiFetch(`api_asistentes.php?id_evento=${idEventoElegido}`)
     if (!resAsistentes.success) throw new Error(t('puerta.pdf_err_lista'))
 
-    // 6. Generar PDF
     const doc = new jsPDF()
-
     doc.setFontSize(18)
     doc.setTextColor(56, 189, 248)
     doc.text(t('puerta.pdf_titulo_doc'), 14, 20)
@@ -264,9 +263,7 @@ const generarPDF = async () => {
 
     const nombreArchivo = `Aforo_${eventoSeleccionado.titulo.replace(/\s+/g, '_')}.pdf`
     doc.save(nombreArchivo)
-    
     Swal.close()
-
   } catch (error) {
     console.error(error)
     Swal.fire({ background: '#1e293b', color: '#f8fafc', title: 'Error', text: t('puerta.pdf_err_generar'), icon: 'error', confirmButtonColor: '#38bdf8' })
