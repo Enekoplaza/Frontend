@@ -1,7 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite' // <-- Añadimos loadEnv aquí
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 
 // Cambiamos a una función que recibe el 'mode' (development o production)
 export default defineConfig(({ mode }) => {
@@ -15,7 +14,6 @@ export default defineConfig(({ mode }) => {
     // 2. Mantenemos tus plugins intactos
     plugins: [
       vue(),
-      vueDevTools(),
     ],
 
     // 3. Mantenemos tu configuración de alias intacta
@@ -27,5 +25,6 @@ export default defineConfig(({ mode }) => {
     server: {
   open: true
 },
+
   }
 })
