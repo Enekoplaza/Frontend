@@ -83,9 +83,62 @@ const eventosParaCalendario = computed(() => {
   return todosLosEventos.value.filter((e) => e.estado === 'confirmado')
 })
 
+// --- ADMIN: GESTIÓN DE TXANDALARIS ---
+const txandalaris = ref([])
+
+const cargarTxandalaris = async () => {
+  if (usuarioEditar.value.rol !== 'admin') return
+  try {
+    const data = await apiFetch('api_admin_txandalaris.php')
+    if (data.success) txandalaris.value = data.txandalaris
+  } catch (error) {
+    console.error('Error cargando txandalaris:', error)
+  }
+}
+
+const convertirEnSocio = async (txandalari) => {
+  const result = await Swal.fire({
+    background: '#1e293b',
+    color: '#f8fafc',
+    icon: 'warning',
+    title: '¿Convertir en socio?',
+    html: `<p style="color:#94a3b8">Se eliminará el rol de txandalari a <strong style="color:#f8fafc">${txandalari.nombre}</strong> y pasará a ser socio.</p>`,
+    showCancelButton: true,
+    confirmButtonColor: '#10b981',
+    cancelButtonColor: '#334155',
+    confirmButtonText: 'Sí, convertir',
+    cancelButtonText: 'Cancelar',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    const data = await apiFetch('api_admin_txandalaris.php', {
+      method: 'PATCH',
+      body: JSON.stringify({ id_usuario: txandalari.id }),
+    })
+    if (data.success) {
+      txandalaris.value = txandalaris.value.filter((t) => t.id !== txandalari.id)
+      Swal.fire({
+        background: '#1e293b',
+        color: '#f8fafc',
+        icon: 'success',
+        title: `${txandalari.nombre} ahora es socio`,
+        timer: 1800,
+        showConfirmButton: false,
+      })
+    } else {
+      Swal.fire({ background: '#1e293b', color: '#f8fafc', icon: 'error', title: data.message })
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 onMounted(() => {
   cargarMisEventos()
   cargarTodosLosEventos()
+  cargarTxandalaris()
 })
 
 // --- POPUP INTERACTIVO DESDE EL CALENDARIO DEL PERFIL ---
@@ -135,7 +188,6 @@ const verDetalleEvento = async (evento) => {
     cancelButtonText: 'Lagundu / Txanda hartu',
   })
 
-  // Si pincha en "Lagundu", cerramos el calendario y lanzamos la asignación de turno
   if (result.dismiss === Swal.DismissReason.cancel) {
     mostrarCalendario.value = false
     abrirPopupAyuda(evento)
@@ -600,6 +652,50 @@ const eliminarCuenta = async () => {
             </div>
           </section>
 
+          <!-- SECCIÓN ADMIN: GESTIÓN DE TXANDALARIS -->
+          <section class="tarjeta tarjeta-txandalaris-admin" v-if="usuarioEditar.rol === 'admin'">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+              "
+            >
+              <h3 style="margin: 0; padding-bottom: 0; border: none">
+                <i class="icono">🐍</i> Txandalaris en LAKOBRA
+              </h3>
+              <span class="badge-count">{{ txandalaris.length }}</span>
+            </div>
+            <div
+              style="
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 1.5rem;
+                margin-top: -0.5rem;
+              "
+            ></div>
+
+            <div v-if="txandalaris.length > 0" class="lista-txandalaris">
+              <div
+                v-for="txan in txandalaris"
+                :key="txan.id"
+                class="txandalari-item"
+              >
+                <div class="txan-info">
+                  <span class="txan-nombre">{{ txan.nombre }}</span>
+                  <span class="txan-email">{{ txan.email }}</span>
+                </div>
+                <button class="btn-convertir-socio" @click="convertirEnSocio(txan)">
+                  Hacer socio
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="estado-vacio">
+              <p>No hay txandalaris actualmente.</p>
+            </div>
+          </section>
+
           <section class="tarjeta" v-if="usuarioEditar.rol !== 'admin'">
             <h3><i class="icono">⚠️</i> Baja de socio</h3>
             <div class="zona-baja-socio">
@@ -622,7 +718,9 @@ const eliminarCuenta = async () => {
       @seleccionar-evento="verDetalleEvento"
     />
   </div>
-</template><style scoped>
+</template>
+
+<style scoped>
 .perfil {
   min-height: 100vh;
   padding: 2rem 1rem;
@@ -1157,6 +1255,77 @@ const eliminarCuenta = async () => {
   box-shadow: none !important;
 }
 
+/* ADMIN: LISTA TXANDALARIS */
+.tarjeta-txandalaris-admin {
+  border-color: rgba(250, 204, 21, 0.15);
+}
+
+.badge-count {
+  background: rgba(250, 204, 21, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 50px;
+  padding: 2px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.lista-txandalaris {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.txandalari-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  background: #0f172a;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  transition: border-color 0.2s;
+}
+
+.txandalari-item:hover {
+  border-color: #10b981;
+}
+
+.txan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.txan-nombre {
+  font-weight: 700;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.txan-email {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.btn-convertir-socio {
+  padding: 7px 16px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid #10b981;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-convertir-socio:hover {
+  background: #10b981;
+  color: #0f172a;
+}
+
 /* =========================================
    📱 TABLET
    ========================================= */
@@ -1198,21 +1367,18 @@ const eliminarCuenta = async () => {
     padding: 5px 12px;
   }
 
-  /* Convertimos el grid en flex para poder usar order entre aside y main */
   .grid-principal {
     display: flex;
     flex-direction: column;
     gap: 0;
   }
 
-  /* display:contents hace que aside y main "desaparezcan" como cajas
-     y sus hijos participen directamente en el flex del grid-principal */
   .barra-lateral,
   .contenido {
     display: contents;
   }
 
-  /* Orden deseado: QR → Eventos → Datos → Txandalari → Baja */
+  /* Orden deseado: QR → Eventos → Datos → Txandalari → Admin Txandalaris → Baja */
   .tarjeta.qr-usuario {
     order: 1;
   }
@@ -1225,8 +1391,11 @@ const eliminarCuenta = async () => {
   .tarjeta.estado-txandalari {
     order: 4;
   }
-  .tarjeta:not(.qr-usuario):not(.eventos):not(.datos-usuario):not(.estado-txandalari) {
+  .tarjeta.tarjeta-txandalaris-admin {
     order: 5;
+  }
+  .tarjeta:not(.qr-usuario):not(.eventos):not(.datos-usuario):not(.estado-txandalari):not(.tarjeta-txandalaris-admin) {
+    order: 6;
   }
 
   .tarjeta {
@@ -1260,6 +1429,17 @@ const eliminarCuenta = async () => {
     flex-direction: row;
     gap: 10px;
     min-width: auto;
+  }
+
+  .txandalari-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .btn-convertir-socio {
+    width: 100%;
+    text-align: center;
   }
 }
 
